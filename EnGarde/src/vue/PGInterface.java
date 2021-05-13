@@ -21,7 +21,7 @@ public class PGInterface implements Runnable{
 		frame.add(pggraphique);
 		
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setSize(960, 400);
+		frame.setSize(1200, 600);
 		frame.setVisible(true);
 	}
 	
