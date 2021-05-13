@@ -3,7 +3,9 @@ package modele;
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class Playground {
+import patterns.Observable;
+
+public class Playground extends Observable{
     Player blanc;
     Player noir;
     
@@ -20,6 +22,9 @@ public class Playground {
     	this.tourCourant = 1;
     }
     
+    public int getTourCourant() {
+    	return tourCourant;
+    }
     
     public void initiliaseCarte() {
     	this.reste = new ArrayList<Carte>();
@@ -48,11 +53,28 @@ public class Playground {
     public void avance(int valeur) {
     	if(tourCourant == 1) this.blanc.setPlace(this.blanc.getPlace() + valeur);
     	else this.noir.setPlace(this.noir.getPlace() - valeur);
+    	this.metAJour();
     }
     
     public void changetTour() {
     	if(tourCourant == 1) tourCourant = 2;
     	else tourCourant = 1;
+    }
+    
+    public int getBlancPos() {
+    	return this.blanc.getPlace();
+    }
+    
+    public int getNoirPos() {
+    	return this.noir.getPlace();
+    }
+    
+    public ArrayList<Carte> getBlancCartes() {
+    	return this.blanc.getCartes();
+    }
+    
+    public ArrayList<Carte> getNoirCartes() {
+    	return this.noir.getCartes();
     }
     
     @Override
