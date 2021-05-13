@@ -1,4 +1,4 @@
-package test;
+package modele;
 
 public class Test {
 
