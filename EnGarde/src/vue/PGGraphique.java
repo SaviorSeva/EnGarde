@@ -45,7 +45,6 @@ public class PGGraphique extends JComponent implements Observateur{
 				imgCarte[i] = ImageIO.read(imgFile);
 				imgTitle = ImageIO.read(new File("./res/images/title.png"));
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -112,9 +111,10 @@ public class PGGraphique extends JComponent implements Observateur{
 		drawable.setFont(font);
 		drawable.drawString(text, strX, distYEnd);
 		
-		
 		// Cartes
 		this.carteYStart = caseYStart + (int)(caseLength * 1.3);
+		int carteLengthTotal = (int)(680 * this.proportionCarte);
+		int carteXStart = (width - carteLengthTotal) / 2;
 		
 		int tour = pg.getTourCourant();
 		
@@ -123,24 +123,30 @@ public class PGGraphique extends JComponent implements Observateur{
 		if(tour == 1) cartes = pg.getBlancCartes();
 		else cartes = pg.getNoirCartes();
 		
+		// Paint card border
 		drawable.setColor(Color.GREEN);
 		drawable.setStroke(new BasicStroke(5));
-		drawable.drawRect(10, carteYStart, (int)(500*this.proportionCarte), (int)(130*this.proportionCarte));
+		drawable.drawRect(carteXStart, carteYStart, (int)(500*this.proportionCarte), (int)(130*this.proportionCarte));
 		
 		// Paint card
 		for(int i=0; i<cartes.size(); i++) {
 			int picSelected = cartes.get(i).getValue();
-			drawable.drawImage(imgCarte[picSelected], 10 + (int)(10*this.proportionCarte) + (int)(100*this.proportionCarte*i), 2 + carteYStart, (int)(80*this.proportionCarte), (int)(126*this.proportionCarte), null);
+			drawable.drawImage(imgCarte[picSelected], carteXStart + (int)(10*this.proportionCarte) + (int)(100*this.proportionCarte*i), 2 + carteYStart, (int)(80*this.proportionCarte), (int)(126*this.proportionCarte), null);
 		}
 		
 		// Paint reste
+		int resteXStart = carteXStart + (int)(500*this.proportionCarte*1.2);
+		drawable.drawImage(imgCarte[0], (int)resteXStart, carteYStart, (int)(80*this.proportionCarte), (int)(126*this.proportionCarte), null);
 		
-		int carteEndX = 10 + (int)(500*this.proportionCarte*1.2);
-		drawable.drawImage(imgCarte[0], (int)carteEndX, carteYStart, (int)(80*this.proportionCarte), (int)(126*this.proportionCarte), null);
+		// Paint nb carte reste
+		int carteEndX = resteXStart + (int)(80*this.proportionCarte*1.1);
 		
-		drawable.setFont(new Font("TimesRoman", Font.PLAIN, 50));
+		drawable.setFont(new Font("TimesRoman", Font.BOLD, (int)(30*proportionCarte)));
 		drawable.setColor(Color.BLACK);
-		drawable.drawString(this.pg.getResteNb() + "", 910 + (int)(80*this.proportionCarte), 300 + (int)(126*this.proportionCarte/2) );
+		String nbReste = this.pg.getResteNb() + "";
+		int nbResteXStart = resteXStart + (int)(40*this.proportionCarte) - (int)(0.5*g.getFontMetrics(font).stringWidth(nbReste));
+		drawable.drawString(nbReste, nbResteXStart, carteYStart+(int)(120*this.proportionCarte));
+		//drawable.drawString(this.pg.getResteNb() + "", carteEndX, carteYStart + (int)(63*this.proportionCarte));
 	}
 
 	@Override
