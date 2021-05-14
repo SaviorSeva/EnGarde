@@ -13,7 +13,6 @@ public class Starter {
 			pg.distribuerCarte(2);
 		}
 		
-		pg.avance(5);
 		
 		System.out.println(pg.toString());
 		
