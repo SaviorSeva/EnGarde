@@ -77,6 +77,14 @@ public class Playground extends Observable{
     	return this.noir.getCartes();
     }
     
+    public int getResteNb() {
+    	return this.reste.size();
+    }
+    
+    public int getDistance() {
+    	return this.getNoirPos() - this.getBlancPos() + 1;
+    }
+    
     @Override
     public String toString() {
     	StringBuilder sb = new StringBuilder();
