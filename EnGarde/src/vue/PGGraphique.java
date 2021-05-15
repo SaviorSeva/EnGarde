@@ -18,12 +18,15 @@ import javax.swing.*;
 import javax.imageio.ImageIO;
 
 import modele.Carte;
+import modele.InterfaceElementPosition;
+import modele.InterfaceElementType;
 import modele.Playground;
 import patterns.Observateur;
 
 public class PGGraphique extends JComponent implements Observateur{
 	public Playground pg;
-	public int caseSize;
+	public int caseWidth;
+	public int caseHeight;
 	public Image[] imgCarte;
 	public double proportionCarte;
 	public double proportionTitre;
@@ -31,13 +34,17 @@ public class PGGraphique extends JComponent implements Observateur{
 	public Image imgTitle;
 	
 	public int distYEnd;
+	public int caseXStart;
 	public int caseYStart;
+	public int carteXStart;
 	public int carteYStart;
+	
+	public ArrayList<InterfaceElementPosition> elePos;
 	
 	public PGGraphique(Playground pg) {
 		this.pg = pg;
 		imgCarte = new Image[6];
-		caseSize = 50;
+		caseWidth = 50;
 		pg.ajouteObservateur(this);
 		for(int i=0; i<6; i++) {
 			File imgFile = new File("./EnGarde/res/images/carte" + i + ".png");
@@ -48,6 +55,7 @@ public class PGGraphique extends JComponent implements Observateur{
 				e.printStackTrace();
 			}
 		}
+		this.caseXStart = 10;
 		this.proportionCarte = 1.25;
 		this.proportionTitre = 1.0;
 		this.proportionCase = 1.0;
@@ -60,7 +68,7 @@ public class PGGraphique extends JComponent implements Observateur{
 		int width = getSize().width;
 		int height = getSize().height;
 		
-		this.caseSize = (width-20)/23;
+		this.caseWidth = (width-20)/23;
 		
 		this.proportionCarte = 1.25 * Math.min(width/1200.0, height/800.0);
 		this.proportionTitre = 1.0 * Math.min(width/1200.0, height/800.0);
@@ -73,20 +81,20 @@ public class PGGraphique extends JComponent implements Observateur{
 		
 		this.caseYStart = (int)(200*proportionTitre);
 		
-		int caseLength = (int)(200*this.proportionCase);
+		this.caseHeight = (int)(200*this.proportionCase);
 		
 		for(int i=0; i<23; i++) {
 			// Orange background
 			drawable.setColor(Color.ORANGE);
-			drawable.fillRect(10+i*caseSize, caseYStart, caseSize, caseLength);
+			drawable.fillRect(caseXStart+i*caseWidth, caseYStart, caseWidth, caseHeight);
 			
 			// Black line
 			drawable.setColor(Color.BLACK);
-			drawable.drawRect(10+i*caseSize, caseYStart, caseSize, caseLength);
+			drawable.drawRect(caseXStart+i*caseWidth, caseYStart, caseWidth, caseHeight);
 			
 			// Number of cases
 			drawable.setFont(new Font("TimesRoman", Font.BOLD, (int)(15*proportionCase)));
-			drawable.drawString((i+1) + "", 10+i*caseSize+(int)(caseSize*0.4), caseYStart+(int)(caseLength * 0.9));
+			drawable.drawString((i+1) + "", caseXStart+i*caseWidth+(int)(caseWidth*0.4), caseYStart+(int)(caseHeight * 0.9));
 		}
 		
 		int b = pg.getBlancPos();
@@ -94,13 +102,13 @@ public class PGGraphique extends JComponent implements Observateur{
 		
 		// Joueur Blanc
 		drawable.setColor(Color.WHITE);
-		drawable.fillOval(10+b*caseSize, caseYStart + (int)(100*this.proportionCase - caseSize/2), caseSize, caseSize);
+		drawable.fillOval(caseXStart+b*caseWidth, caseYStart + (int)(100*this.proportionCase - caseWidth/2), caseWidth, caseWidth);
 		
 		drawable.setColor(Color.BLACK);
-		drawable.fillOval(10+n*caseSize, caseYStart + (int)(100*this.proportionCase - caseSize/2), caseSize, caseSize);
+		drawable.fillOval(caseXStart+n*caseWidth, caseYStart + (int)(100*this.proportionCase - caseWidth/2), caseWidth, caseWidth);
 		
 		// String Distance
-		this.distYEnd = caseYStart + (int)(caseLength * 1.15);
+		this.distYEnd = caseYStart + (int)(caseHeight * 1.15);
 		drawable.setColor(Color.BLACK);
 		String text = "Distance entre 2 joueurs : " + pg.getDistance();
 		Font font = new Font("TimesRoman", Font.PLAIN, (int)(20*this.proportionCase));
@@ -112,9 +120,9 @@ public class PGGraphique extends JComponent implements Observateur{
 		drawable.drawString(text, strX, distYEnd);
 		
 		// Cartes
-		this.carteYStart = caseYStart + (int)(caseLength * 1.3);
+		this.carteYStart = caseYStart + (int)(caseHeight * 1.3);
 		int carteLengthTotal = (int)(680 * this.proportionCarte);
-		int carteXStart = (width - carteLengthTotal) / 2;
+		this.carteXStart = (width - carteLengthTotal) / 2;
 		
 		int tour = pg.getTourCourant();
 		
@@ -128,7 +136,7 @@ public class PGGraphique extends JComponent implements Observateur{
 		drawable.setStroke(new BasicStroke(5));
 		drawable.drawRect(carteXStart, carteYStart, (int)(500*this.proportionCarte), (int)(130*this.proportionCarte));
 		
-		// Paint card
+		// Paint player's 5 cards
 		for(int i=0; i<cartes.size(); i++) {
 			int picSelected = cartes.get(i).getValue();
 			drawable.drawImage(imgCarte[picSelected], carteXStart + (int)(10*this.proportionCarte) + (int)(100*this.proportionCarte*i), 2 + carteYStart, (int)(80*this.proportionCarte), (int)(126*this.proportionCarte), null);
@@ -139,15 +147,53 @@ public class PGGraphique extends JComponent implements Observateur{
 		drawable.drawImage(imgCarte[0], (int)resteXStart, carteYStart, (int)(80*this.proportionCarte), (int)(126*this.proportionCarte), null);
 		
 		// Paint nb carte reste
-		int carteEndX = resteXStart + (int)(80*this.proportionCarte*1.1);
-		
 		drawable.setFont(new Font("TimesRoman", Font.BOLD, (int)(30*proportionCarte)));
 		drawable.setColor(Color.BLACK);
 		String nbReste = this.pg.getResteNb() + "";
 		int nbResteXStart = resteXStart + (int)(40*this.proportionCarte) - (int)(0.5*g.getFontMetrics(font).stringWidth(nbReste));
 		drawable.drawString(nbReste, nbResteXStart, carteYStart+(int)(120*this.proportionCarte));
 		//drawable.drawString(this.pg.getResteNb() + "", carteEndX, carteYStart + (int)(63*this.proportionCarte));
+		
+		this.elePos = this.initialiseElePos();
 	}
+	
+	public ArrayList<InterfaceElementPosition> initialiseElePos(){
+		ArrayList<InterfaceElementPosition> res = new ArrayList<InterfaceElementPosition>();
+		for(int i=0; i<23; i++) {
+			InterfaceElementType iet = InterfaceElementType.CASE;
+			int x1 = this.caseXStart + this.caseWidth * i;
+			int y1 = this.caseYStart;
+			int x2 = this.caseXStart + this.caseWidth * (i+1);
+			int y2 = this.caseYStart + this.caseHeight;
+			InterfaceElementPosition iep = new InterfaceElementPosition(iet, x1, x2, y1, y2, i);
+			res.add(iep);
+		}
+		for(int i=0; i<5; i++) {
+			InterfaceElementType iet = InterfaceElementType.CARTE;
+			int x1 = this.carteXStart + (int)(10*this.proportionCarte) + (int)(100*this.proportionCarte*i);
+			int y1 = this.carteYStart;
+			int x2 = x1 + (int)(80*this.proportionCarte);
+			int y2 = this.carteYStart + (int)(126*this.proportionCarte);
+			InterfaceElementPosition iep = new InterfaceElementPosition(iet, x1, x2, y1, y2, i);
+			res.add(iep);
+		}
+		return res;
+	}
+	
+	public InterfaceElementPosition getElementByClick(int x, int y) {
+		InterfaceElementPosition res = null; 
+		boolean changed = false;
+		for(InterfaceElementPosition iep : this.elePos) {
+			if((iep.getP1().getX() < x) && (iep.getP1().getY() < y) && (iep.getP2().getX() > x) && (iep.getP2().getY() > y)) {
+				res = iep;
+				changed = true;
+				break;
+			}
+		}
+		if(!changed) return new InterfaceElementPosition(InterfaceElementType.BACKGROUND, x, x, y, y, 0);
+		return res;
+	}
+	
 
 	@Override
 	public void miseAJour() {

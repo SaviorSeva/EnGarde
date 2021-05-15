@@ -14,11 +14,10 @@ public class Starter {
 			pg.distribuerCarte(2);
 		}
 		
-		pg.avance(5);
 		
 		System.out.println(pg.toString());
 
 		ControlleurMediateur controle = new ControlleurMediateur(pg);
-		PGInterface.start(pg, controle);
+		PGInterface.start(pg);
 	}
 }
