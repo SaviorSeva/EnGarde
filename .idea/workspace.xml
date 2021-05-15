@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="972358dd-3d03-4786-9926-29d54bcb3ffa" name="Default Changelist" comment="Merge with Master 2" />
+    <list default="true" id="972358dd-3d03-4786-9926-29d54bcb3ffa" name="Default Changelist" comment="Zoommer">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/EnGarde/out/production/EnGarde/vue/PGGraphique.class" beforeDir="false" afterPath="$PROJECT_DIR$/EnGarde/out/production/EnGarde/vue/PGGraphique.class" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -109,7 +112,14 @@
       <option name="project" value="LOCAL" />
       <updated>1621100196258</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Zoommer">
+      <created>1621103760243</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1621103760243</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -129,6 +139,7 @@
     <MESSAGE value="Realize &quot;Mouse click&quot;" />
     <MESSAGE value="Merge with Master" />
     <MESSAGE value="Merge with Master 2" />
-    <option name="LAST_COMMIT_MESSAGE" value="Merge with Master 2" />
+    <MESSAGE value="Zoommer" />
+    <option name="LAST_COMMIT_MESSAGE" value="Zoommer" />
   </component>
 </project>
