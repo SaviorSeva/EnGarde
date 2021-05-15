@@ -1,5 +1,6 @@
 package vue;
 
+import controlleur.ControlleurMediateur;
 import modele.Playground;
 
 public class Starter {
@@ -15,7 +16,8 @@ public class Starter {
 		
 		
 		System.out.println(pg.toString());
-		
+
+		ControlleurMediateur controle = new ControlleurMediateur(pg);
 		PGInterface.start(pg);
 	}
 }
