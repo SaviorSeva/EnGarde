@@ -20,6 +20,7 @@ import javax.imageio.ImageIO;
 import modele.Carte;
 import modele.InterfaceElementPosition;
 import modele.InterfaceElementType;
+import modele.LockedBoolean;
 import modele.Playground;
 import patterns.Observateur;
 
@@ -28,9 +29,12 @@ public class PGGraphique extends JComponent implements Observateur{
 	public int caseWidth;
 	public int caseHeight;
 	public Image[] imgCarte;
+	
 	public double proportionCarte;
+	public double proportionZoomCarte;
 	public double proportionTitre;
 	public double proportionCase;
+	
 	public Image imgTitle;
 	
 	public int distYEnd;
@@ -40,6 +44,7 @@ public class PGGraphique extends JComponent implements Observateur{
 	public int carteYStart;
 	
 	public ArrayList<InterfaceElementPosition> elePos;
+	public ArrayList<LockedBoolean> zoomCarte; 
 	
 	public PGGraphique(Playground pg) {
 		this.pg = pg;
@@ -59,8 +64,34 @@ public class PGGraphique extends JComponent implements Observateur{
 		this.proportionCarte = 1.25;
 		this.proportionTitre = 1.0;
 		this.proportionCase = 1.0;
+		this.proportionZoomCarte = 1.25 * proportionCarte;
+		this.zoomCarte = new ArrayList<LockedBoolean>(); 
+		initialiseZoom();
 		caseYStart = 0;
 	}
+	
+	public void initialiseZoom() {
+		this.zoomCarte.clear();
+		for(int i=0; i<5; i++) {
+			zoomCarte.add(LockedBoolean.FALSE);
+		}
+	}
+	
+	public void resetZoom() {
+		for(int i=0; i<this.zoomCarte.size(); i++) {
+			LockedBoolean status = this.zoomCarte.get(i);
+			if(!status.isLocked()) {
+				if(status.isTrue()) this.zoomCarte.set(i, LockedBoolean.FALSE);
+			}else {
+				if(!status.isTrue()) this.zoomCarte.set(i, LockedBoolean.FALSE);
+			}
+		}
+	}
+	
+	public void changeZoomTo(int i, LockedBoolean lb) {
+		this.zoomCarte.set(i, lb);
+	}
+
 	
 	@Override
 	public void paintComponent(Graphics g) {
@@ -127,6 +158,7 @@ public class PGGraphique extends JComponent implements Observateur{
 		int tour = pg.getTourCourant();
 		
 		String s = "";
+		
 		ArrayList<Carte> cartes;
 		if(tour == 1) cartes = pg.getBlancCartes();
 		else cartes = pg.getNoirCartes();
@@ -139,7 +171,21 @@ public class PGGraphique extends JComponent implements Observateur{
 		// Paint player's 5 cards
 		for(int i=0; i<cartes.size(); i++) {
 			int picSelected = cartes.get(i).getValue();
-			drawable.drawImage(imgCarte[picSelected], carteXStart + (int)(10*this.proportionCarte) + (int)(100*this.proportionCarte*i), 2 + carteYStart, (int)(80*this.proportionCarte), (int)(126*this.proportionCarte), null);
+			if(zoomCarte.get(i).isTrue()) {
+				drawable.drawImage(	imgCarte[picSelected], 
+						carteXStart + (int)(10*this.proportionCarte) + (int)(100*this.proportionCarte*i) - (int)(40*(this.proportionZoomCarte-this.proportionCarte)), 
+						(int)(2 + carteYStart - (63*(this.proportionZoomCarte-this.proportionCarte))), 
+						(int)(80*this.proportionZoomCarte), 
+						(int)(126*this.proportionZoomCarte), 
+						null);
+			}else{
+				drawable.drawImage(	imgCarte[picSelected], 
+									carteXStart + (int)(10*this.proportionCarte) + (int)(100*this.proportionCarte*i), 
+									2 + carteYStart, 
+									(int)(80*this.proportionCarte), 
+									(int)(126*this.proportionCarte), 
+									null);
+			}
 		}
 		
 		// Paint reste

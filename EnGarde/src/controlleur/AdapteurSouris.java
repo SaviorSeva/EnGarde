@@ -3,6 +3,8 @@ package controlleur;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import javax.swing.SwingUtilities;
+
 public class AdapteurSouris extends MouseAdapter {
 	public ControleMediateur cm;
 	
@@ -14,13 +16,20 @@ public class AdapteurSouris extends MouseAdapter {
 	public void mousePressed(MouseEvent e) {
 		int sourisX = e.getX();
 		int sourisY = e.getY();
-		System.out.println("(" + sourisX + ", " + sourisY + ")");
-		cm.clicSouris(sourisX, sourisY);
+		if(SwingUtilities.isLeftMouseButton(e))
+			cm.clicSouris(sourisX, sourisY);
+		else if(SwingUtilities.isRightMouseButton(e)){
+			cm.clicSourisDroite(sourisX, sourisY);
+		}
 	}
 	
 	@Override
 	public void mouseMoved(MouseEvent e) {
-		// TODO Auto-generated method stub
-		super.mouseMoved(e);
+		int sourisX = e.getX();
+		int sourisY = e.getY();
+		//System.out.println("(" + sourisX + ", " + sourisY + ")");
+		cm.deplaceSouris(sourisX, sourisY);
 	}
+	
+	
 }

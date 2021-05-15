@@ -4,6 +4,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
 
+import javax.swing.Box;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
@@ -11,6 +12,7 @@ import controlleur.AdapteurSouris;
 import controlleur.ControleMediateur;
 import modele.InterfaceElementPosition;
 import modele.InterfaceElementType;
+import modele.LockedBoolean;
 import modele.Playground;
 import patterns.Observateur;
 
@@ -30,11 +32,19 @@ public class PGInterface implements Runnable{
 	
 	@Override
 	public void run() {
-		pggraphique.addMouseListener(new AdapteurSouris(this.cm));
+		
 		
 		this.frame = new JFrame("En Garde !");
+		
+		AdapteurSouris as = new AdapteurSouris(this.cm);
+		
+		pggraphique.addMouseListener(as);
+		pggraphique.addMouseMotionListener(as);
 		frame.add(pggraphique);
 		
+		Box boiteInfo = Box.createHorizontalBox();
+		
+		// Info Label
 		
 		
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -44,6 +54,26 @@ public class PGInterface implements Runnable{
 	
 	public InterfaceElementPosition getElementByClick(int x, int y) {
 		return pggraphique.getElementByClick(x, y);
+	}
+	
+	public void repaint() {
+		this.pggraphique.repaint();
+	}
+	
+	public void changeZoomTo(int i, LockedBoolean b) {
+		this.pggraphique.changeZoomTo(i, b);
+	}
+	
+	public ArrayList<LockedBoolean> getZoomCarte(){
+		return this.pggraphique.zoomCarte;
+	}
+	
+	public void initialiseZoom() {
+		this.pggraphique.initialiseZoom();
+	}
+	
+	public void resetZoom() {
+		this.pggraphique.resetZoom();
 	}
 	
 	public static void start(Playground j) {
