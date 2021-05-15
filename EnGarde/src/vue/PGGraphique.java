@@ -104,6 +104,7 @@ public class PGGraphique extends JComponent implements Observateur{
 		this.proportionCarte = 1.25 * Math.min(width/1200.0, height/800.0);
 		this.proportionTitre = 1.0 * Math.min(width/1200.0, height/800.0);
 		this.proportionCase = 1.0 * Math.min(width/1200.0, height/800.0);
+		this.proportionZoomCarte = 1.25 * proportionCarte;
 		
 		drawable.clearRect(0, 0, width, height);
 		

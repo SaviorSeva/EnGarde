@@ -14,13 +14,29 @@ public class Playground extends Observable{
     
     int tourCourant;
     
+    public ArrayList<Boolean> selected;
+    
     public Playground() {
     	this.blanc = new Player(0);
     	this.noir = new Player(22);
     	
     	this.initiliaseCarte();
     	this.tourCourant = 1;
+    	this.selected = new ArrayList<Boolean>();
     }
+    
+    public void initialiseSelected() {
+		this.selected.clear();
+		for(int i=0; i<5; i++) {
+			selected.add(false);
+		}
+	}
+    
+    public void resetSelected() {
+		for(int i=0; i<this.selected.size(); i++) {
+			 this.selected.set(i, false);
+		}
+	}
     
     public int getTourCourant() {
     	return tourCourant;
@@ -82,7 +98,7 @@ public class Playground extends Observable{
     }
     
     public int getDistance() {
-    	return this.getNoirPos() - this.getBlancPos() + 1;
+    	return this.getNoirPos() - this.getBlancPos();
     }
     
     @Override
@@ -95,5 +111,53 @@ public class Playground extends Observable{
     	return sb.toString();
     }
     
+    /*
+     *  Return :
+     *  	-1 if error,
+     *  	0 if cannot parry (which means lose this round),
+     *  	1 if has no attack,
+     * 		2 if can parry attack,
+     * 		3 if have to retreat,
+     */
+    public int phaseParer(AttackType at, Carte attValue, int attnb){
+    	ArrayList<Carte> cartes;
+    	if(this.tourCourant == 1) cartes = this.getBlancCartes();
+    	else cartes = this.getNoirCartes();
+    	int nb = 0;
+    	switch(at) {
+    	case NONE:
+    		return 1;
+		case DIRECT:
+    		for(int i=0; i<cartes.size(); i++) {
+    			if(cartes.get(i).getValue() == attValue.getValue()) nb++;
+    		}
+    		if(nb >= attnb) {
+    			for(int i=0; i<cartes.size() && nb>0; i++) {
+    				if(cartes.get(i).getValue() == attValue.getValue()) {
+    					this.selected.set(i, true);
+    					nb--;
+    				}
+    			}
+    			return 2;
+    		}
+    		else return 0;
+		case INDIRECT:
+			// TODO
+    		for(int i=0; i<cartes.size(); i++) {
+    			if(cartes.get(i).getValue() == attValue.getValue()) nb++;
+    		}
+    		if(nb >= attnb) return 2;
+    		else {
+    			return 3;
+    		}
+    	}
+    	this.metAJour();
+    	return -1;
+    }
     
+    public void retreat(int valeur) {
+    	if(tourCourant == 1) this.blanc.setPlace(this.blanc.getPlace() - valeur);
+    	else this.noir.setPlace(this.noir.getPlace() + valeur);
+    	this.metAJour();
+    }
 }
