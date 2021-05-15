@@ -52,10 +52,10 @@ public class PGGraphique extends JComponent implements Observateur{
 		caseWidth = 50;
 		pg.ajouteObservateur(this);
 		for(int i=0; i<6; i++) {
-			File imgFile = new File("./res/images/carte" + i + ".png");
+			File imgFile = new File("./EnGarde/res/images/carte" + i + ".png");
 			try {
 				imgCarte[i] = ImageIO.read(imgFile);
-				imgTitle = ImageIO.read(new File("./res/images/title.png"));
+				imgTitle = ImageIO.read(new File("./EnGarde/res/images/title.png"));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
