@@ -7,9 +7,7 @@ public class Starter {
 		Playground pg = new Playground();
 		
 		pg.shuffleReste();
-		
-		
-		
+
 		PGInterface.start(pg);
 		
 		pg.restartNewRound();

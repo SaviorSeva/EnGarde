@@ -13,6 +13,7 @@ public class AdapteurConfirmer implements ActionListener{
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 		//用Timer试试 
-		cm.setConfirmed();
+		cm.confirmReceived();
+		cm.initialiseZoom();
 	}
 }

@@ -71,4 +71,16 @@ public class ControleMediateur {
 		System.out.println(pg.confirmed);
 		pg.metAJour();
 	}
+	
+	public void confirmReceived() {
+		this.pg.confirmReceived();
+	}
+	
+	public void resetZoom(){
+		this.pginter.resetZoom();
+	}
+	
+	public void initialiseZoom() {
+		this.pginter.initialiseZoom();
+	}
 }
