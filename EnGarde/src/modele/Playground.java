@@ -19,6 +19,8 @@ public class Playground extends Observable{
     
     public ArrayList<Boolean> selected;
     
+    public int waitStatus;
+    
     public Playground() {
     	this.blanc = new Player(0);
     	this.noir = new Player(22);
@@ -33,6 +35,7 @@ public class Playground extends Observable{
     	this.confirmed = false;
     	
     	this.directionDeplace = 0;
+    	this.waitStatus = 0;
     }
     
     public int getDirectionDeplace() {
@@ -47,8 +50,8 @@ public class Playground extends Observable{
 	}
 	
 	public void restartNewRound() {
-    	this.blanc.setPlace(10);
-    	this.noir.setPlace(15);
+    	this.blanc.setPlace(0);
+    	this.noir.setPlace(22);
     	
     	this.initiliaseCarte();
     	
@@ -225,33 +228,28 @@ public class Playground extends Observable{
     }
     
     public void phaseDeplacer() {
-    	this.waitConfirm();
     	// 在这里写loop
     	// if (this.confirmed == true)
     	
     	Carte c = this.getSelectedCard();
     	
-		if(this.getDistance() != c.getValue()) {
+    	if(c == null) System.err.println("Error getSelectedCard()");
+    	
+		if(this.getDistance() == c.getValue() && this.directionDeplace == 1) {
+			// Direct Attack
+			int nbSelected = this.getNBSelectedCard();
+			this.jouerCarte();
+			this.roundEnd(AttackType.DIRECT, c, nbSelected);	
+		}else {
 			if(this.directionDeplace == 1) avance(c.getValue());
 			else if(this.directionDeplace == 2) retreat(c.getValue());
 			this.jouerCarte();
 			if(this.canAttack()) {
-				// Indirect Attack
-				this.waitConfirm();
-				Carte indirectCarte = this.getSelectedCard();
-				int nbSelected = this.getNBSelectedCard();
-				this.jouerCarte();
-				this.roundEnd(AttackType.INDIRECT, indirectCarte, nbSelected);
+				this.waitStatus = 4;
 				
 			}else {
 				this.roundEnd(AttackType.NONE, null, 0);
 			}
-		}
-		else {
-			// Direct Attack
-			int nbSelected = this.getNBSelectedCard();
-			this.jouerCarte();
-			this.roundEnd(AttackType.DIRECT, c, nbSelected);
 		}
     }
     
@@ -285,23 +283,22 @@ public class Playground extends Observable{
     		break;
     	case 1:
     		System.out.println("Case 1 noAttack");
-    		this.phaseDeplacer();
+    		this.waitStatus = 3;
     		break;
     	case 2:
     		System.out.println("Case 2 canParry");
-    		this.waitConfirm();
-        	// Carte c = this.getSelectedCard();
-        	// int nbSelected = this.getNBSelectedCard();
-			this.jouerCarte();
-			this.phaseDeplacer();
+    		this.waitStatus = 1;
     		break;
     	case 3:
     		System.out.println("Case 3 retreat");
+    		this.waitStatus = 2;
+    		/*
     		this.waitConfirm();
     		Carte c = this.getSelectedCard();
     		this.jouerCarte();
     		this.retreat(c.getValue());
     		this.roundEnd(AttackType.NONE, null, 0);
+    		*/
     		break;
 		default:
 			// Should not be executed
@@ -315,6 +312,8 @@ public class Playground extends Observable{
     	while(this.reste.size() != 0 && cartes.size() < 5) {
     		this.distribuerCarte(tourCourant);
     	}
+    	this.waitStatus = 0;
+    	this.initialiseSelected();
     	this.changetTour();
     	this.roundStart(at, attValue, attnb);
     }
@@ -323,6 +322,35 @@ public class Playground extends Observable{
     	while(!confirmed);
     	this.confirmed = false;
     	this.metAJour();
+    }
+    
+    public void confirmReceived() {
+    	switch(this.waitStatus) {
+    	case 1:
+    		this.jouerCarte();
+			this.waitStatus = 3;
+    		break;
+    	case 2:
+    		Carte c = this.getSelectedCard();
+    		this.jouerCarte();
+    		this.retreat(c.getValue());
+    		this.roundEnd(AttackType.NONE, null, 0);
+    		break;
+    	case 3:
+    		this.phaseDeplacer();
+    		break;
+    	case 4:
+    		// Indirect Attack
+			Carte indirectCarte = this.getSelectedCard();
+			int nbSelected = this.getNBSelectedCard();
+			this.jouerCarte();
+			this.roundEnd(AttackType.INDIRECT, indirectCarte, nbSelected);
+			break;
+    	default:
+			// Should not be executed
+			System.err.println("Line 323 : confirmReceived() Error");
+			break;	
+    	}
     }
     
     public Carte getSelectedCard() {
