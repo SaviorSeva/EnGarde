@@ -14,7 +14,7 @@ public class Playground extends Observable{
     
     public int tourCourant;
     
-    boolean confirmed;
+    public boolean confirmed;
     int directionDeplace; // 1-Avance, 2-Retrait, 0-Valeur initialise
     
     public ArrayList<Boolean> selected;
@@ -226,6 +226,8 @@ public class Playground extends Observable{
     
     public void phaseDeplacer() {
     	this.waitConfirm();
+    	// 在这里写loop
+    	// if (this.confirmed == true)
     	
     	Carte c = this.getSelectedCard();
     	
@@ -320,6 +322,7 @@ public class Playground extends Observable{
     public void waitConfirm() {
     	while(!confirmed);
     	this.confirmed = false;
+    	this.metAJour();
     }
     
     public Carte getSelectedCard() {

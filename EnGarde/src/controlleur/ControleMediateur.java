@@ -3,6 +3,8 @@ package controlleur;
 import java.awt.Point;
 import java.util.ArrayList;
 
+import javax.swing.Timer;
+
 import modele.InterfaceElementPosition;
 import modele.InterfaceElementType;
 import modele.LockedBoolean;
@@ -66,6 +68,7 @@ public class ControleMediateur {
 	
 	public void setConfirmed() {
 		this.pg.setConfirmed(true);
+		System.out.println(pg.confirmed);
 		pg.metAJour();
 	}
 }
