@@ -29,6 +29,10 @@ public class Player {
 		this.cartes = cartes;
 	}
 	
+	public void clearCartes() {
+		this.cartes.clear();
+	}
+	
 	public void addCartes(Carte c) {
 		this.cartes.add(c);
 	}

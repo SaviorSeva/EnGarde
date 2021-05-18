@@ -32,8 +32,7 @@ public class PGInterface implements Runnable{
 	
 	@Override
 	public void run() {
-		
-		
+
 		this.frame = new JFrame("En Garde !");
 		
 		AdapteurSouris as = new AdapteurSouris(this.cm);

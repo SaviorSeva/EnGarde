@@ -75,24 +75,24 @@ public class PGGraphique extends JComponent implements Observateur{
 		for(int i=0; i<5; i++) {
 			zoomCarte.add(LockedBoolean.FALSE);
 		}
+		this.pg.initialiseSelected();
 	}
 	
 	public void resetZoom() {
 		for(int i=0; i<this.zoomCarte.size(); i++) {
 			LockedBoolean status = this.zoomCarte.get(i);
 			if(!status.isLocked()) {
-				if(status.isTrue()) this.zoomCarte.set(i, LockedBoolean.FALSE);
-			}else {
-				if(!status.isTrue()) this.zoomCarte.set(i, LockedBoolean.FALSE);
+				this.zoomCarte.set(i, LockedBoolean.FALSE);
 			}
 		}
+		this.pg.setSelected(this.lockedBooleanListToBooleanList());
 	}
 	
 	public void changeZoomTo(int i, LockedBoolean lb) {
 		this.zoomCarte.set(i, lb);
+		this.pg.setSelected(i, lb.isLocked() && lb.isTrue());
 	}
 
-	
 	@Override
 	public void paintComponent(Graphics g) {
 		Graphics2D drawable = (Graphics2D) g;
@@ -194,10 +194,11 @@ public class PGGraphique extends JComponent implements Observateur{
 		drawable.drawImage(imgCarte[0], (int)resteXStart, carteYStart, (int)(80*this.proportionCarte), (int)(126*this.proportionCarte), null);
 		
 		// Paint nb carte reste
-		drawable.setFont(new Font("TimesRoman", Font.BOLD, (int)(30*proportionCarte)));
+		Font f2 = new Font("TimesRoman", Font.BOLD, (int)(30*proportionCarte));
+		drawable.setFont(f2);
 		drawable.setColor(Color.BLACK);
 		String nbReste = this.pg.getResteNb() + "";
-		int nbResteXStart = resteXStart + (int)(40*this.proportionCarte) - (int)(0.5*g.getFontMetrics(font).stringWidth(nbReste));
+		int nbResteXStart = resteXStart + (int)(40*this.proportionCarte) - (int)(0.5*g.getFontMetrics(f2).stringWidth(nbReste));
 		drawable.drawString(nbReste, nbResteXStart, carteYStart+(int)(120*this.proportionCarte));
 		//drawable.drawString(this.pg.getResteNb() + "", carteEndX, carteYStart + (int)(63*this.proportionCarte));
 		
@@ -241,6 +242,14 @@ public class PGGraphique extends JComponent implements Observateur{
 		return res;
 	}
 	
+	
+	public ArrayList<Boolean> lockedBooleanListToBooleanList(){
+		ArrayList<Boolean> al = new ArrayList<Boolean>();
+		for(int i=0; i<this.zoomCarte.size(); i++){
+			al.add(this.zoomCarte.get(i).isTrue());
+		}
+		return al;
+	}
 
 	@Override
 	public void miseAJour() {
