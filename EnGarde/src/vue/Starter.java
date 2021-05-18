@@ -8,12 +8,15 @@ public class Starter {
 		
 		pg.shuffleReste();
 		
+		
+		
+		PGInterface.start(pg);
+		
 		pg.restartNewRound();
 		
-		pg.avance(18);
 		
 		System.out.println(pg.toString());
 		
-		PGInterface.start(pg);
+		
 	}
 }

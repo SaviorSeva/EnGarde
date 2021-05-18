@@ -1,13 +1,17 @@
 package vue;
 
+import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
 
 import javax.swing.Box;
 import javax.swing.JFrame;
+import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
 
+import controlleur.AdapteurConfirmer;
 import controlleur.AdapteurSouris;
 import controlleur.ControleMediateur;
 import modele.InterfaceElementPosition;
@@ -21,7 +25,8 @@ public class PGInterface implements Runnable{
 	public PGGraphique pggraphique;
 	public JFrame frame;
 	public ControleMediateur cm;
-	
+	public JToggleButton confirmer;
+	 
 	
 	public PGInterface(Playground pg) {
 		this.pg = pg;
@@ -39,12 +44,21 @@ public class PGInterface implements Runnable{
 		
 		pggraphique.addMouseListener(as);
 		pggraphique.addMouseMotionListener(as);
-		frame.add(pggraphique);
-		
+	
 		Box boiteInfo = Box.createHorizontalBox();
 		
 		// Info Label
 		
+		// Bouton confirmer
+		this.confirmer = new JToggleButton("Confirmer");
+		confirmer.setAlignmentX(Component.LEFT_ALIGNMENT);
+		confirmer.setFocusable(false);
+		boiteInfo.add(confirmer);
+		
+		this.confirmer.addActionListener(new AdapteurConfirmer(this.cm));
+		
+		frame.add(pggraphique);
+		frame.add(boiteInfo, BorderLayout.SOUTH);
 		
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setSize(1200, 800);

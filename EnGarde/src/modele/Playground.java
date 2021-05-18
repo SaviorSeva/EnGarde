@@ -6,13 +6,13 @@ import java.util.Collections;
 import patterns.Observable;
 
 public class Playground extends Observable{
-    Player blanc;
-    Player noir;
+    public Player blanc;
+    public Player noir;
     
     ArrayList<Carte> reste;
     ArrayList<Carte> used;
     
-    int tourCourant;
+    public int tourCourant;
     
     boolean confirmed;
     int directionDeplace; // 1-Avance, 2-Retrait, 0-Valeur initialise
@@ -35,9 +35,20 @@ public class Playground extends Observable{
     	this.directionDeplace = 0;
     }
     
-    public void restartNewRound() {
-    	this.blanc.setPlace(0);
-    	this.noir.setPlace(22);
+    public int getDirectionDeplace() {
+		return directionDeplace;
+	}
+	public void setDirectionDeplace(int directionDeplace) {
+		this.directionDeplace = directionDeplace;
+	}
+	
+	public void setConfirmed(boolean b) {
+		this.confirmed = b;
+	}
+	
+	public void restartNewRound() {
+    	this.blanc.setPlace(10);
+    	this.noir.setPlace(15);
     	
     	this.initiliaseCarte();
     	
@@ -46,6 +57,8 @@ public class Playground extends Observable{
 			this.distribuerCarte(2);
 		}
     	this.tourCourant = 1;
+    	
+    	this.roundStart(AttackType.NONE, null, 0);
     }
     
     public void initialiseSelected() {
@@ -221,7 +234,7 @@ public class Playground extends Observable{
 			else if(this.directionDeplace == 2) retreat(c.getValue());
 			this.jouerCarte();
 			if(this.canAttack()) {
-				
+				// Indirect Attack
 				this.waitConfirm();
 				Carte indirectCarte = this.getSelectedCard();
 				int nbSelected = this.getNBSelectedCard();
@@ -233,6 +246,7 @@ public class Playground extends Observable{
 			}
 		}
 		else {
+			// Direct Attack
 			int nbSelected = this.getNBSelectedCard();
 			this.jouerCarte();
 			this.roundEnd(AttackType.DIRECT, c, nbSelected);
@@ -255,24 +269,37 @@ public class Playground extends Observable{
     			this.used.add(joue);
     		}
     	}
+    	this.metAJour();
     }
     
     public void roundStart(AttackType at, Carte attValue, int attnb) {
     	int pharerResultat = phaseParer(at, attValue, attnb);
     	switch(pharerResultat) {
     	case 0:
+    		System.out.println("Case 0 lose");
     		if(this.tourCourant == 1) this.noir.incrementPoint();
     		else this.blanc.incrementPoint();
     		this.restartNewRound();
     		break;
     	case 1:
+    		System.out.println("Case 1 noAttack");
     		this.phaseDeplacer();
     		break;
     	case 2:
-    		// TODO Wait confirmer
+    		System.out.println("Case 2 canParry");
+    		this.waitConfirm();
+        	// Carte c = this.getSelectedCard();
+        	// int nbSelected = this.getNBSelectedCard();
+			this.jouerCarte();
+			this.phaseDeplacer();
     		break;
     	case 3:
-    		// TODO Retreat
+    		System.out.println("Case 3 retreat");
+    		this.waitConfirm();
+    		Carte c = this.getSelectedCard();
+    		this.jouerCarte();
+    		this.retreat(c.getValue());
+    		this.roundEnd(AttackType.NONE, null, 0);
     		break;
 		default:
 			// Should not be executed
@@ -291,7 +318,8 @@ public class Playground extends Observable{
     }
     
     public void waitConfirm() {
-    	while(confirmed);
+    	while(!confirmed);
+    	this.confirmed = false;
     }
     
     public Carte getSelectedCard() {
