@@ -135,9 +135,14 @@ public class PGGraphique extends JComponent implements Observateur{
 		// Joueur Blanc
 		drawable.setColor(Color.WHITE);
 		drawable.fillOval(caseXStart+b*caseWidth, caseYStart + (int)(100*this.proportionCase - caseWidth/2), caseWidth, caseWidth);
+		if(pg.getTourCourant() == 1)
+			drawable.fillRect(caseXStart+b*caseWidth, caseYStart + (int)(100*this.proportionCase - caseWidth/2), 5, 5);
 		
+		// Joueur Noir
 		drawable.setColor(Color.BLACK);
 		drawable.fillOval(caseXStart+n*caseWidth, caseYStart + (int)(100*this.proportionCase - caseWidth/2), caseWidth, caseWidth);
+		if(pg.getTourCourant() == 2)
+			drawable.fillRect(caseXStart+n*caseWidth, caseYStart + (int)(100*this.proportionCase - caseWidth/2), 5, 5);
 		
 		// String Distance
 		this.distYEnd = caseYStart + (int)(caseHeight * 1.15);

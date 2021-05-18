@@ -9,6 +9,8 @@ public class Test {
 			pg.distribuerCarte(2);
 		}
 		
+		
+		
 		System.out.println(pg.toString());
 	}
 }

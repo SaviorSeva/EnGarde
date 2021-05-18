@@ -21,15 +21,22 @@ public class ControleMediateur {
 	public void ajouteInterfaceUtilisateur(PGInterface pgi) {
 		this.pginter = pgi;
 	}
-	
-	public void removeCard() {
-		
-	}
 
 	public void clicSouris(int x, int y) {
 		InterfaceElementPosition iep = pginter.getElementByClick(x, y);
 		if(iep.getEle() == InterfaceElementType.CARTE) {
 			this.pginter.changeZoomTo(iep.getNombre(), LockedBoolean.LOCKEDTRUE);
+		}else if(iep.getEle() == InterfaceElementType.CASE) {
+			if(pg.getTourCourant() == 1) {
+				int place = pg.getBlancPos();
+				if(iep.getNombre() > place) pg.setDirectionDeplace(1);
+				else pg.setDirectionDeplace(2);
+			}else {
+				int place = pg.getNoirPos();
+				if(iep.getNombre() > place) pg.setDirectionDeplace(2);
+				else pg.setDirectionDeplace(1);
+			}
+			System.out.println(this.pg.getDirectionDeplace());
 		}
 		System.out.println(iep.toString());
 		this.pginter.repaint();
@@ -55,5 +62,10 @@ public class ControleMediateur {
 			this.pginter.changeZoomTo(iep.getNombre(), LockedBoolean.LOCKEDFALSE);
 		}
 		this.pginter.repaint();
+	}
+	
+	public void setConfirmed() {
+		this.pg.setConfirmed(true);
+		pg.metAJour();
 	}
 }
