@@ -14,15 +14,38 @@ public class Playground extends Observable{
     
     int tourCourant;
     
+    boolean confirmed;
+    int directionDeplace; // 1-Avance, 2-Retrait, 0-Valeur initialise
+    
     public ArrayList<Boolean> selected;
     
     public Playground() {
     	this.blanc = new Player(0);
     	this.noir = new Player(22);
     	
+    	this.reste = new ArrayList<Carte>();
+    	this.used = new ArrayList<Carte>();
+    	
     	this.initiliaseCarte();
+    	
     	this.tourCourant = 1;
     	this.selected = new ArrayList<Boolean>();
+    	this.confirmed = false;
+    	
+    	this.directionDeplace = 0;
+    }
+    
+    public void restartNewRound() {
+    	this.blanc.setPlace(0);
+    	this.noir.setPlace(22);
+    	
+    	this.initiliaseCarte();
+    	
+    	for(int i=0; i<5; i++) {
+			this.distribuerCarte(1);
+			this.distribuerCarte(2);
+		}
+    	this.tourCourant = 1;
     }
     
     public void initialiseSelected() {
@@ -30,20 +53,40 @@ public class Playground extends Observable{
 		for(int i=0; i<5; i++) {
 			selected.add(false);
 		}
+		//System.out.println(this.selected);
 	}
     
     public void resetSelected() {
 		for(int i=0; i<this.selected.size(); i++) {
 			 this.selected.set(i, false);
 		}
+		//System.out.println(this.selected);
 	}
+    
+    public void setSelected(ArrayList<Boolean> al) {
+    	this.selected = al;
+    	//System.out.println(this.selected);
+    }
+    
+    public void setSelected(int i, boolean b) {
+    	this.selected.set(i, b);
+    	//System.out.println(this.selected);
+    }
+    
+    public boolean isEmptyCase(int i) {
+    	return (this.blanc.getPlace() != i) && (this.noir.getPlace() != i);
+    }
     
     public int getTourCourant() {
     	return tourCourant;
     }
     
     public void initiliaseCarte() {
-    	this.reste = new ArrayList<Carte>();
+    	if(this.reste.size() != 0) this.reste.clear();
+    	this.used.clear();
+    	this.blanc.clearCartes();
+    	this.noir.clearCartes();
+    	
     	for(int i=1; i<6; i++) {
     		this.reste.add(Carte.UN);
     		this.reste.add(Carte.DEUX);
@@ -51,7 +94,7 @@ public class Playground extends Observable{
     		this.reste.add(Carte.QUATRE);
     		this.reste.add(Carte.CINQ);
     	}
-    	this.used = new ArrayList<Carte>();
+    	this.shuffleReste();
     }
     
     public void shuffleReste() {
@@ -69,6 +112,12 @@ public class Playground extends Observable{
     public void avance(int valeur) {
     	if(tourCourant == 1) this.blanc.setPlace(this.blanc.getPlace() + valeur);
     	else this.noir.setPlace(this.noir.getPlace() - valeur);
+    	this.metAJour();
+    }
+    
+    public void retreat(int valeur) {
+    	if(tourCourant == 1) this.blanc.setPlace(this.blanc.getPlace() - valeur);
+    	else this.noir.setPlace(this.noir.getPlace() + valeur);
     	this.metAJour();
     }
     
@@ -103,7 +152,14 @@ public class Playground extends Observable{
     
     @Override
     public String toString() {
-    	StringBuilder sb = new StringBuilder();
+    	StringBuilder sb = new StringBuilder("          1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 ");
+    	sb.append("\nCases : [ ");
+    	for(int i=0; i<23; i++) {
+    		if(this.blanc.getPlace() == i) sb.append("B ");
+    		else if(this.noir.getPlace() == i) sb.append("N ");
+    		else sb.append(". ");
+    	}
+    	sb.append("]\n");
     	sb.append("Reste : " + this.reste.toString() + "\n");
     	sb.append("Blanc : " + this.blanc.toString() + "\n");
     	sb.append("Noir : " + this.noir.toString() + "\n");
@@ -155,9 +211,118 @@ public class Playground extends Observable{
     	return -1;
     }
     
-    public void retreat(int valeur) {
-    	if(tourCourant == 1) this.blanc.setPlace(this.blanc.getPlace() - valeur);
-    	else this.noir.setPlace(this.noir.getPlace() + valeur);
-    	this.metAJour();
+    public void phaseDeplacer() {
+    	this.waitConfirm();
+    	
+    	Carte c = this.getSelectedCard();
+    	
+		if(this.getDistance() != c.getValue()) {
+			if(this.directionDeplace == 1) avance(c.getValue());
+			else if(this.directionDeplace == 2) retreat(c.getValue());
+			this.jouerCarte();
+			if(this.canAttack()) {
+				
+				this.waitConfirm();
+				Carte indirectCarte = this.getSelectedCard();
+				int nbSelected = this.getNBSelectedCard();
+				this.jouerCarte();
+				this.roundEnd(AttackType.INDIRECT, indirectCarte, nbSelected);
+				
+			}else {
+				this.roundEnd(AttackType.NONE, null, 0);
+			}
+		}
+		else {
+			int nbSelected = this.getNBSelectedCard();
+			this.jouerCarte();
+			this.roundEnd(AttackType.DIRECT, c, nbSelected);
+		}
+    }
+    
+    public ArrayList<Carte> getCurrentPlayerCards(){
+    	if(tourCourant == 1) return this.getBlancCartes();
+		else return this.getNoirCartes();
+    }
+    
+    public void jouerCarte() {
+    	// TODO Valid card
+    	ArrayList<Carte> cartes = this.getCurrentPlayerCards();
+    	for(int i=0; i<this.selected.size(); i++) {
+    		if(this.selected.get(i)) {
+    			Carte joue = cartes.remove(i);
+    			this.selected.remove(i);
+    			i--;
+    			this.used.add(joue);
+    		}
+    	}
+    }
+    
+    public void roundStart(AttackType at, Carte attValue, int attnb) {
+    	int pharerResultat = phaseParer(at, attValue, attnb);
+    	switch(pharerResultat) {
+    	case 0:
+    		if(this.tourCourant == 1) this.noir.incrementPoint();
+    		else this.blanc.incrementPoint();
+    		this.restartNewRound();
+    		break;
+    	case 1:
+    		this.phaseDeplacer();
+    		break;
+    	case 2:
+    		// TODO Wait confirmer
+    		break;
+    	case 3:
+    		// TODO Retreat
+    		break;
+		default:
+			// Should not be executed
+			System.err.println("roundStart() Error");
+			break;
+    	}
+    }
+    
+    public void roundEnd(AttackType at, Carte attValue, int attnb) {
+    	ArrayList<Carte> cartes = this.getCurrentPlayerCards();
+    	while(this.reste.size() != 0 && cartes.size() < 5) {
+    		this.distribuerCarte(tourCourant);
+    	}
+    	this.changetTour();
+    	this.roundStart(at, attValue, attnb);
+    }
+    
+    public void waitConfirm() {
+    	while(confirmed);
+    }
+    
+    public Carte getSelectedCard() {
+    	Carte c = null;
+    	for(int i=0; i<this.selected.size(); i++) {
+    		if(this.selected.get(i)) {
+    			c = this.getCurrentPlayerCards().get(i);
+    		}
+    	}
+    	return c;
+    }
+    
+    public int getNBSelectedCard() {
+    	int res = 0;
+    	for(int i=0; i<this.selected.size(); i++) {
+    		if(this.selected.get(i)) res++;
+    	}
+    	return res;
+    }
+
+    public boolean cartesContains(int value) {
+    	ArrayList<Carte> cartes = this.getCurrentPlayerCards();
+    	for(int i=0; i<cartes.size(); i++) {
+    		if(cartes.get(i).getValue() == value) return true;
+    	}
+    	return false;
+    }
+    
+    public boolean canAttack() {
+    	int dist = this.getDistance();
+    	if(this.cartesContains(dist)) return true;
+    	return false;
     }
 }

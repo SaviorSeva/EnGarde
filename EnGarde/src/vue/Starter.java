@@ -8,10 +8,7 @@ public class Starter {
 		
 		pg.shuffleReste();
 		
-		for(int i=0; i<5; i++) {
-			pg.distribuerCarte(1);
-			pg.distribuerCarte(2);
-		}
+		pg.restartNewRound();
 		
 		pg.avance(18);
 		
