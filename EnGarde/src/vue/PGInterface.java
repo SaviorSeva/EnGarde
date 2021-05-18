@@ -10,9 +10,11 @@ import javax.swing.Box;
 import javax.swing.JFrame;
 import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 
 import controlleur.AdapteurConfirmer;
 import controlleur.AdapteurSouris;
+import controlleur.AdapteurTimerAttente;
 import controlleur.ControleMediateur;
 import modele.InterfaceElementPosition;
 import modele.InterfaceElementType;
@@ -55,10 +57,13 @@ public class PGInterface implements Runnable{
 		confirmer.setFocusable(false);
 		boiteInfo.add(confirmer);
 		
+		Timer chrono = new Timer(16, new AdapteurTimerAttente(this.cm));
 		this.confirmer.addActionListener(new AdapteurConfirmer(this.cm));
 		
 		frame.add(pggraphique);
 		frame.add(boiteInfo, BorderLayout.SOUTH);
+		
+		chrono.start();
 		
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setSize(1200, 800);

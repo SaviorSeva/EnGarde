@@ -25,10 +25,15 @@ import modele.Playground;
 import patterns.Observateur;
 
 public class PGGraphique extends JComponent implements Observateur{
+	Graphics2D drawable;
+	Graphics gra;
+	
 	public Playground pg;
 	public int caseWidth;
 	public int caseHeight;
 	public Image[] imgCarte;
+	
+	int width, height;
 	
 	public double proportionCarte;
 	public double proportionZoomCarte;
@@ -47,10 +52,12 @@ public class PGGraphique extends JComponent implements Observateur{
 	public ArrayList<LockedBoolean> zoomCarte; 
 	
 	public PGGraphique(Playground pg) {
+		pg.ajouteObservateur(this);
+		
 		this.pg = pg;
 		imgCarte = new Image[6];
 		caseWidth = 50;
-		pg.ajouteObservateur(this);
+
 		for(int i=0; i<6; i++) {
 			File imgFile = new File("./res/images/carte" + i + ".png");
 			try {
@@ -92,29 +99,12 @@ public class PGGraphique extends JComponent implements Observateur{
 		this.zoomCarte.set(i, lb);
 		this.pg.setSelected(i, lb.isLocked() && lb.isTrue());
 	}
-
-	@Override
-	public void paintComponent(Graphics g) {
-		Graphics2D drawable = (Graphics2D) g;
-		int width = getSize().width;
-		int height = getSize().height;
-		
-		this.caseWidth = (width-20)/23;
-		
-		this.proportionCarte = 1.25 * Math.min(width/1200.0, height/800.0);
-		this.proportionTitre = 1.0 * Math.min(width/1200.0, height/800.0);
-		this.proportionCase = 1.0 * Math.min(width/1200.0, height/800.0);
-		this.proportionZoomCarte = 1.25 * proportionCarte;
-		
-		drawable.clearRect(0, 0, width, height);
-		
-		// Titre 
+	
+	public void tracerTitre() {
 		drawable.drawImage(imgTitle, (int)(width/2 - (200*proportionTitre)),  0, (int)(400*proportionTitre), (int)(200*proportionTitre), null);
-		
-		this.caseYStart = (int)(200*proportionTitre);
-		
-		this.caseHeight = (int)(200*this.proportionCase);
-		
+	}
+	
+	public void tracerGrille() {
 		for(int i=0; i<23; i++) {
 			// Orange background
 			drawable.setColor(Color.ORANGE);
@@ -128,10 +118,9 @@ public class PGGraphique extends JComponent implements Observateur{
 			drawable.setFont(new Font("TimesRoman", Font.BOLD, (int)(15*proportionCase)));
 			drawable.drawString((i+1) + "", caseXStart+i*caseWidth+(int)(caseWidth*0.4), caseYStart+(int)(caseHeight * 0.9));
 		}
-		
-		int b = pg.getBlancPos();
-		int n = pg.getNoirPos();
-		
+	}
+	
+	public void tracerJoueur(int b, int n) {
 		// Joueur Blanc
 		drawable.setColor(Color.WHITE);
 		drawable.fillOval(caseXStart+b*caseWidth, caseYStart + (int)(100*this.proportionCase - caseWidth/2), caseWidth, caseWidth);
@@ -143,19 +132,19 @@ public class PGGraphique extends JComponent implements Observateur{
 		drawable.fillOval(caseXStart+n*caseWidth, caseYStart + (int)(100*this.proportionCase - caseWidth/2), caseWidth, caseWidth);
 		if(pg.getTourCourant() == 2)
 			drawable.fillRect(caseXStart+n*caseWidth, caseYStart + (int)(100*this.proportionCase - caseWidth/2), 5, 5);
-		
-		// String Distance
+	
+		// Distance
 		this.distYEnd = caseYStart + (int)(caseHeight * 1.15);
 		drawable.setColor(Color.BLACK);
 		String text = "Distance entre 2 joueurs : " + pg.getDistance();
 		Font font = new Font("TimesRoman", Font.PLAIN, (int)(20*this.proportionCase));
-		FontMetrics metrics = g.getFontMetrics(font);
-		
+		FontMetrics metrics = gra.getFontMetrics(font);
 		int strX = width/2 - metrics.stringWidth(text) / 2;
-
 		drawable.setFont(font);
 		drawable.drawString(text, strX, distYEnd);
-		
+	}
+	
+	public void tracerCarte() {
 		// Cartes
 		this.carteYStart = caseYStart + (int)(caseHeight * 1.3);
 		int carteLengthTotal = (int)(680 * this.proportionCarte);
@@ -193,19 +182,48 @@ public class PGGraphique extends JComponent implements Observateur{
 									null);
 			}
 		}
-		
-		// Paint reste
+	}
+	
+	public void tracerReste() {
+		// Tracer la carte
 		int resteXStart = carteXStart + (int)(500*this.proportionCarte*1.2);
-		drawable.drawImage(imgCarte[0], (int)resteXStart, carteYStart, (int)(80*this.proportionCarte), (int)(126*this.proportionCarte), null);
+		drawable.drawImage(imgCarte[0], resteXStart, carteYStart, (int)(80*this.proportionCarte), (int)(126*this.proportionCarte), null);
 		
-		// Paint nb carte reste
+		// Tracer nb de carte dans le pile
 		Font f2 = new Font("TimesRoman", Font.BOLD, (int)(30*proportionCarte));
 		drawable.setFont(f2);
 		drawable.setColor(Color.BLACK);
 		String nbReste = this.pg.getResteNb() + "";
-		int nbResteXStart = resteXStart + (int)(40*this.proportionCarte) - (int)(0.5*g.getFontMetrics(f2).stringWidth(nbReste));
+		int nbResteXStart = resteXStart + (int)(40*this.proportionCarte) - (int)(0.5*gra.getFontMetrics(f2).stringWidth(nbReste));
 		drawable.drawString(nbReste, nbResteXStart, carteYStart+(int)(120*this.proportionCarte));
 		//drawable.drawString(this.pg.getResteNb() + "", carteEndX, carteYStart + (int)(63*this.proportionCarte));
+	}
+
+	@Override
+	public void paintComponent(Graphics g) {
+		this.drawable = (Graphics2D) g;
+		this.gra = g;
+		
+		this.width = getSize().width;
+		this.height = getSize().height;
+		
+		this.caseWidth = (width-20)/23;
+		
+		this.proportionCarte = 1.25 * Math.min(width/1200.0, height/800.0);
+		this.proportionTitre = 1.0 * Math.min(width/1200.0, height/800.0);
+		this.proportionCase = 1.0 * Math.min(width/1200.0, height/800.0);
+		this.proportionZoomCarte = 1.25 * proportionCarte;
+		
+		drawable.clearRect(0, 0, width, height);
+		
+		this.caseYStart = (int)(200*proportionTitre);
+		this.caseHeight = (int)(200*this.proportionCase);
+		
+		this.tracerTitre();
+		this.tracerGrille();
+		this.tracerJoueur(this.pg.getBlancPos(), this.pg.getNoirPos());
+		this.tracerCarte();
+		this.tracerReste();
 		
 		this.elePos = this.initialiseElePos();
 	}
@@ -260,4 +278,5 @@ public class PGGraphique extends JComponent implements Observateur{
 	public void miseAJour() {
 		this.repaint();
 	}
+
 }
