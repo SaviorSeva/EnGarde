@@ -7,6 +7,7 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -32,6 +33,7 @@ public class PGGraphique extends JComponent implements Observateur{
 	public int caseWidth;
 	public int caseHeight;
 	public Image[] imgCarte;
+	public BufferedImage [] grayscaledCarte;
 	
 	int width, height;
 	
@@ -56,6 +58,7 @@ public class PGGraphique extends JComponent implements Observateur{
 		
 		this.pg = pg;
 		imgCarte = new Image[6];
+		this.grayscaledCarte = new BufferedImage [6];
 		caseWidth = 50;
 
 		for(int i=0; i<6; i++) {
@@ -63,10 +66,14 @@ public class PGGraphique extends JComponent implements Observateur{
 			try {
 				imgCarte[i] = ImageIO.read(imgFile);
 				imgTitle = ImageIO.read(new File("./res/images/title.png"));
+				this.grayscaledCarte[i] = ImageIO.read(imgFile);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
+		
+		this.toGrayscale();
+		
 		this.caseXStart = 10;
 		this.proportionCarte = 1.25;
 		this.proportionTitre = 1.0;
@@ -75,6 +82,25 @@ public class PGGraphique extends JComponent implements Observateur{
 		this.zoomCarte = new ArrayList<LockedBoolean>(); 
 		initialiseZoom();
 		caseYStart = 0;
+	}
+	
+	public void toGrayscale() {
+		for(int m=0; m<this.grayscaledCarte.length; m++) {
+			BufferedImage image = this.grayscaledCarte[m];
+			width = image.getWidth();
+			height = image.getHeight();
+			for(int i=0; i<height; i++) {
+				for(int j=0; j<width; j++) {
+					Color c = new Color(image.getRGB(j, i));
+					int red = (int)(c.getRed() * 0.299);
+					int green = (int)(c.getGreen() * 0.587);
+					int blue = (int)(c.getBlue() *0.114);
+					Color newColor = new Color(red+green+blue,
+												red+green+blue,red+green+blue);
+					image.setRGB(j,i,newColor.getRGB());
+				}
+			}
+		}	
 	}
 	
 	public void initialiseZoom() {
@@ -89,7 +115,9 @@ public class PGGraphique extends JComponent implements Observateur{
 		for(int i=0; i<this.zoomCarte.size(); i++) {
 			LockedBoolean status = this.zoomCarte.get(i);
 			if(!status.isLocked()) {
-				this.zoomCarte.set(i, LockedBoolean.FALSE);
+				if(!status.isInvalid()) this.zoomCarte.set(i, LockedBoolean.FALSE);
+			}else {
+				if(!status.isTrue()) this.zoomCarte.set(i, LockedBoolean.FALSE);
 			}
 		}
 		this.pg.setSelected(this.lockedBooleanListToBooleanList());
@@ -173,13 +201,20 @@ public class PGGraphique extends JComponent implements Observateur{
 						(int)(80*this.proportionZoomCarte), 
 						(int)(126*this.proportionZoomCarte), 
 						null);
-			}else{
+			}else if(!zoomCarte.get(i).isInvalid()){
 				drawable.drawImage(	imgCarte[picSelected], 
 									carteXStart + (int)(10*this.proportionCarte) + (int)(100*this.proportionCarte*i), 
 									2 + carteYStart, 
 									(int)(80*this.proportionCarte), 
 									(int)(126*this.proportionCarte), 
 									null);
+			}else {
+				drawable.drawImage(	this.grayscaledCarte[picSelected], 
+						carteXStart + (int)(10*this.proportionCarte) + (int)(100*this.proportionCarte*i), 
+						2 + carteYStart, 
+						(int)(80*this.proportionCarte), 
+						(int)(126*this.proportionCarte), 
+						null);
 			}
 		}
 	}

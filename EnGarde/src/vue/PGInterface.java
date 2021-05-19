@@ -6,12 +6,9 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
 
-import javax.swing.Box;
-import javax.swing.JFrame;
-import javax.swing.JToggleButton;
-import javax.swing.SwingUtilities;
-import javax.swing.Timer;
+import javax.swing.*;
 
+import controlleur.AdapteurCancel;
 import controlleur.AdapteurConfirmer;
 import controlleur.AdapteurSouris;
 import controlleur.AdapteurTimerAttente;
@@ -27,7 +24,8 @@ public class PGInterface implements Runnable{
 	public PGGraphique pggraphique;
 	public JFrame frame;
 	public ControleMediateur cm;
-	public JToggleButton confirmer;
+	public JToggleButton confirmer, annuler, cancel;
+	public JTextField infoArea;
 	 
 	
 	public PGInterface(Playground pg) {
@@ -57,8 +55,19 @@ public class PGInterface implements Runnable{
 		confirmer.setFocusable(false);
 		boiteInfo.add(confirmer);
 		
+		// Bouton cancel
+		this.cancel = new JToggleButton("Cancel");
+		cancel.setAlignmentX(Component.LEFT_ALIGNMENT);
+		cancel.setFocusable(false);
+		boiteInfo.add(cancel);
+		
+		this.infoArea = new JTextField("Some Text");
+		this.infoArea.setAlignmentX(Component.RIGHT_ALIGNMENT);
+		boiteInfo.add(infoArea);
+		
 		Timer chrono = new Timer(16, new AdapteurTimerAttente(this.cm));
 		this.confirmer.addActionListener(new AdapteurConfirmer(this.cm));
+		this.cancel.addActionListener(new AdapteurCancel(this.cm));
 		
 		frame.add(pggraphique);
 		frame.add(boiteInfo, BorderLayout.SOUTH);

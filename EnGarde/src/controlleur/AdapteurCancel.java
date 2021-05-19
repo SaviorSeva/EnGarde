@@ -3,16 +3,15 @@ package controlleur;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class AdapteurConfirmer implements ActionListener{
+public class AdapteurCancel implements ActionListener{
 	ControleMediateur cm;
 	
-	public AdapteurConfirmer(ControleMediateur cm) {
+	public AdapteurCancel(ControleMediateur cm) {
 		this.cm = cm;
 	}
 	
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
-		cm.confirmReceived();
-		cm.initialiseZoom();
+		this.cm.clicCancel();
 	}
 }

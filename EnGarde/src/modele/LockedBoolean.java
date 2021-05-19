@@ -1,7 +1,7 @@
 package modele;
 
 public enum LockedBoolean {
-	FALSE(0), TRUE(1), LOCKEDFALSE(2), LOCKEDTRUE(3);
+	INVALID(-1), FALSE(0), TRUE(1), LOCKEDFALSE(2), LOCKEDTRUE(3);
 	
 	private int type;
 	
@@ -19,5 +19,9 @@ public enum LockedBoolean {
 	
 	public boolean isLocked() {
 		return this.type >= 2;
+	}
+	
+	public boolean isInvalid() {
+		return this.type == -1;
 	}
 }

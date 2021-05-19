@@ -12,6 +12,10 @@ public class Playground extends Observable{
     ArrayList<Carte> reste;
     ArrayList<Carte> used;
     
+    private AttackType at;
+    private Carte attValue;
+    private int attnb;
+    
     public int tourCourant;
     
     public boolean confirmed;
@@ -95,6 +99,11 @@ public class Playground extends Observable{
     
     public int getTourCourant() {
     	return tourCourant;
+    }
+    
+    public Player getPlayerCourant() {
+    	if(getTourCourant() == 1) return this.blanc;
+    	else return this.noir;
     }
     
     public void initiliaseCarte() {
@@ -188,8 +197,9 @@ public class Playground extends Observable{
      *  	-1 if error,
      *  	0 if cannot parry (which means lose this round),
      *  	1 if has no attack,
-     * 		2 if can parry attack,
+     * 		2 if can parry direct attack,
      * 		3 if have to retreat,
+     * 		4 if can parry indirect attack, and player can retreat or parry the attack.
      */
     public int phaseParer(AttackType at, Carte attValue, int attnb){
     	ArrayList<Carte> cartes;
@@ -227,11 +237,9 @@ public class Playground extends Observable{
     	return -1;
     }
     
-    public void phaseDeplacer() {
+    public void phaseDeplacer(Carte c) {
     	// 在这里写loop
     	// if (this.confirmed == true)
-    	
-    	Carte c = this.getSelectedCard();
     	
     	if(c == null) System.err.println("Error getSelectedCard()");
     	
@@ -273,6 +281,10 @@ public class Playground extends Observable{
     }
     
     public void roundStart(AttackType at, Carte attValue, int attnb) {
+    	this.at = at;
+    	this.attValue = attValue;
+    	this.attnb = attnb;
+    	
     	int pharerResultat = phaseParer(at, attValue, attnb);
     	switch(pharerResultat) {
     	case 0:
@@ -300,6 +312,9 @@ public class Playground extends Observable{
     		this.roundEnd(AttackType.NONE, null, 0);
     		*/
     		break;
+    	case 4:
+    		this.waitStatus = 5;
+    		break;
 		default:
 			// Should not be executed
 			System.err.println("roundStart() Error");
@@ -325,32 +340,106 @@ public class Playground extends Observable{
     }
     
     public void confirmReceived() {
+    	Carte c;
+    	int nbSelected;
     	switch(this.waitStatus) {
     	case 1:
-    		this.jouerCarte();
-			this.waitStatus = 3;
+    		c = this.getSelectedCard();
+    		nbSelected = this.getNBSelectedCard();
+    		if(c.getValue() == this.attValue.getValue() && nbSelected == this.attnb) {
+    			this.jouerCarte();
+    			this.waitStatus = 3;
+    		}else {
+    			System.out.println(	"You cannot parry the direct attack of (" + 
+    								this.attValue.getValue() + 
+    								", " + 
+    								this.attnb + 
+    								") with the selection of (" +
+    								c.getValue() + ", " + nbSelected + ").");
+    		}
     		break;
     	case 2:
-    		Carte c = this.getSelectedCard();
+    		c = this.getSelectedCard();
     		this.jouerCarte();
     		this.retreat(c.getValue());
     		this.roundEnd(AttackType.NONE, null, 0);
     		break;
     	case 3:
-    		this.phaseDeplacer();
+    		c = this.getSelectedCard();
+    		if(c.getValue() > this.getDistance() && this.directionDeplace == 1)
+    			System.out.println("You cannot surpass the other player");
+    		else if(this.directionDeplace == 2) {
+    			if(this.getPlayerCourant().getDistToStartPoint() < c.getValue()) System.out.println("You cannot retreat due to the size of the playground.");
+				else this.phaseDeplacer(c);
+    		}else 
+    			this.phaseDeplacer(c);
+				
+    		
     		break;
     	case 4:
     		// Indirect Attack
 			Carte indirectCarte = this.getSelectedCard();
-			int nbSelected = this.getNBSelectedCard();
-			this.jouerCarte();
-			this.roundEnd(AttackType.INDIRECT, indirectCarte, nbSelected);
+			nbSelected = this.getNBSelectedCard();
+			if(indirectCarte.getValue() == this.getDistance()) {
+				this.jouerCarte();
+				this.roundEnd(AttackType.INDIRECT, indirectCarte, nbSelected);
+			}else {
+				System.out.println("You cannot attack with the selection of (" +
+						indirectCarte.getValue() + ", " + nbSelected + 
+						") because the distance is " + this.getDistance() + ".");
+			}
 			break;
+    	case 5:
+    		c = this.getSelectedCard();
+    		nbSelected = this.getNBSelectedCard();
+    		if(c.getValue() == this.attValue.getValue() && nbSelected == this.attnb) {
+    			this.jouerCarte();
+    			this.waitStatus = 3;
+    		}else {
+    			System.out.println(	"You cannot parry the indirect attack of (" + 
+    								this.attValue.getValue() + 
+    								", " + 
+    								this.attnb + 
+    								") with the selection of (" +
+    								c.getValue() + ", " + nbSelected + ").");
+    		}
+    		break;
     	default:
 			// Should not be executed
 			System.err.println("Line 323 : confirmReceived() Error");
 			break;	
     	}
+    }
+    
+    public void cancelReceived() {
+    	switch(this.waitStatus) {
+    	case 1:
+    		System.out.println("Not parrying direct attack. You lose !");
+    		if(this.tourCourant == 1) this.noir.incrementPoint();
+    		else this.blanc.incrementPoint();
+    		this.restartNewRound();
+    		break;
+    	case 2:
+    		System.out.println("Not parrying indirect attack. You lose !");
+    		if(this.tourCourant == 1) this.noir.incrementPoint();
+    		else this.blanc.incrementPoint();
+    		this.restartNewRound();
+    		break;
+    	case 3:
+    		System.out.println("You must move at this round !");
+    		break;
+    	case 4:
+    		System.out.println("You've chose not to attack the enemy.");
+    		this.roundEnd(AttackType.NONE, null, 0);
+    		break;
+    	case 5:
+    		Carte c = this.getSelectedCard();
+    		this.jouerCarte();
+    		this.retreat(c.getValue());
+    		this.roundEnd(AttackType.NONE, null, 0);
+    		break;
+    	}
+    	this.metAJour();
     }
     
     public Carte getSelectedCard() {
