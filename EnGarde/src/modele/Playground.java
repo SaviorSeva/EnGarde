@@ -106,6 +106,11 @@ public class Playground extends Observable{
     	else return this.noir;
     }
     
+    public Player getEnemyCourant() {
+    	if(getTourCourant() == 2) return this.blanc;
+    	else return this.noir;
+    }
+    
     public void initiliaseCarte() {
     	if(this.reste.size() != 0) this.reste.clear();
     	this.used.clear();
@@ -228,7 +233,7 @@ public class Playground extends Observable{
     		for(int i=0; i<cartes.size(); i++) {
     			if(cartes.get(i).getValue() == attValue.getValue()) nb++;
     		}
-    		if(nb >= attnb) return 2;
+    		if(nb >= attnb) return 4;
     		else {
     			return 3;
     		}
@@ -238,8 +243,6 @@ public class Playground extends Observable{
     }
     
     public void phaseDeplacer(Carte c) {
-    	// 在这里写loop
-    	// if (this.confirmed == true)
     	
     	if(c == null) System.err.println("Error getSelectedCard()");
     	
@@ -280,46 +283,82 @@ public class Playground extends Observable{
     	this.metAJour();
     }
     
+    public void enterE3() {
+    	ArrayList<Carte> cs = this.getCurrentPlayerCards();
+    	boolean unableToMove = true;
+    	for(int i=0; i<cs.size() && unableToMove; i++) {
+    		int val = cs.get(i).getValue();
+    		if(this.getDistance() >= val || this.getPlayerCourant().getDistToStartPoint() > val) unableToMove = false;
+    	}
+    	if(unableToMove) {
+    		System.out.println("You cannot move or attack, therefore you lose !");
+    		this.getEnemyCourant().incrementPoint();
+			this.restartNewRound();
+    	}else this.waitStatus = 3;
+    }
+    
     public void roundStart(AttackType at, Carte attValue, int attnb) {
     	this.at = at;
     	this.attValue = attValue;
     	this.attnb = attnb;
     	
-    	int pharerResultat = phaseParer(at, attValue, attnb);
-    	switch(pharerResultat) {
-    	case 0:
-    		System.out.println("Case 0 lose");
-    		if(this.tourCourant == 1) this.noir.incrementPoint();
-    		else this.blanc.incrementPoint();
+    	if(this.getBlancCartes().size() == 0 && this.getNoirCartes().size() == 0) {
+    		int distBlanc = this.blanc.getDistToStartPoint();
+    		int distNoir = this.noir.getDistToStartPoint();
+    		if(distBlanc > distNoir) this.blanc.incrementPoint();
+    		else if(distNoir > distBlanc) this.noir.incrementPoint();
     		this.restartNewRound();
-    		break;
-    	case 1:
-    		System.out.println("Case 1 noAttack");
-    		this.waitStatus = 3;
-    		break;
-    	case 2:
-    		System.out.println("Case 2 canParry");
-    		this.waitStatus = 1;
-    		break;
-    	case 3:
-    		System.out.println("Case 3 retreat");
-    		this.waitStatus = 2;
-    		/*
-    		this.waitConfirm();
-    		Carte c = this.getSelectedCard();
-    		this.jouerCarte();
-    		this.retreat(c.getValue());
-    		this.roundEnd(AttackType.NONE, null, 0);
-    		*/
-    		break;
-    	case 4:
-    		this.waitStatus = 5;
-    		break;
-		default:
-			// Should not be executed
-			System.err.println("roundStart() Error");
-			break;
     	}
+    	else if(this.getCurrentPlayerCards().size() == 0) this.roundEnd(AttackType.NONE, null, 0);
+    	else {
+    		int pharerResultat = phaseParer(at, attValue, attnb);
+        	switch(pharerResultat) {
+        	case 0:
+        		System.out.println("Case 0 lose");
+        		if(this.tourCourant == 1) this.noir.incrementPoint();
+        		else this.blanc.incrementPoint();
+        		this.restartNewRound();
+        		break;
+        	case 1:
+        		System.out.println("Case 1 noAttack");
+        		enterE3();
+        		break;
+        	case 2:
+        		System.out.println("Case 2 canParry");
+        		this.waitStatus = 1;
+        		break;
+        	case 3:
+        		System.out.println("Case 3 retreat");
+        		ArrayList<Carte> cs = this.getCurrentPlayerCards();
+        		boolean unableToRetreat = true;
+        		for(int i=0; i<cs.size() && unableToRetreat; i++) {
+        			if(this.getPlayerCourant().getDistToStartPoint() >= cs.get(i).getValue()) unableToRetreat = false;
+        		}
+        		if(unableToRetreat) {
+        			System.out.println("You cannnot retreat. You lose !");
+        			this.getEnemyCourant().incrementPoint();
+        			this.restartNewRound();
+        		}
+        		this.waitStatus = 2;
+        		/*
+        		this.waitConfirm();
+        		Carte c = this.getSelectedCard();
+        		this.jouerCarte();
+        		this.retreat(c.getValue());
+        		this.roundEnd(AttackType.NONE, null, 0);
+        		*/
+        		break;
+        	case 4:
+        		System.out.println("Case 4 retreat or parry");
+        		this.waitStatus = 5;
+        		break;
+    		default:
+    			// Should not be executed
+    			System.err.println("roundStart() Error");
+    			break;
+        	}
+    	}
+    	
     }
     
     public void roundEnd(AttackType at, Carte attValue, int attnb) {
@@ -348,7 +387,7 @@ public class Playground extends Observable{
     		nbSelected = this.getNBSelectedCard();
     		if(c.getValue() == this.attValue.getValue() && nbSelected == this.attnb) {
     			this.jouerCarte();
-    			this.waitStatus = 3;
+    			enterE3();
     		}else {
     			System.out.println(	"You cannot parry the direct attack of (" + 
     								this.attValue.getValue() + 
@@ -360,9 +399,12 @@ public class Playground extends Observable{
     		break;
     	case 2:
     		c = this.getSelectedCard();
-    		this.jouerCarte();
-    		this.retreat(c.getValue());
-    		this.roundEnd(AttackType.NONE, null, 0);
+    		if(this.getPlayerCourant().getDistToStartPoint() < c.getValue()) System.out.println("You cannot retreat due to the size of the playground.");
+    		else{
+    			this.jouerCarte();
+    			this.retreat(c.getValue());
+        		this.roundEnd(AttackType.NONE, null, 0);
+    		}
     		break;
     	case 3:
     		c = this.getSelectedCard();
@@ -394,7 +436,7 @@ public class Playground extends Observable{
     		nbSelected = this.getNBSelectedCard();
     		if(c.getValue() == this.attValue.getValue() && nbSelected == this.attnb) {
     			this.jouerCarte();
-    			this.waitStatus = 3;
+    			enterE3();
     		}else {
     			System.out.println(	"You cannot parry the indirect attack of (" + 
     								this.attValue.getValue() + 
@@ -434,9 +476,13 @@ public class Playground extends Observable{
     		break;
     	case 5:
     		Carte c = this.getSelectedCard();
-    		this.jouerCarte();
-    		this.retreat(c.getValue());
-    		this.roundEnd(AttackType.NONE, null, 0);
+    		if(this.getPlayerCourant().getDistToStartPoint() < c.getValue()) System.out.println("You cannot retreat due to the size of the playground.");
+    		else {
+    			this.jouerCarte();
+        		this.retreat(c.getValue());
+        		this.roundEnd(AttackType.NONE, null, 0);
+    		}
+    		
     		break;
     	}
     	this.metAJour();
