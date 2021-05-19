@@ -4,11 +4,13 @@ import java.util.ArrayList;
 
 public class Player {
 	public int place;
+	int startPoint;
 	int point;
 	ArrayList<Carte> cartes;
 	
 	public Player(int i) {
 		this.place = i;
+		this.startPoint = i;
 		this.point = 0;
 		this.cartes = new ArrayList<Carte>();
 	}
@@ -43,6 +45,11 @@ public class Player {
 	
 	public int getPoint() {
 		return this.point;
+	}
+	
+	public int getDistToStartPoint() {
+		if(this.place > this.startPoint) return this.place - this.startPoint;
+		else return this.startPoint - this.place;
 	}
 
 	@Override
