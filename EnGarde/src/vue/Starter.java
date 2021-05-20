@@ -12,7 +12,6 @@ public class Starter {
 		
 		pg.restartNewRound();
 		
-		
 		System.out.println(pg.toString());
 		
 		
