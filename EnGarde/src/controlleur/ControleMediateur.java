@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import javax.swing.Timer;
 
 import modele.Carte;
+import modele.ExecPlayground;
 import modele.InterfaceElementPosition;
 import modele.InterfaceElementType;
 import modele.LockedBoolean;
@@ -13,12 +14,12 @@ import modele.Playground;
 import vue.PGInterface;
 
 public class ControleMediateur {
-	Playground pg;
+	ExecPlayground epg;
 	PGInterface pginter;
 	ArrayList<Point> elementPos; 
 	
-	public ControleMediateur(Playground pg) {
-		this.pg = pg;
+	public ControleMediateur(ExecPlayground epg) {
+		this.epg = epg;
 	}
 	
 	public void ajouteInterfaceUtilisateur(PGInterface pgi) {
@@ -30,11 +31,11 @@ public class ControleMediateur {
 		if(iep.getEle() == InterfaceElementType.CARTE && !pginter.getZoomCarte().get(iep.getNombre()).isInvalid()) {
 			this.pginter.changeZoomTo(iep.getNombre(), LockedBoolean.LOCKEDTRUE);
 			
-			int dist = pg.getDistance();
-			ArrayList<Carte> cartes = this.pg.getCurrentPlayerCards();
+			int dist = epg.getDistance();
+			ArrayList<Carte> cartes = this.epg.getCurrentPlayerCards();
 			for(int i=0; i<cartes.size(); i++) {
 				if(i != iep.getNombre()) {
-					if(dist != this.pg.getSelectedCard().getValue())
+					if(dist != this.epg.getSelectedCard().getValue())
 						this.pginter.changeZoomTo(i, LockedBoolean.INVALID);
 					else {
 						if(cartes.get(i).getValue() != cartes.get(iep.getNombre()).getValue())
@@ -45,16 +46,16 @@ public class ControleMediateur {
 			
 			
 		}else if(iep.getEle() == InterfaceElementType.CASE) {
-			if(pg.getTourCourant() == 1) {
-				int place = pg.getBlancPos();
-				if(iep.getNombre() > place) pg.setDirectionDeplace(1);
-				else pg.setDirectionDeplace(2);
+			if(epg.pg.getTourCourant() == 1) {
+				int place = epg.pg.getBlancPos();
+				if(iep.getNombre() > place) epg.pg.setDirectionDeplace(1);
+				else epg.pg.setDirectionDeplace(2);
 			}else {
-				int place = pg.getNoirPos();
-				if(iep.getNombre() > place) pg.setDirectionDeplace(2);
-				else pg.setDirectionDeplace(1);
+				int place = epg.pg.getBlancPos();
+				if(iep.getNombre() > place) epg.pg.setDirectionDeplace(2);
+				else epg.pg.setDirectionDeplace(1);
 			}
-			System.out.println(this.pg.getDirectionDeplace());
+			System.out.println(this.epg.pg.getDirectionDeplace());
 		}
 		System.out.println(iep.toString());
 		this.pginter.repaint();
@@ -86,14 +87,8 @@ public class ControleMediateur {
 		this.pginter.repaint();
 	}
 	
-	public void setConfirmed() {
-		this.pg.setConfirmed(true);
-		System.out.println(pg.confirmed);
-		pg.metAJour();
-	}
-	
 	public void confirmReceived() {
-		this.pg.confirmReceived();
+		this.epg.confirmReceived();
 	}
 	
 	public void resetZoom(){
@@ -105,6 +100,6 @@ public class ControleMediateur {
 	}
 	
 	public void clicCancel() {
-		this.pg.cancelReceived();
+		this.epg.cancelReceived();
 	}
 }

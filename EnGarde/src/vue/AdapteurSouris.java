@@ -1,9 +1,11 @@
-package controlleur;
+package vue;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import javax.swing.SwingUtilities;
+
+import controlleur.ControleMediateur;
 
 public class AdapteurSouris extends MouseAdapter {
 	public ControleMediateur cm;

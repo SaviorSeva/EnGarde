@@ -8,11 +8,8 @@ import java.util.ArrayList;
 
 import javax.swing.*;
 
-import controlleur.AdapteurCancel;
-import controlleur.AdapteurConfirmer;
-import controlleur.AdapteurSouris;
-import controlleur.AdapteurTimerAttente;
 import controlleur.ControleMediateur;
+import modele.ExecPlayground;
 import modele.InterfaceElementPosition;
 import modele.InterfaceElementType;
 import modele.LockedBoolean;
@@ -31,7 +28,7 @@ public class PGInterface implements Runnable{
 	public PGInterface(Playground pg) {
 		this.pg = pg;
 		this.pggraphique = new PGGraphique(this.pg);
-		this.cm = new ControleMediateur(this.pg);
+		this.cm = new ControleMediateur(new ExecPlayground(pg));
 		this.cm.ajouteInterfaceUtilisateur(this);
 	}
 	
