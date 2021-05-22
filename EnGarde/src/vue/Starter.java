@@ -14,7 +14,7 @@ public class Starter {
 		
 		epg.restartNewRound();
 		
-		System.out.println(pg.toString());
+		//System.out.println(pg.toString());
 		
 		
 	}

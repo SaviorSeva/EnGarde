@@ -5,9 +5,13 @@ import java.util.Collections;
 
 public class ExecPlayground {
 	public Playground pg;
+	public Action currentAction;
+	public Historique hist;
 	
 	public ExecPlayground(Playground pg) {
 		this.pg = pg;
+		this.currentAction = new Action();
+		this.hist = new Historique();
 	}
 	
 	public int getDistance() {
@@ -134,39 +138,38 @@ public class ExecPlayground {
 	}
 	
 	public void phaseDeplacer(Carte c) {
+		if(c == null) System.err.println("Error getSelectedCard()");
 		
-	if(c == null) System.err.println("Error getSelectedCard()");
-
-
-	if(this.pg.getDistance() == c.getValue() && this.pg.getDirectionDeplace() == 1) {
-		// Direct Attack
-		int nbSelected = this.getNBSelectedCard();
-		this.jouerCarte();
-		this.roundEnd(new Attack(AttackType.DIRECT, c, nbSelected));
-	}else if(this.pg.getDirectionDeplace()!=0){
-		if(this.pg.getDirectionDeplace() == 1) this.avance(c.getValue());
-		else if(pg.getDirectionDeplace() == 2) this.retreat(c.getValue());
-		this.jouerCarte();
-		if(this.canAttack()) {
-			this.pg.setWaitStatus(4);
-
-		}else {
-			this.roundEnd(new Attack(AttackType.NONE, null, 0));
+		if(this.pg.getDistance() == c.getValue() && this.pg.getDirectionDeplace() == 1) {
+			// Direct Attack
+			int nbSelected = this.getNBSelectedCard();
+			this.jouerCarte();
+			this.currentAction.appendDirectAttackAction(c, nbSelected);
+			this.roundEnd(new Attack(AttackType.DIRECT, c, nbSelected));
+		}else if(this.pg.getDirectionDeplace() != 0){
+			// Move Forward
+			if(this.pg.getDirectionDeplace() == 1) {
+				this.avance(c.getValue());
+				this.currentAction.appendMoveForwardAction(c);
+			}
+			// Move backward
+			else if(pg.getDirectionDeplace() == 2) {
+				this.retreat(c.getValue());
+				this.currentAction.appendMoveBackwardAction(c);
+			}
+			this.jouerCarte();
+			// Possibility of indirect attack
+			if(this.canAttack()) {
+				this.pg.setWaitStatus(4);
+			}else {
+				this.currentAction.appendNoAttackAction();
+				this.roundEnd(new Attack(AttackType.NONE, null, 0));
+			}
+		}else{
+			System.out.println("You must choose a Direction! ");
 		}
-	}else{
-		System.out.println("You must choose a Direction! ");
 	}
-}
-
-
-
-
-
-
-
-
-
-
+	
 	public ArrayList<Carte> getCurrentPlayerCards(){
 		if(pg.getTourCourant() == 1) return this.pg.getBlancCartes();
 		else return this.pg.getNoirCartes();
@@ -197,13 +200,15 @@ public class ExecPlayground {
 			System.out.println("You cannot move or attack, therefore you lose !");
 			this.pg.getEnemyCourant().incrementPoint();
 			this.restartNewRound();
-		}else this.pg.setWaitStatus(3);
+		}else {
+			//System.out.println("Inside " + this.currentAction.toString());
+			this.pg.setWaitStatus(3);
+		}
 	}
 	
 	public void roundStart(Attack att) {
-		
 		pg.setLastAttack(att);
-		
+
 		if(this.pg.getBlancCartes().size() == 0 && this.pg.getNoirCartes().size() == 0) {
 			int distBlanc = this.pg.getBlanc().getDistToStartPoint();
 			int distNoir = this.pg.getNoir().getDistToStartPoint();
@@ -211,52 +216,59 @@ public class ExecPlayground {
 			else if(distNoir > distBlanc) this.pg.getNoir().incrementPoint();
 			this.restartNewRound();
 		}
-		else if(this.getCurrentPlayerCards().size() == 0) this.roundEnd(new Attack(AttackType.NONE, null, 0));
+		else if(this.getCurrentPlayerCards().size() == 0) {
+			this.currentAction.appendNoAction();
+			
+			this.roundEnd(new Attack(AttackType.NONE, null, 0));
+		}
 		else {
 			int pharerResultat = phaseParer(this.pg.getLastAttack());
 	    	switch(pharerResultat) {
 	    	case 0:
 	    		System.out.println("Case 0 lose");
-			if(this.pg.getTourCourant() == 1) this.pg.getNoir().incrementPoint();
-			else this.pg.getBlanc().incrementPoint();
-			this.restartNewRound();
-			break;
-		case 1:
-			System.out.println("Case 1 noAttack");
-			enterE3();
-			break;
-		case 2:
-			System.out.println("Case 2 canParry");
-			this.pg.setWaitStatus(1);
-			break;
-		case 3:
-			System.out.println("Case 3 retreat");
-			ArrayList<Carte> cs = this.getCurrentPlayerCards();
-			boolean unableToRetreat = true;
-			for(int i=0; i<cs.size() && unableToRetreat; i++) {
-				if(this.pg.getPlayerCourant().getDistToStartPoint() >= cs.get(i).getValue()) unableToRetreat = false;
-			}
-			if(unableToRetreat) {
-				System.out.println("You cannnot retreat. You lose !");
-				this.pg.getEnemyCourant().incrementPoint();
+				if(this.pg.getTourCourant() == 1) this.pg.getNoir().incrementPoint();
+				else this.pg.getBlanc().incrementPoint();
 				this.restartNewRound();
-			}
-			this.pg.setWaitStatus(2);
-			/*
-			this.waitConfirm();
-			Carte c = this.getSelectedCard();
-			this.jouerCarte();
-			this.retreat(c.getValue());
-			this.roundEnd(AttackType.NONE, null, 0);
-			*/
-			break;
-		case 4:
-			System.out.println("Case 4 retreat or parry");
-			this.pg.setWaitStatus(5);
-			break;
-		default:
-			// Should not be executed
-			System.err.println("roundStart() Error");
+				break;
+			case 1:
+				System.out.println("Case 1 noAttack");
+				
+				//Historique
+				this.currentAction.appendNoParryAction();
+				enterE3();
+				break;
+			case 2:
+				System.out.println("Case 2 canParry");
+				this.pg.setWaitStatus(1);
+				break;
+			case 3:
+				System.out.println("Case 3 retreat");
+				ArrayList<Carte> cs = this.getCurrentPlayerCards();
+				boolean unableToRetreat = true;
+				for(int i=0; i<cs.size() && unableToRetreat; i++) {
+					if(this.pg.getPlayerCourant().getDistToStartPoint() >= cs.get(i).getValue()) unableToRetreat = false;
+				}
+				if(unableToRetreat) {
+					System.out.println("You cannnot retreat. You lose !");
+					this.pg.getEnemyCourant().incrementPoint();
+					this.restartNewRound();
+				}
+				this.pg.setWaitStatus(2);
+				/*
+				this.waitConfirm();
+				Carte c = this.getSelectedCard();
+				this.jouerCarte();
+				this.retreat(c.getValue());
+				this.roundEnd(AttackType.NONE, null, 0);
+				*/
+				break;
+			case 4:
+				System.out.println("Case 4 retreat or parry");
+				this.pg.setWaitStatus(5);
+				break;
+			default:
+				// Should not be executed
+				System.err.println("roundStart() Error");
 				break;
 	    	}
 		}
@@ -271,6 +283,10 @@ public class ExecPlayground {
 		this.pg.setWaitStatus(0);
 		this.pg.initialiseSelected();
 		this.changetTour();
+		hist.addCopy(this.currentAction);
+		System.out.println(this.currentAction.toString());
+		System.out.println(this.hist.toString());
+		this.currentAction.clear();
 		this.roundStart(att);
 	}
 	
@@ -283,6 +299,7 @@ public class ExecPlayground {
 			nbSelected = this.getNBSelectedCard();
 			if(c.getValue() == this.pg.getLastAttack().getAttValue().getValue() && nbSelected == this.pg.getLastAttack().getAttnb()) {
 				this.jouerCarte();
+				this.currentAction.appendParryAction(c, nbSelected);
 				enterE3();
 			}else {
 				System.out.println(	"You cannot parry the direct attack of (" + 
@@ -298,11 +315,13 @@ public class ExecPlayground {
 			if(this.pg.getPlayerCourant().getDistToStartPoint() < c.getValue()) System.out.println("You cannot retreat due to the size of the playground.");
 			else{
 				this.jouerCarte();
+				this.currentAction.appendRetreatAction(c);
 				this.retreat(c.getValue());
 				this.roundEnd(new Attack(AttackType.NONE, null, 0));
 			}
 			break;
 		case 3:
+			if(this.currentAction.getActionString().equals("")) this.currentAction.appendNoParryAction();
 			c = this.getSelectedCard();
 			if(c == null) System.out.println("You must pick a card!");
 			else if(c.getValue() > this.pg.getDistance() && this.pg.getDirectionDeplace() == 1)
@@ -312,8 +331,6 @@ public class ExecPlayground {
 				else this.phaseDeplacer(c);
 			}else 
 				this.phaseDeplacer(c);
-				
-			
 			break;
 		case 4:
 			// Indirect Attack
@@ -321,6 +338,7 @@ public class ExecPlayground {
 			nbSelected = this.getNBSelectedCard();
 			if(indirectCarte.getValue() == this.pg.getDistance()) {
 				this.jouerCarte();
+				this.currentAction.appendIndirectAttackAction(indirectCarte, nbSelected);
 				this.roundEnd(new Attack(AttackType.INDIRECT, indirectCarte, nbSelected));
 			}else {
 				System.out.println("You cannot attack with the selection of (" +
@@ -333,6 +351,7 @@ public class ExecPlayground {
 			nbSelected = this.getNBSelectedCard();
 			if(c.getValue() == this.pg.getLastAttack().getAttValue().getValue() && nbSelected == this.pg.getLastAttack().getAttnb()) {
 				this.jouerCarte();
+				this.currentAction.appendParryAction(c, nbSelected);
 				enterE3();
 			}else {
 				System.out.println(	"You cannot parry the indirect attack of (" + 
@@ -379,6 +398,7 @@ public class ExecPlayground {
 			if(this.pg.getPlayerCourant().getDistToStartPoint() < c.getValue()) System.out.println("You cannot retreat due to the size of the playground.");
 			else {
 				this.jouerCarte();
+				this.currentAction.appendRetreatAction(c);
 	    		this.retreat(c.getValue());
 	    		this.roundEnd(new Attack(AttackType.NONE, null, 0));
 			}

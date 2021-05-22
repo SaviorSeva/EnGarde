@@ -55,9 +55,9 @@ public class ControleMediateur {
 				if(iep.getNombre() > place) epg.pg.setDirectionDeplace(2);
 				else epg.pg.setDirectionDeplace(1);
 			}
-			System.out.println(this.epg.pg.getDirectionDeplace());
+			//System.out.println(this.epg.pg.getDirectionDeplace());
 		}
-		System.out.println(iep.toString());
+		//System.out.println(iep.toString());
 		this.pginter.repaint();
 	}
 
