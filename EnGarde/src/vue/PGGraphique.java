@@ -58,7 +58,7 @@ public class PGGraphique extends JComponent implements Observateur{
 		
 		this.pg = pg;
 		imgCarte = new Image[6];
-		this.grayscaledCarte = new BufferedImage [6];
+		this.grayscaledCarte = new BufferedImage[6];
 		caseWidth = 50;
 
 		for(int i=0; i<6; i++) {
