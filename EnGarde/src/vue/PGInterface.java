@@ -8,10 +8,6 @@ import java.util.ArrayList;
 
 import javax.swing.*;
 
-import controlleur.AdapteurCancel;
-import controlleur.AdapteurConfirmer;
-import controlleur.AdapteurSouris;
-import controlleur.AdapteurTimerAttente;
 import controlleur.ControleMediateur;
 import modele.InterfaceElementPosition;
 import modele.InterfaceElementType;
