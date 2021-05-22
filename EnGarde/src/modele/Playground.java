@@ -18,7 +18,6 @@ public class Playground extends Observable{
     
     public int tourCourant;
     
-    public boolean confirmed;
     int directionDeplace; // 1-Avance, 2-Retrait, 0-Valeur initialise
     
     public ArrayList<Boolean> selected;
@@ -36,7 +35,6 @@ public class Playground extends Observable{
     	
     	this.tourCourant = 1;
     	this.selected = new ArrayList<Boolean>();
-    	this.confirmed = false;
     	
     	this.directionDeplace = 0;
     	this.waitStatus = 0;
@@ -47,10 +45,6 @@ public class Playground extends Observable{
 	}
 	public void setDirectionDeplace(int directionDeplace) {
 		this.directionDeplace = directionDeplace;
-	}
-	
-	public void setConfirmed(boolean b) {
-		this.confirmed = b;
 	}
 	
 	public void restartNewRound() {
@@ -370,12 +364,6 @@ public class Playground extends Observable{
     	this.initialiseSelected();
     	this.changetTour();
     	this.roundStart(at, attValue, attnb);
-    }
-    
-    public void waitConfirm() {
-    	while(!confirmed);
-    	this.confirmed = false;
-    	this.metAJour();
     }
     
     public void confirmReceived() {

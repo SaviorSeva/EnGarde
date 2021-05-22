@@ -86,12 +86,6 @@ public class ControleMediateur {
 		this.pginter.repaint();
 	}
 	
-	public void setConfirmed() {
-		this.pg.setConfirmed(true);
-		System.out.println(pg.confirmed);
-		pg.metAJour();
-	}
-	
 	public void confirmReceived() {
 		this.pg.confirmReceived();
 	}
