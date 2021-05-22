@@ -1,7 +1,9 @@
-package controlleur;
+package vue;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
+import controlleur.ControleMediateur;
 
 public class AdapteurTimerAttente implements ActionListener{
 	public ControleMediateur cm;
