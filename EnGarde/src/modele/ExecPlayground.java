@@ -292,7 +292,8 @@ public class ExecPlayground {
 			break;
 		case 3:
 			c = this.getSelectedCard();
-			if(c.getValue() > this.pg.getDistance() && this.pg.getDirectionDeplace() == 1)
+			if(c == null) System.out.println("You must pick a card!");
+			else if(c.getValue() > this.pg.getDistance() && this.pg.getDirectionDeplace() == 1)
 				System.out.println("You cannot surpass the other player");
 			else if(this.pg.getDirectionDeplace() == 2) {
 				if(this.pg.getPlayerCourant().getDistToStartPoint() < c.getValue()) System.out.println("You cannot retreat due to the size of the playground.");
