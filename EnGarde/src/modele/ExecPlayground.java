@@ -136,25 +136,37 @@ public class ExecPlayground {
 	public void phaseDeplacer(Carte c) {
 		
 	if(c == null) System.err.println("Error getSelectedCard()");
-	
+
+
 	if(this.pg.getDistance() == c.getValue() && this.pg.getDirectionDeplace() == 1) {
 		// Direct Attack
-			int nbSelected = this.getNBSelectedCard();
-			this.jouerCarte();
-			this.roundEnd(new Attack(AttackType.DIRECT, c, nbSelected));	
+		int nbSelected = this.getNBSelectedCard();
+		this.jouerCarte();
+		this.roundEnd(new Attack(AttackType.DIRECT, c, nbSelected));
+	}else if(this.pg.getDirectionDeplace()!=0){
+		if(this.pg.getDirectionDeplace() == 1) this.avance(c.getValue());
+		else if(pg.getDirectionDeplace() == 2) this.retreat(c.getValue());
+		this.jouerCarte();
+		if(this.canAttack()) {
+			this.pg.setWaitStatus(4);
+
 		}else {
-			if(this.pg.getDirectionDeplace() == 1) this.avance(c.getValue());
-			else if(pg.getDirectionDeplace() == 2) this.retreat(c.getValue());
-			this.jouerCarte();
-			if(this.canAttack()) {
-				this.pg.setWaitStatus(4);
-				
-			}else {
-				this.roundEnd(new Attack(AttackType.NONE, null, 0));
-			}
+			this.roundEnd(new Attack(AttackType.NONE, null, 0));
 		}
+	}else{
+		System.out.println("You must choose a Direction! ");
 	}
-	
+}
+
+
+
+
+
+
+
+
+
+
 	public ArrayList<Carte> getCurrentPlayerCards(){
 		if(pg.getTourCourant() == 1) return this.pg.getBlancCartes();
 		else return this.pg.getNoirCartes();
