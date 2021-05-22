@@ -46,7 +46,7 @@ public class ExecPlayground {
 		}
     	this.pg.setTourCourant(1);
     	
-    	this.roundStart(AttackType.NONE, null, 0);
+    	this.roundStart(new Attack(AttackType.NONE, null, 0));
     }
 	
 	 public void changetTour() {
@@ -141,7 +141,7 @@ public class ExecPlayground {
 		// Direct Attack
 			int nbSelected = this.getNBSelectedCard();
 			this.jouerCarte();
-			this.roundEnd(AttackType.DIRECT, c, nbSelected);	
+			this.roundEnd(new Attack(AttackType.DIRECT, c, nbSelected));	
 		}else {
 			if(this.pg.getDirectionDeplace() == 1) this.avance(c.getValue());
 			else if(pg.getDirectionDeplace() == 2) this.retreat(c.getValue());
@@ -150,7 +150,7 @@ public class ExecPlayground {
 				this.pg.setWaitStatus(4);
 				
 			}else {
-				this.roundEnd(AttackType.NONE, null, 0);
+				this.roundEnd(new Attack(AttackType.NONE, null, 0));
 			}
 		}
 	}
@@ -188,9 +188,9 @@ public class ExecPlayground {
 		}else this.pg.setWaitStatus(3);
 	}
 	
-	public void roundStart(AttackType at, Carte attValue, int attnb) {
+	public void roundStart(Attack att) {
 		
-		pg.setLastAttack(new Attack(at, attValue, attnb));
+		pg.setLastAttack(att);
 		
 		if(this.pg.getBlancCartes().size() == 0 && this.pg.getNoirCartes().size() == 0) {
 			int distBlanc = this.pg.getBlanc().getDistToStartPoint();
@@ -199,7 +199,7 @@ public class ExecPlayground {
 			else if(distNoir > distBlanc) this.pg.getNoir().incrementPoint();
 			this.restartNewRound();
 		}
-		else if(this.getCurrentPlayerCards().size() == 0) this.roundEnd(AttackType.NONE, null, 0);
+		else if(this.getCurrentPlayerCards().size() == 0) this.roundEnd(new Attack(AttackType.NONE, null, 0));
 		else {
 			int pharerResultat = phaseParer(this.pg.getLastAttack());
 	    	switch(pharerResultat) {
@@ -251,7 +251,7 @@ public class ExecPlayground {
 		
 	}
 	
-	public void roundEnd(AttackType at, Carte attValue, int attnb) {
+	public void roundEnd(Attack att) {
 		ArrayList<Carte> cartes = this.getCurrentPlayerCards();
 		while(this.pg.getReste().size() != 0 && cartes.size() < 5) {
 			this.distribuerCarte(pg.getTourCourant());
@@ -259,7 +259,7 @@ public class ExecPlayground {
 		this.pg.setWaitStatus(0);
 		this.pg.initialiseSelected();
 		this.changetTour();
-		this.roundStart(at, attValue, attnb);
+		this.roundStart(att);
 	}
 	
 	public void confirmReceived() {
@@ -287,7 +287,7 @@ public class ExecPlayground {
 			else{
 				this.jouerCarte();
 				this.retreat(c.getValue());
-				this.roundEnd(AttackType.NONE, null, 0);
+				this.roundEnd(new Attack(AttackType.NONE, null, 0));
 			}
 			break;
 		case 3:
@@ -308,7 +308,7 @@ public class ExecPlayground {
 			nbSelected = this.getNBSelectedCard();
 			if(indirectCarte.getValue() == this.pg.getDistance()) {
 				this.jouerCarte();
-				this.roundEnd(AttackType.INDIRECT, indirectCarte, nbSelected);
+				this.roundEnd(new Attack(AttackType.INDIRECT, indirectCarte, nbSelected));
 			}else {
 				System.out.println("You cannot attack with the selection of (" +
 						indirectCarte.getValue() + ", " + nbSelected + 
@@ -359,7 +359,7 @@ public class ExecPlayground {
 			break;
 		case 4:
 			System.out.println("You've chose not to attack the enemy.");
-			this.roundEnd(AttackType.NONE, null, 0);
+			this.roundEnd(new Attack(AttackType.NONE, null, 0));
 			break;
 		case 5:
 			Carte c = this.getSelectedCard();
@@ -367,7 +367,7 @@ public class ExecPlayground {
 			else {
 				this.jouerCarte();
 	    		this.retreat(c.getValue());
-	    		this.roundEnd(AttackType.NONE, null, 0);
+	    		this.roundEnd(new Attack(AttackType.NONE, null, 0));
 			}
 			
 			break;
