@@ -3,10 +3,10 @@ package modele;
 public class Test {
 	public static void main(String args[]) {
 		Playground pg = new Playground();
-		
+		ExecPlayground epg = new ExecPlayground(pg);
 		for(int i=0; i<5; i++) {
-			pg.distribuerCarte(1);
-			pg.distribuerCarte(2);
+			epg.distribuerCarte(1);
+			epg.distribuerCarte(2);
 		}
 		
 		
