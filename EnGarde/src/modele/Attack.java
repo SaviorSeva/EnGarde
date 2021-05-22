@@ -39,6 +39,5 @@ public class Attack {
 	public String toString() {
 		return "Attack [at=" + at + ", attValue=" + attValue + ", attnb=" + attnb + "]";
 	}
-    
-    
+
 }
