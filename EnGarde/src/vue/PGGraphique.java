@@ -152,14 +152,27 @@ public class PGGraphique extends JComponent implements Observateur{
 		// Joueur Blanc
 		drawable.setColor(Color.WHITE);
 		drawable.fillOval(caseXStart+b*caseWidth, caseYStart + (int)(100*this.proportionCase - caseWidth/2), caseWidth, caseWidth);
-		if(pg.getTourCourant() == 1)
-			drawable.fillRect(caseXStart+b*caseWidth, caseYStart + (int)(100*this.proportionCase - caseWidth/2), 5, 5);
+		if(pg.getTourCourant() == 1) {
+			int xpoints[] = {(int)(caseXStart+(b+0.25)*caseWidth), (int)(caseXStart+(b+0.75)*caseWidth), (int)(caseXStart+(b+0.5)*caseWidth)};
+			int triangleStart = caseYStart + (this.caseHeight - this.caseWidth) / 6;
+			int triangleEnd = caseYStart + (this.caseHeight - this.caseWidth) / 3;
+		    int ypoints[] = {triangleStart, triangleStart, triangleEnd};
+		    int npoints = 3;
+		    drawable.fillPolygon(xpoints, ypoints, npoints);
+		}
+			
 		
 		// Joueur Noir
 		drawable.setColor(Color.BLACK);
 		drawable.fillOval(caseXStart+n*caseWidth, caseYStart + (int)(100*this.proportionCase - caseWidth/2), caseWidth, caseWidth);
-		if(pg.getTourCourant() == 2)
-			drawable.fillRect(caseXStart+n*caseWidth, caseYStart + (int)(100*this.proportionCase - caseWidth/2), 5, 5);
+		if(pg.getTourCourant() == 2) {
+			int xpoints[] = {(int)(caseXStart+(n+0.25)*caseWidth), (int)(caseXStart+(n+0.75)*caseWidth), (int)(caseXStart+(n+0.5)*caseWidth)};
+			int triangleStart = caseYStart + (this.caseHeight - this.caseWidth) / 6;
+			int triangleEnd = caseYStart + (this.caseHeight - this.caseWidth) / 3;
+		    int ypoints[] = {triangleStart, triangleStart, triangleEnd};
+		    int npoints = 3;
+		    drawable.fillPolygon(xpoints, ypoints, npoints);
+		}
 	
 		// Distance
 		this.distYEnd = caseYStart + (int)(caseHeight * 1.15);
