@@ -3,9 +3,8 @@ package vue;
 import modele.ExecPlayground;
 import modele.Playground;
 
-public class Starter {
+public class Starter2 {
 	public static void main(String[] args) {
-		/*
 		Playground pg = new Playground();
 		ExecPlayground epg = new ExecPlayground(pg);
 		
@@ -15,15 +14,7 @@ public class Starter {
 		
 		epg.restartNewRound();
 		
-		//System.out.println(pg.toString());
-		*/
-		Playground pg = new Playground();
-		ExecPlayground epg = new ExecPlayground(pg);
+		System.out.println(pg.toString());
 		
-		epg.shuffleReste();
-
-		InterfaceSwing.start(pg);
-		
-		epg.restartNewRound();
 	}
 }

@@ -232,7 +232,6 @@ public class ExecPlayground {
 				break;
 			case 1:
 				System.out.println("Case 1 noAttack");
-				
 				//Historique
 				this.currentAction.appendNoParryAction();
 				enterE3();
