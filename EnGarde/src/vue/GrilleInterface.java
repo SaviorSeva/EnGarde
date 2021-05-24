@@ -119,7 +119,7 @@ public class GrilleInterface extends JComponent implements Observateur{
 			else drawable.drawOval(10 + i*20, yStart, 15, 15);
 		}
 		for(int i=0; i<5; i++) {
-			if(i<blackScore) drawable.fillOval(10+i*20, yStart, 15, 15);
+			if(i<blackScore) drawable.fillOval(23*caseWidth -10 - i*20, yStart, 15, 15);
 			else drawable.drawOval(23*caseWidth -10 - i*20, yStart, 15, 15);
 		}
 	}
