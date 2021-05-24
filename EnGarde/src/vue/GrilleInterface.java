@@ -6,9 +6,12 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.util.ArrayList;
 
 import javax.swing.JComponent;
 
+import modele.InterfaceElementPosition;
+import modele.InterfaceElementType;
 import modele.Playground;
 import patterns.Observateur;
 
@@ -24,6 +27,8 @@ public class GrilleInterface extends JComponent implements Observateur{
 	public int caseXStart;
 	public double proportionCaseX;
 	public double proportionCaseY;
+	
+	public ArrayList<InterfaceElementPosition> grillePos;
 	
 	public GrilleInterface(Playground pg) {
 		this.pg = pg;
@@ -47,6 +52,20 @@ public class GrilleInterface extends JComponent implements Observateur{
 			drawable.setFont(new Font("TimesRoman", Font.BOLD, (int)(15*proportionCaseX)));
 			drawable.drawString((i+1) + "", caseXStart+i*caseWidth+(int)(caseWidth*0.4), (int)(caseHeight * 0.9));
 		}
+	}
+	
+	public ArrayList<InterfaceElementPosition> getGrillesPositions(){
+		ArrayList<InterfaceElementPosition> res = new ArrayList<InterfaceElementPosition>();
+		for(int i=0; i<23; i++) {
+			InterfaceElementType iet = InterfaceElementType.CASE;
+			int x1 = this.caseXStart + this.caseWidth * i;
+			int y1 = 0;
+			int x2 = this.caseXStart + this.caseWidth * (i+1);
+			int y2 = this.caseHeight;
+			InterfaceElementPosition iep = new InterfaceElementPosition(iet, x1, x2, y1, y2, i);
+			res.add(iep);
+		}
+		return res;
 	}
 	
 	public void tracerJoueur(int b, int n) {
@@ -103,6 +122,7 @@ public class GrilleInterface extends JComponent implements Observateur{
 		this.gra = g;
 		this.tracerGrille();
 		this.tracerJoueur(this.pg.getBlancPos(), this.pg.getNoirPos());
+		this.grillePos = this.getGrillesPositions();
 	}
 	
 	@Override

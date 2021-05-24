@@ -1,0 +1,130 @@
+package controlleur;
+
+import java.awt.Point;
+import java.util.ArrayList;
+
+import modele.Carte;
+import modele.ExecPlayground;
+import modele.InterfaceElementPosition;
+import modele.InterfaceElementType;
+import modele.LockedBoolean;
+import vue.InterfaceSwing;
+import vue.PGInterface;
+
+public class ControlCenter {
+	ExecPlayground epg;
+	InterfaceSwing interSwing;
+	
+	public ControlCenter(ExecPlayground epg) {
+		this.epg = epg;
+	}
+	
+	public void ajouteInterfaceUtilisateur(InterfaceSwing ifs) {
+		this.interSwing = ifs;
+	}
+	
+	public void resetZoom(){
+		this.interSwing.ci.resetZoom();
+	}
+	
+	public void initialiseZoom() {
+		this.interSwing.ci.initialiseZoom();
+	}
+	
+	public InterfaceElementPosition getCaseByClick(int x, int y) {
+		InterfaceElementPosition res = null; 
+		boolean changed = false;
+		for(InterfaceElementPosition iep : this.interSwing.gi.grillePos) {
+			if((iep.getP1().getX() < x) && (iep.getP1().getY() < y) && (iep.getP2().getX() >= x) && (iep.getP2().getY() >= y)) {
+				res = iep;
+				changed = true;
+				break;
+			}
+		}
+		if(!changed) return new InterfaceElementPosition(InterfaceElementType.BACKGROUND, x, x, y, y, 0);
+		return res;
+	}
+	
+	public InterfaceElementPosition getCardByClick(int x, int y) {
+		InterfaceElementPosition res = null; 
+		boolean changed = false;
+		for(InterfaceElementPosition iep : this.interSwing.ci.cartePosition) {
+			if((iep.getP1().getX() < x) && (iep.getP1().getY() < y) && (iep.getP2().getX() >= x) && (iep.getP2().getY() >= y)) {
+				res = iep;
+				changed = true;
+				break;
+			}
+		}
+		if(!changed) return new InterfaceElementPosition(InterfaceElementType.BACKGROUND, x, x, y, y, 0);
+		return res;
+	}
+	
+	public void clicSourisGrille(int sourisX, int sourisY) {
+		InterfaceElementPosition iep = this.getCaseByClick(sourisX, sourisY);
+		if(epg.pg.getTourCourant() == 1) {
+			int place = epg.pg.getBlancPos();
+			if(iep.getNombre() > place) epg.pg.setDirectionDeplace(1);
+			else epg.pg.setDirectionDeplace(2);
+		}else {
+			int place = epg.pg.getNoirPos();
+			if(iep.getNombre() > place) epg.pg.setDirectionDeplace(2);
+			else epg.pg.setDirectionDeplace(1);
+		}
+		this.interSwing.repaintGrille();
+	}
+	
+	public void clicSourisCarte(int sourisX, int sourisY) {
+		InterfaceElementPosition iep = this.getCardByClick(sourisX, sourisY);
+		if(iep.getEle() == InterfaceElementType.CARTE && !this.interSwing.ci.zoomCarte.get(iep.getNombre()).isInvalid()) {
+			this.interSwing.ci.changeZoomTo(iep.getNombre(), LockedBoolean.LOCKEDTRUE);
+			
+			int dist = epg.getDistance();
+			ArrayList<Carte> cartes = this.epg.getCurrentPlayerCards();
+			for(int i=0; i<cartes.size(); i++) {
+				if(i != iep.getNombre()) {
+					if(dist != this.epg.getSelectedCard().getValue())
+						this.interSwing.ci.changeZoomTo(i, LockedBoolean.INVALID);
+					else {
+						if(cartes.get(i).getValue() != cartes.get(iep.getNombre()).getValue())
+							this.interSwing.ci.changeZoomTo(i, LockedBoolean.INVALID);
+					}
+				}
+			}
+		}
+		this.interSwing.repaintCarte();
+	}
+	
+	public void clicSourisCarteDroite(int sourisX, int sourisY) {
+		InterfaceElementPosition iep = this.getCardByClick(sourisX, sourisY);
+		if(iep.getEle() == InterfaceElementType.CARTE) {
+			for(int i=0; i<interSwing.ci.zoomCarte.size(); i++) {
+				if(i != iep.getNombre()) interSwing.ci.changeZoomTo(i, LockedBoolean.FALSE);
+				else this.interSwing.ci.changeZoomTo(iep.getNombre(), LockedBoolean.LOCKEDFALSE);
+			}
+			
+		}
+		this.interSwing.repaintCarte();
+	}
+
+	public void deplaceSourisCarte(int sourisX, int sourisY) {
+		InterfaceElementPosition iep = this.getCardByClick(sourisX, sourisY);
+		
+		if(iep.getEle() == InterfaceElementType.CARTE) {
+			LockedBoolean status = interSwing.ci.zoomCarte.get(iep.getNombre());
+			if(!status.isLocked() && !status.isInvalid())
+				interSwing.ci.changeZoomTo(iep.getNombre(), LockedBoolean.TRUE);
+		}
+		else if (iep.getEle() == InterfaceElementType.BACKGROUND) {
+			interSwing.ci.resetZoom();
+		}
+		this.interSwing.repaintCarte();
+	} 
+	
+	public void confirmReceived() {
+		this.epg.confirmReceived();
+	}
+	
+	public void clicCancel() {
+		this.epg.cancelReceived();
+	}
+}
