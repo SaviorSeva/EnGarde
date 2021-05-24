@@ -91,7 +91,7 @@ public class InterfaceSwing implements Runnable{
 		gi.addMouseListener(asg);
 		ci.addMouseListener(asc);
 		ci.addMouseMotionListener(asc);
-		
+
 		boiteContenu.add(ti);
 		boiteContenu.add(gi);
 		gi.setAlignmentX(JComponent.CENTER_ALIGNMENT);
