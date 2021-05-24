@@ -1,14 +1,17 @@
 package vue;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Stroke;
 import java.util.ArrayList;
 
 import javax.swing.JComponent;
+import javax.swing.border.StrokeBorder;
 
 import modele.InterfaceElementPosition;
 import modele.InterfaceElementType;
@@ -71,7 +74,7 @@ public class GrilleInterface extends JComponent implements Observateur{
 	public void tracerJoueur(int b, int n) {
 		// Joueur Blanc
 		drawable.setColor(Color.WHITE);
-		drawable.fillOval(caseXStart+b*caseWidth, (int)(100*this.proportionCaseX - caseWidth/2), caseWidth, caseWidth);
+		drawable.fillOval(caseXStart+b*caseWidth, (int)(this.caseHeight - this.caseWidth)/2, caseWidth, caseWidth);
 		if(pg.getTourCourant() == 1) {
 			int xpoints[] = {(int)(caseXStart+(b+0.25)*caseWidth), (int)(caseXStart+(b+0.75)*caseWidth), (int)(caseXStart+(b+0.5)*caseWidth)};
 			int triangleStart = (this.caseHeight - this.caseWidth) / 6;
@@ -84,7 +87,7 @@ public class GrilleInterface extends JComponent implements Observateur{
 		
 		// Joueur Noir
 		drawable.setColor(Color.BLACK);
-		drawable.fillOval(caseXStart+n*caseWidth, (int)(100*this.proportionCaseX - caseWidth/2), caseWidth, caseWidth);
+		drawable.fillOval(caseXStart+n*caseWidth, (int)(this.caseHeight - this.caseWidth)/2, caseWidth, caseWidth);
 		if(pg.getTourCourant() == 2) {
 			int xpoints[] = {(int)(caseXStart+(n+0.25)*caseWidth), (int)(caseXStart+(n+0.75)*caseWidth), (int)(caseXStart+(n+0.5)*caseWidth)};
 			int triangleStart = (this.caseHeight - this.caseWidth) / 6;
@@ -105,6 +108,22 @@ public class GrilleInterface extends JComponent implements Observateur{
 		drawable.drawString(text, strX, distYEnd);
 	}
 	
+	public void tracerScore() {
+		int yStart = (int)(caseHeight * 1.05);
+		drawable.setColor(Color.BLACK);
+		drawable.setStroke(new BasicStroke(2));
+		int whiteScore = this.pg.getBlanc().getPoint();
+		int blackScore = this.pg.getNoir().getPoint();
+		for(int i=0; i<5; i++) {
+			if(i<whiteScore) drawable.fillOval(10+i*20, yStart, 15, 15);
+			else drawable.drawOval(10 + i*20, yStart, 15, 15);
+		}
+		for(int i=0; i<5; i++) {
+			if(i<blackScore) drawable.fillOval(10+i*20, yStart, 15, 15);
+			else drawable.drawOval(23*caseWidth -10 - i*20, yStart, 15, 15);
+		}
+	}
+	
 	@Override
 	public void paintComponent(Graphics g) {
 		int width = getSize().width;
@@ -122,6 +141,8 @@ public class GrilleInterface extends JComponent implements Observateur{
 		this.gra = g;
 		this.tracerGrille();
 		this.tracerJoueur(this.pg.getBlancPos(), this.pg.getNoirPos());
+		this.tracerScore();
+		
 		this.grillePos = this.getGrillesPositions();
 	}
 	
