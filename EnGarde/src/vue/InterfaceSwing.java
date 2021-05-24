@@ -2,6 +2,7 @@ package vue;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.util.ArrayList;
 
 import javax.swing.Box;
 import javax.swing.JComponent;
@@ -11,8 +12,15 @@ import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
+import controlleur.AdapteurCancelCC;
+import controlleur.AdapteurConfirmCC;
+import controlleur.AdapteurSourisCarte;
+import controlleur.AdapteurSourisGrille;
+import controlleur.ControlCenter;
 import controlleur.ControleMediateur;
 import modele.ExecPlayground;
+import modele.InterfaceElementPosition;
+import modele.InterfaceElementType;
 import modele.Playground;
 
 public class InterfaceSwing implements Runnable{
@@ -21,7 +29,7 @@ public class InterfaceSwing implements Runnable{
 	public TitreInterface ti;
 	public CarteInterface ci;
 	public JFrame frame;
-	public ControleMediateur cm;
+	public ControlCenter cc;
 	public JToggleButton confirmer, annuler, cancel;
 	public JTextField infoArea;
 	
@@ -30,21 +38,34 @@ public class InterfaceSwing implements Runnable{
 		this.gi = new GrilleInterface(this.pg);
 		this.ti = new TitreInterface();
 		this.ci = new CarteInterface(this.pg);
-		this.cm = new ControleMediateur(new ExecPlayground(pg));
-		// this.cm.ajouteInterfaceUtilisateur(this);
+		this.cc = new ControlCenter(new ExecPlayground(pg));
+		this.cc.ajouteInterfaceUtilisateur(this);
+	}
+	
+	public ArrayList<InterfaceElementPosition> getGrillePos() {
+		return this.gi.getGrillesPositions();
+	}
+	
+	public void repaintGrille() {
+		gi.repaint();
+	}
+	
+	public void repaintCarte() {
+		ci.repaint();
 	}
 
 	@Override
 	public void run() {
 		this.frame = new JFrame("En Garde !");
 		
-		AdapteurSouris as = new AdapteurSouris(this.cm);
-		
 		//pggraphique.addMouseListener(as);
 		//pggraphique.addMouseMotionListener(as);
 	
 		Box boiteInfo = Box.createHorizontalBox();
 		Box boiteContenu = Box.createVerticalBox();
+		
+		AdapteurSourisGrille asg = new AdapteurSourisGrille(this.cc);
+		AdapteurSourisCarte asc = new AdapteurSourisCarte(this.cc);
 		
 		// Info Label
 		
@@ -64,21 +85,21 @@ public class InterfaceSwing implements Runnable{
 		this.infoArea.setAlignmentX(Component.RIGHT_ALIGNMENT);
 		boiteInfo.add(infoArea);
 		
-		Timer chrono = new Timer(16, new AdapteurTimerAttente(this.cm));
-		this.confirmer.addActionListener(new AdapteurConfirmer(this.cm));
-		this.cancel.addActionListener(new AdapteurCancel(this.cm));
+		this.confirmer.addActionListener(new AdapteurConfirmCC(this.cc));
+		this.cancel.addActionListener(new AdapteurCancelCC(this.cc));
 		
+		gi.addMouseListener(asg);
+		ci.addMouseListener(asc);
+		ci.addMouseMotionListener(asc);
+
 		boiteContenu.add(ti);
 		boiteContenu.add(gi);
 		gi.setAlignmentX(JComponent.CENTER_ALIGNMENT);
 		boiteContenu.add(ci);
 		
-
 		frame.add(boiteContenu);
 		
 		frame.add(boiteInfo, BorderLayout.SOUTH);
-		
-		chrono.start();
 		
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setSize(1200, 800);

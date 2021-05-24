@@ -16,6 +16,8 @@ import javax.imageio.ImageIO;
 import javax.swing.JComponent;
 
 import modele.Carte;
+import modele.InterfaceElementPosition;
+import modele.InterfaceElementType;
 import modele.LockedBoolean;
 import modele.Playground;
 import patterns.Observateur;
@@ -33,6 +35,7 @@ public class CarteInterface extends JComponent implements Observateur{
 	public double proportionCarte;
 	public double proportionZoomCarte;
 	
+	public ArrayList<InterfaceElementPosition> cartePosition;
 	public ArrayList<LockedBoolean> zoomCarte; 
 	
 	public CarteInterface(Playground pg) {
@@ -62,6 +65,31 @@ public class CarteInterface extends JComponent implements Observateur{
 			zoomCarte.add(LockedBoolean.FALSE);
 		}
 		this.pg.initialiseSelected();
+	}
+	
+	public void changeZoomTo(int i, LockedBoolean lb) {
+		this.zoomCarte.set(i, lb);
+		this.pg.setSelected(i, lb.isLocked() && lb.isTrue());
+	}
+	
+	public void resetZoom() {
+		for(int i=0; i<this.zoomCarte.size(); i++) {
+			LockedBoolean status = this.zoomCarte.get(i);
+			if(!status.isLocked()) {
+				if(!status.isInvalid()) this.zoomCarte.set(i, LockedBoolean.FALSE);
+			}else {
+				if(!status.isTrue()) this.zoomCarte.set(i, LockedBoolean.FALSE);
+			}
+		}
+		this.pg.setSelected(this.lockedBooleanListToBooleanList());
+	}
+	
+	public ArrayList<Boolean> lockedBooleanListToBooleanList(){
+		ArrayList<Boolean> al = new ArrayList<Boolean>();
+		for(int i=0; i<this.zoomCarte.size(); i++){
+			al.add(this.zoomCarte.get(i).isTrue());
+		}
+		return al;
 	}
 	
 	public void generateGrayscaledCards() {
@@ -155,12 +183,27 @@ public class CarteInterface extends JComponent implements Observateur{
 		this.proportionCarte = 1.1 * Math.min(width/800.0, height/200.0);
 		this.proportionZoomCarte = 1.25 * proportionCarte;
 		
-		System.out.println(width + ", " + height + ", " + proportionCarte);
+		//System.out.println(width + ", " + height + ", " + proportionCarte);
 		
+		this.cartePosition = this.getCartePosition();
 		this.tracerCarte(width, height);
 		this.tracerReste();
 	}
 	
+	public ArrayList<InterfaceElementPosition> getCartePosition() {
+		ArrayList<InterfaceElementPosition> res = new ArrayList<InterfaceElementPosition>();
+		for(int i=0; i<5; i++) {
+			InterfaceElementType iet = InterfaceElementType.CARTE;
+			int x1 = carteXStart + (int)(10*this.proportionCarte) + (int)(100*this.proportionCarte*i);
+			int y1 = 2 + (int)(63*(this.proportionZoomCarte-this.proportionCarte));
+			int x2 = x1 + (int)(80*this.proportionCarte);
+			int y2 = y1 + (int)(126*this.proportionCarte);
+			InterfaceElementPosition iep = new InterfaceElementPosition(iet, x1, x2, y1, y2, i);
+			res.add(iep);
+		}
+		return res;
+	}
+
 	@Override
 	public void miseAJour() {
 		this.repaint();
