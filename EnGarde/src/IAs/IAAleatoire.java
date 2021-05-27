@@ -6,14 +6,13 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class IAAleatoire extends IA{
-
     Random random;
 
     ArrayList<Carte> canPlay;
     ArrayList<CarteEtDirection> ceds;
     int direction;
     ArrayList<Boolean> choisir;
-    private Boolean parry;
+    private boolean parry;
 
     public IAAleatoire(ExecPlayground epg, Playground pg) {
         super(epg, pg);

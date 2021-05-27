@@ -107,7 +107,7 @@ public class InterfaceSwing implements Runnable{
 		frame.setSize(1200, 800);
 		frame.setVisible(true);
 		
-		this.chorno.start();
+		// this.chorno.start();
 	}
 	
 	public static void start(Playground j, ExecPlayground epg) {

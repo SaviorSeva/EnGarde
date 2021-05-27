@@ -11,10 +11,11 @@ import modele.InterfaceElementPosition;
 import modele.InterfaceElementType;
 import modele.LockedBoolean;
 import modele.Playground;
+import patterns.Observateur;
 import vue.InterfaceSwing;
 
 
-public class ControlCenter {
+public class ControlCenter implements Observateur{
 	Playground pg;
 	ExecPlayground epg;
 	InterfaceSwing interSwing;
@@ -24,6 +25,7 @@ public class ControlCenter {
 	public ControlCenter(ExecPlayground epg) {
 		this.epg = epg;
 		this.pg = this.epg.getPg();
+		this.epg.ajouteObservateur(this);
 		switch(this.epg.getIAType()) {
 		case 0:
 			this.ia = null;
@@ -40,15 +42,13 @@ public class ControlCenter {
 	
 	public void IAStep() {
 		if (epg.isIaRound()) {
-			if(!ia.getParry())
-				ia.iaParryPhase();
-			else{
-				ia.pickMove();
-				pg.setDirectionDeplace(ia.getDirection());
-				pg.setSelected(ia.getIaCartes());
-				this.epg.confirmReceived();
-				ia.resetChoisir();
-			}
+			ia.iaParryPhase();
+			
+			ia.pickMove();
+			pg.setDirectionDeplace(ia.getDirection());
+			pg.setSelected(ia.getIaCartes());
+			this.epg.confirmReceived();
+			ia.resetChoisir();
 		}else ia = new IAAleatoire(epg,pg);
 			//iaAleatoire.setParry(false);
 	}
@@ -156,5 +156,10 @@ public class ControlCenter {
 	
 	public void clicCancel() {
 		this.epg.cancelReceived();
+	}
+
+	@Override
+	public void miseAJour() {
+		this.IAStep();
 	}
 }

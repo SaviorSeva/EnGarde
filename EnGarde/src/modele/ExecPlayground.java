@@ -3,7 +3,9 @@ package modele;
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class ExecPlayground {
+import patterns.Observable;
+
+public class ExecPlayground extends Observable{
 	public Playground pg;
 	public Action currentAction;
 	public Historique hist;
@@ -24,7 +26,7 @@ public class ExecPlayground {
 	}
 
 	public boolean isIaRound() {
-		if (pg.getTourCourant() != humanPlayer && (IAType!=0)) return true;
+		if (pg.getTourCourant() != humanPlayer && (IAType != 0)) return true;
 		else return false;
 	}
 
@@ -226,7 +228,7 @@ public class ExecPlayground {
 	
 	public void roundStart(Attack att) {
 		pg.setLastAttack(att);
-
+		
 		if(this.pg.getBlancCartes().size() == 0 && this.pg.getNoirCartes().size() == 0) {
 			int distBlanc = this.pg.getBlanc().getDistToStartPoint();
 			int distNoir = this.pg.getNoir().getDistToStartPoint();
@@ -288,7 +290,9 @@ public class ExecPlayground {
 				break;
 	    	}
 		}
-		
+		if(this.IAType != 0 && this.isIaRound()) {
+			this.metAJour();
+		}
 	}
 	
 	public void roundEnd(Attack att) {
