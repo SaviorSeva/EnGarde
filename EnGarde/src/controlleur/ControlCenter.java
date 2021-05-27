@@ -91,14 +91,17 @@ public class ControlCenter implements Observateur{
 	
 	public void clicSourisGrille(int sourisX, int sourisY) {
 		InterfaceElementPosition iep = this.getCaseByClick(sourisX, sourisY);
-		if(epg.pg.getTourCourant() == 1) {
-			int place = epg.pg.getBlancPos();
-			if(iep.getNombre() > place) epg.pg.setDirectionDeplace(1);
-			else epg.pg.setDirectionDeplace(2);
-		}else {
-			int place = epg.pg.getNoirPos();
-			if(iep.getNombre() > place) epg.pg.setDirectionDeplace(2);
-			else epg.pg.setDirectionDeplace(1);
+		if(iep.getEle() == InterfaceElementType.CASE) {
+			if(epg.pg.getTourCourant() == 1) {
+				int place = epg.pg.getBlancPos();
+				if(iep.getNombre() > place) epg.pg.setDirectionDeplace(1);
+				else epg.pg.setDirectionDeplace(2);
+			}else {
+				int place = epg.pg.getNoirPos();
+				if(iep.getNombre() > place) epg.pg.setDirectionDeplace(2);
+				else epg.pg.setDirectionDeplace(1);
+			}
+			this.interSwing.gi.setChoseCase(iep.getNombre());
 		}
 		this.interSwing.repaintGrille();
 	}
@@ -120,6 +123,31 @@ public class ControlCenter implements Observateur{
 					}
 				}
 			}
+			switch(this.pg.getWaitStatus()) {
+			case 1:
+				// Parry direct attack
+				this.interSwing.gi.setParryCase();
+				break;
+			case 2:
+				// Retreat only
+				this.interSwing.gi.setRetreatCaseColor();
+				break;
+			case 3:
+				// Move or direct attack
+				this.interSwing.gi.setMoveCaseColor();
+				break;
+			case 4:
+				// Indirect attack only
+				this.interSwing.gi.setAttackCaseColor();
+				break;
+			case 5:
+				// Parry indirect attack or retreat
+				this.interSwing.gi.setPRCaseColor();
+				break;
+			default:
+				System.err.println("Clic Carte Error Line 136");
+				break;
+			}
 		}
 		this.interSwing.repaintCarte();
 	}
@@ -127,11 +155,12 @@ public class ControlCenter implements Observateur{
 	public void clicSourisCarteDroite(int sourisX, int sourisY) {
 		InterfaceElementPosition iep = this.getCardByClick(sourisX, sourisY);
 		if(iep.getEle() == InterfaceElementType.CARTE) {
+			
 			for(int i=0; i<interSwing.ci.zoomCarte.size(); i++) {
 				if(i != iep.getNombre()) interSwing.ci.changeZoomTo(i, LockedBoolean.FALSE);
 				else this.interSwing.ci.changeZoomTo(iep.getNombre(), LockedBoolean.LOCKEDFALSE);
 			}
-			
+			this.interSwing.gi.resetCaseColor();
 		}
 		this.interSwing.repaintCarte();
 	}
@@ -152,6 +181,9 @@ public class ControlCenter implements Observateur{
 	
 	public void confirmReceived() {
 		this.epg.confirmReceived();
+		this.interSwing.gi.resetCaseColor();
+		this.interSwing.gi.resetChoseCase();
+		this.interSwing.gi.resetParryCase();
 	}
 	
 	public void clicCancel() {

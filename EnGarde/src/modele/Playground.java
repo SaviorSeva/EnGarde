@@ -48,6 +48,7 @@ public class Playground extends Observable{
 		return directionDeplace;
 	}
 	public void setDirectionDeplace(int directionDeplace) {
+		System.out.println(directionDeplace);
 		this.directionDeplace = directionDeplace;
 	}
 	public Player getBlanc() {
@@ -152,6 +153,21 @@ public class Playground extends Observable{
     public int getDistance() {
     	return this.getNoirPos() - this.getBlancPos();
     }
+    
+    public ArrayList<Carte> getCurrentPlayerCards(){
+		if(this.getTourCourant() == 1) return this.getBlancCartes();
+		else return this.getNoirCartes();
+	}
+    
+    public Carte getSelectedCard() {
+		Carte c = null;
+		for(int i=0; i<this.getSelected().size(); i++) {
+			if(this.getSelected().get(i)) {
+				c = this.getCurrentPlayerCards().get(i);
+			}
+		}
+		return c;
+	}
     
     @Override
     public String toString() {

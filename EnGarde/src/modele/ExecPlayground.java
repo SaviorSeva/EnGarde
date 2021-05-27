@@ -302,6 +302,7 @@ public class ExecPlayground extends Observable{
 		}
 		this.pg.setWaitStatus(0);
 		this.pg.initialiseSelected();
+		this.pg.setDirectionDeplace(0);
 		this.changetTour();
 		hist.addCopy(this.currentAction);
 		System.out.println(this.currentAction.toString());
@@ -317,7 +318,8 @@ public class ExecPlayground extends Observable{
 		case 1:
 			c = this.getSelectedCard();
 			nbSelected = this.getNBSelectedCard();
-			if(c.getValue() == this.pg.getLastAttack().getAttValue().getValue() && nbSelected == this.pg.getLastAttack().getAttnb()) {
+			if(c == null) System.out.println("You must pick a card to parry !"); 
+			else if(c.getValue() == this.pg.getLastAttack().getAttValue().getValue() && nbSelected == this.pg.getLastAttack().getAttnb()) {
 				this.jouerCarte();
 				this.currentAction.appendParryAction(c, nbSelected);
 				enterE3();
@@ -411,6 +413,7 @@ public class ExecPlayground extends Observable{
 			break;
 		case 4:
 			System.out.println("You've chose not to attack the enemy.");
+			this.currentAction.appendNoAttackAction();
 			this.roundEnd(new Attack(AttackType.NONE, null, 0));
 			break;
 		case 5:

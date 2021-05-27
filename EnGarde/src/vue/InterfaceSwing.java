@@ -110,6 +110,7 @@ public class InterfaceSwing implements Runnable{
 		// this.chorno.start();
 	}
 	
+	
 	public static void start(Playground j, ExecPlayground epg) {
 		// Swing s'exécute dans un thread séparé. En aucun cas il ne faut accéder directement
 		// aux composants graphiques depuis le thread principal. Swing fournit la méthode
