@@ -60,7 +60,7 @@ public class IAAleatoire extends IA{
 
     @Override
     public void iaParryPhase(){
-        if(parry==false) {
+        if(!parry) {
             Attack etreAtt = pg.getLastAttack();
             int nb = 0;
             switch (etreAtt.getAt()) {
@@ -73,7 +73,9 @@ public class IAAleatoire extends IA{
                             choisir.set(i, true);
                             nb++;
                         }
-                    pg.setSelected(this.getIaCartes());
+                    System.out.println("AI choose to parry direct attack of " + pg.getLastAttack().getAttValue().getValue() + "with " + nb + "cards");
+                    epg.pg.setDirectionDeplace(0);
+                    pg.setSelected(choisir);
                     epg.confirmReceived();
                     break;
                 case INDIRECT:
@@ -86,15 +88,16 @@ public class IAAleatoire extends IA{
                         for (int i = 0; i < iaCartes.size(); i++) {
                             if (iaCartes.get(i).getValue() == etreAtt.getAttValue().getValue()) choisir.set(i, true);
                         }
-                        System.out.println("IA parry");
-                        pg.setSelected(this.getIaCartes());
+                        System.out.println("AI choose to parry indirect attack of " + pg.getLastAttack().getAttValue().getValue() + "with " + etreAtt.getAttnb() + "cards");
+                        epg.pg.setDirectionDeplace(0);
+                        pg.setSelected(choisir);
                         epg.confirmReceived();
                     }else if(ceds.size()>0){
                         int r = random.nextInt(ceds.size());
                         int index = ceds.get(r).getIndex();
                         choisir.set(index, true);
                         direction = ceds.get(r).getDirection();
-                        System.out.println("IA retreat" + ceds.get(r).getC());
+                        System.out.println("IA retreat " + ceds.get(r).getC());
                         epg.pg.setDirectionDeplace(direction);
                         pg.setSelected(choisir);
                         epg.confirmReceived();
@@ -148,5 +151,4 @@ public class IAAleatoire extends IA{
             choisir.set(i, false);
         }
     }
-
 }

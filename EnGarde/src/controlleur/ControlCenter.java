@@ -41,16 +41,19 @@ public class ControlCenter implements Observateur{
 	}
 	
 	public void IAStep() {
-		if (epg.isIaRound()) {
-			ia.iaParryPhase();
-			
-			ia.pickMove();
-			pg.setDirectionDeplace(ia.getDirection());
-			pg.setSelected(ia.getIaCartes());
-			this.epg.confirmReceived();
-			ia.resetChoisir();
-		}else ia = new IAAleatoire(epg,pg);
-			//iaAleatoire.setParry(false);
+		ia = new IAAleatoire(epg,pg);
+		while (epg.isIaRound()){
+			if (!ia.getParry()) {
+				ia.iaParryPhase();
+			}
+			else {
+				ia.pickMove();
+				pg.setDirectionDeplace(ia.getDirection());
+				pg.setSelected(ia.getIaCartes());
+				this.epg.confirmReceived();
+				ia.resetChoisir();
+			}
+		}
 	}
 	
 	public void resetZoom(){

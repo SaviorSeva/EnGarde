@@ -22,7 +22,7 @@ public class TitreInterface extends JComponent{
 	
 	public TitreInterface() {
 		try {
-			imgTitle = ImageIO.read(new File("./res/images/title.png"));
+			imgTitle = ImageIO.read(new File("./EnGarde/res/images/title.png"));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

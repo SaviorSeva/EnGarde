@@ -32,7 +32,7 @@ public class InterfaceSwing implements Runnable{
 	public ControlCenter cc;
 	public JToggleButton confirmer, annuler, cancel;
 	public JTextField infoArea;
-	public Timer chorno;
+	//public Timer chorno;
 	
 	public InterfaceSwing(Playground pg, ExecPlayground epg) {
 		this.pg = pg;
@@ -41,7 +41,7 @@ public class InterfaceSwing implements Runnable{
 		this.ci = new CarteInterface(this.pg);
 		this.cc = new ControlCenter(epg);
 		this.cc.ajouteInterfaceUtilisateur(this);
-		this.chorno = new Timer(1000, new AdapteurTimerAttente(cc));
+		//this.chorno = new Timer(1000, new AdapteurTimerAttente(cc));
 	}
 	
 	public ArrayList<InterfaceElementPosition> getGrillePos() {

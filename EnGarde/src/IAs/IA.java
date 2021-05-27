@@ -32,5 +32,4 @@ public abstract class IA {
 
 	public abstract ArrayList<Boolean> getIaCartes();
 
-
 }

@@ -290,7 +290,8 @@ public class ExecPlayground extends Observable{
 				break;
 	    	}
 		}
-		if(this.IAType != 0 && this.isIaRound()) {
+
+		if (this.IAType != 0 && this.isIaRound()) {
 			this.metAJour();
 		}
 	}
