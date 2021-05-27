@@ -114,13 +114,16 @@ public class GrilleInterface extends JComponent implements Observateur{
 		drawable.setStroke(new BasicStroke(2));
 		int whiteScore = this.pg.getBlanc().getPoint();
 		int blackScore = this.pg.getNoir().getPoint();
+		int ovalSize = (int)(15 * this.proportionCaseX);
+		int ovalMargin = (int)(20 * this.proportionCaseX);
 		for(int i=0; i<5; i++) {
-			if(i<whiteScore) drawable.fillOval(10+i*20, yStart, 15, 15);
-			else drawable.drawOval(10 + i*20, yStart, 15, 15);
+			if(i<whiteScore) drawable.fillOval(10+i*ovalMargin, yStart, ovalSize, ovalSize);
+			else drawable.drawOval(10 + i*ovalMargin, yStart, ovalSize, ovalSize);
 		}
 		for(int i=0; i<5; i++) {
-			if(i<blackScore) drawable.fillOval(23*caseWidth -10 - i*20, yStart, 15, 15);
-			else drawable.drawOval(23*caseWidth -10 - i*20, yStart, 15, 15);
+			if(i<blackScore) drawable.fillOval(10 + 23*this.caseWidth - i*ovalMargin - ovalSize
+					, yStart, ovalSize, ovalSize);
+			else drawable.drawOval(10 + 23*this.caseWidth - i*ovalMargin - ovalSize, yStart, ovalSize, ovalSize);
 		}
 	}
 	

@@ -3,24 +3,54 @@ package controlleur;
 import java.awt.Point;
 import java.util.ArrayList;
 
+import IAs.IA;
+import IAs.IAAleatoire;
 import modele.Carte;
 import modele.ExecPlayground;
 import modele.InterfaceElementPosition;
 import modele.InterfaceElementType;
 import modele.LockedBoolean;
+import modele.Playground;
 import vue.InterfaceSwing;
-import vue.PGInterface;
+
 
 public class ControlCenter {
+	Playground pg;
 	ExecPlayground epg;
 	InterfaceSwing interSwing;
+	ArrayList<Point> elementPos;
+	IA ia;
 	
 	public ControlCenter(ExecPlayground epg) {
 		this.epg = epg;
+		this.pg = this.epg.getPg();
+		switch(this.epg.getIAType()) {
+		case 0:
+			this.ia = null;
+			break;
+		case 1:
+			this.ia = new IAAleatoire(this.epg, this.pg);
+			break;
+		}
 	}
 	
 	public void ajouteInterfaceUtilisateur(InterfaceSwing ifs) {
 		this.interSwing = ifs;
+	}
+	
+	public void IAStep() {
+		if (epg.isIaRound()) {
+			if(!ia.getParry())
+				ia.iaParryPhase();
+			else{
+				ia.pickMove();
+				pg.setDirectionDeplace(ia.getDirection());
+				pg.setSelected(ia.getIaCartes());
+				this.epg.confirmReceived();
+				ia.resetChoisir();
+			}
+		}else ia = new IAAleatoire(epg,pg);
+			//iaAleatoire.setParry(false);
 	}
 	
 	public void resetZoom(){

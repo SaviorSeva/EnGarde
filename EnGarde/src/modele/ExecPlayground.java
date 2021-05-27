@@ -8,10 +8,28 @@ public class ExecPlayground {
 	public Action currentAction;
 	public Historique hist;
 	
-	public ExecPlayground(Playground pg) {
+	public int IAType;
+	public int humanPlayer;
+	
+	public ExecPlayground(Playground pg, int IAType) {
 		this.pg = pg;
 		this.currentAction = new Action();
 		this.hist = new Historique();
+		this.IAType = IAType;
+		humanPlayer = pg.getStartType();
+	}
+	
+	public int getIAType() {
+		return IAType;
+	}
+
+	public boolean isIaRound() {
+		if (pg.getTourCourant() != humanPlayer && (IAType!=0)) return true;
+		else return false;
+	}
+
+	public Playground getPg() {
+		return this.pg;
 	}
 	
 	public int getDistance() {
@@ -197,7 +215,7 @@ public class ExecPlayground {
 			if(this.pg.getDistance() >= val || this.pg.getPlayerCourant().getDistToStartPoint() > val) unableToMove = false;
 		}
 		if(unableToMove) {
-			System.out.println("You cannot move or attack, therefore you lose !");
+			System.out.println("You cannot move or attack, therefore" + pg.getTourCourant() + " lose !");
 			this.pg.getEnemyCourant().incrementPoint();
 			this.restartNewRound();
 		}else {
@@ -225,7 +243,7 @@ public class ExecPlayground {
 			int pharerResultat = phaseParer(this.pg.getLastAttack());
 	    	switch(pharerResultat) {
 	    	case 0:
-	    		System.out.println("Case 0 lose");
+	    		System.out.println("Case 0 lose, lose player: " + pg.getTourCourant());
 				if(this.pg.getTourCourant() == 1) this.pg.getNoir().incrementPoint();
 				else this.pg.getBlanc().incrementPoint();
 				this.restartNewRound();
@@ -251,8 +269,7 @@ public class ExecPlayground {
 					System.out.println("You cannnot retreat. You lose !");
 					this.pg.getEnemyCourant().incrementPoint();
 					this.restartNewRound();
-				}
-				this.pg.setWaitStatus(2);
+				}else this.pg.setWaitStatus(2);
 				/*
 				this.waitConfirm();
 				Carte c = this.getSelectedCard();
@@ -311,7 +328,7 @@ public class ExecPlayground {
 			break;
 		case 2:
 			c = this.getSelectedCard();
-			if(this.pg.getPlayerCourant().getDistToStartPoint() < c.getValue()) System.out.println("You cannot retreat due to the size of the playground.");
+			if(this.pg.getPlayerCourant().getDistToStartPoint() < c.getValue()) System.out.println("You cannot retreat due to the size of the playground (case 2).");
 			else{
 				this.jouerCarte();
 				this.currentAction.appendRetreatAction(c);
@@ -326,7 +343,7 @@ public class ExecPlayground {
 			else if(c.getValue() > this.pg.getDistance() && this.pg.getDirectionDeplace() == 1)
 				System.out.println("You cannot surpass the other player");
 			else if(this.pg.getDirectionDeplace() == 2) {
-				if(this.pg.getPlayerCourant().getDistToStartPoint() < c.getValue()) System.out.println("You cannot retreat due to the size of the playground.");
+				if(this.pg.getPlayerCourant().getDistToStartPoint() < c.getValue()) System.out.println("You cannot retreat due to the size of the playground (case 3).");
 				else this.phaseDeplacer(c);
 			}else 
 				this.phaseDeplacer(c);

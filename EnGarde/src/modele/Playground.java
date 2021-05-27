@@ -22,6 +22,12 @@ public class Playground extends Observable{
     
     private int waitStatus;
     
+    /*	startType == 0 two human
+ 	 	startType == 1 human play as white
+ 		startType == 2 human play as black
+ 	*/
+     private int startType;
+    
     public Playground() {
     	this.blanc = new Player(0);
     	this.noir = new Player(22);
@@ -34,6 +40,7 @@ public class Playground extends Observable{
     	
     	this.directionDeplace = 0;
     	this.waitStatus = 0;
+    	this.startType = 2;
     }
     
     // Getters et setters basiques
@@ -163,5 +170,7 @@ public class Playground extends Observable{
     	return sb.toString();
     }
     
-   
+    public int getStartType() {
+		return this.startType;
+	}
 }
