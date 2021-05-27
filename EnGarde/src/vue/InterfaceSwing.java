@@ -16,8 +16,8 @@ import controlleur.AdapteurCancelCC;
 import controlleur.AdapteurConfirmCC;
 import controlleur.AdapteurSourisCarte;
 import controlleur.AdapteurSourisGrille;
+import controlleur.AdapteurTimerAttente;
 import controlleur.ControlCenter;
-import controlleur.ControleMediateur;
 import modele.ExecPlayground;
 import modele.InterfaceElementPosition;
 import modele.InterfaceElementType;
@@ -32,14 +32,16 @@ public class InterfaceSwing implements Runnable{
 	public ControlCenter cc;
 	public JToggleButton confirmer, annuler, cancel;
 	public JTextField infoArea;
+	public Timer chorno;
 	
-	public InterfaceSwing(Playground pg) {
+	public InterfaceSwing(Playground pg, ExecPlayground epg) {
 		this.pg = pg;
 		this.gi = new GrilleInterface(this.pg);
 		this.ti = new TitreInterface();
 		this.ci = new CarteInterface(this.pg);
-		this.cc = new ControlCenter(new ExecPlayground(pg));
+		this.cc = new ControlCenter(epg);
 		this.cc.ajouteInterfaceUtilisateur(this);
+		this.chorno = new Timer(1000, new AdapteurTimerAttente(cc));
 	}
 	
 	public ArrayList<InterfaceElementPosition> getGrillePos() {
@@ -104,13 +106,16 @@ public class InterfaceSwing implements Runnable{
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setSize(1200, 800);
 		frame.setVisible(true);
+		
+		// this.chorno.start();
 	}
 	
-	public static void start(Playground j) {
+	
+	public static void start(Playground j, ExecPlayground epg) {
 		// Swing s'exécute dans un thread séparé. En aucun cas il ne faut accéder directement
 		// aux composants graphiques depuis le thread principal. Swing fournit la méthode
 		// invokeLater pour demander au thread de Swing d'exécuter la méthode run d'un Runnable.
-		SwingUtilities.invokeLater(new InterfaceSwing(j));
+		SwingUtilities.invokeLater(new InterfaceSwing(j, epg));
 	}
 	
 }

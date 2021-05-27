@@ -28,7 +28,7 @@ public class PGInterface implements Runnable{
 	public PGInterface(Playground pg) {
 		this.pg = pg;
 		this.pggraphique = new PGGraphique(this.pg);
-		this.cm = new ControleMediateur(new ExecPlayground(pg));
+		this.cm = new ControleMediateur(new ExecPlayground(pg, false));
 		this.cm.ajouteInterfaceUtilisateur(this);
 	}
 	

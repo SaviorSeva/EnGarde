@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import javax.swing.JComponent;
 import javax.swing.border.StrokeBorder;
 
+import modele.Carte;
 import modele.InterfaceElementPosition;
 import modele.InterfaceElementType;
 import modele.Playground;
@@ -33,27 +34,54 @@ public class GrilleInterface extends JComponent implements Observateur{
 	
 	public ArrayList<InterfaceElementPosition> grillePos;
 	
+	int predictMove1, predictMove2;
+	int parryCase;
+	int choseCase;
+	
 	public GrilleInterface(Playground pg) {
 		this.pg = pg;
 		pg.ajouteObservateur(this);
 		this.setPreferredSize(new Dimension(50*23 + 20, 250));
 		this.proportionCaseX = 1.0;
 		this.proportionCaseY = 1.0;
+		this.predictMove1 = -1;
+		this.predictMove2 = -1;
+		this.parryCase = -1;
+		this.choseCase = -1;
 	}
 	
 	public void tracerGrille() {
 		for(int i=0; i<23; i++) {
+			
 			// Orange background
-			drawable.setColor(Color.ORANGE);
+
+			if(i == parryCase) drawable.setColor(Color.PINK);
+			else if(i == this.predictMove1) {
+					if(this.pg.getEnemyCourant().getPlace() == i) drawable.setColor(Color.RED);
+					else drawable.setColor(Color.GREEN);
+			}
+			else if (i == this.predictMove2) {
+				if(this.pg.getEnemyCourant().getPlace() == i) drawable.setColor(Color.RED);
+				else drawable.setColor(Color.GREEN);
+			}else drawable.setColor(Color.ORANGE);
 			drawable.fillRect(caseXStart+i*caseWidth, 0, caseWidth, caseHeight);
 			
 			// Black line
 			drawable.setColor(Color.BLACK);
 			drawable.drawRect(caseXStart+i*caseWidth, 0, caseWidth, caseHeight);
 			
+			drawable.setStroke(new BasicStroke(1));
+			
 			// Number of cases
+			if(i == choseCase) drawable.setColor(Color.YELLOW);
 			drawable.setFont(new Font("TimesRoman", Font.BOLD, (int)(15*proportionCaseX)));
 			drawable.drawString((i+1) + "", caseXStart+i*caseWidth+(int)(caseWidth*0.4), (int)(caseHeight * 0.9));
+		}
+		// Highlight selected case
+		if(choseCase != -1) {
+			drawable.setColor(Color.YELLOW);
+			drawable.setStroke(new BasicStroke(3));
+			drawable.drawRect(caseXStart+choseCase*caseWidth, 0, caseWidth, caseHeight);
 		}
 	}
 	
@@ -114,14 +142,85 @@ public class GrilleInterface extends JComponent implements Observateur{
 		drawable.setStroke(new BasicStroke(2));
 		int whiteScore = this.pg.getBlanc().getPoint();
 		int blackScore = this.pg.getNoir().getPoint();
+		int ovalSize = (int)(15 * this.proportionCaseX);
+		int ovalMargin = (int)(20 * this.proportionCaseX);
 		for(int i=0; i<5; i++) {
-			if(i<whiteScore) drawable.fillOval(10+i*20, yStart, 15, 15);
-			else drawable.drawOval(10 + i*20, yStart, 15, 15);
+			if(i<whiteScore) drawable.fillOval(10+i*ovalMargin, yStart, ovalSize, ovalSize);
+			else drawable.drawOval(10 + i*ovalMargin, yStart, ovalSize, ovalSize);
 		}
 		for(int i=0; i<5; i++) {
-			if(i<blackScore) drawable.fillOval(10+i*20, yStart, 15, 15);
-			else drawable.drawOval(23*caseWidth -10 - i*20, yStart, 15, 15);
+			if(i<blackScore) drawable.fillOval(10 + 23*this.caseWidth - i*ovalMargin - ovalSize
+					, yStart, ovalSize, ovalSize);
+			else drawable.drawOval(10 + 23*this.caseWidth - i*ovalMargin - ovalSize, yStart, ovalSize, ovalSize);
 		}
+	}
+	
+	public void setMoveCaseColor() {
+		int place = this.pg.getPlayerCourant().getPlace();
+		int dist = this.pg.getSelectedCard().getValue();
+		this.predictMove1 = place + dist;
+		this.predictMove2 = place - dist;
+		if(this.pg.getTourCourant() == 1) {
+			if(this.predictMove1 > this.pg.getNoirPos() || this.predictMove1 > 22) this.predictMove1 = -1;
+			if(this.predictMove2 < 0) this.predictMove2 = -1;
+		}else {
+			if(this.predictMove2 < this.pg.getBlancPos() || this.predictMove2 < 0) this.predictMove2 = -1;
+			if(this.predictMove1 > 22) this.predictMove1 = -1;
+		}
+		this.repaint();
+	}
+	
+	public void setChoseCase(int i) {
+		this.choseCase = i;
+		this.repaint();
+	}
+	
+	public void resetChoseCase() {
+		this.choseCase = -1;
+		this.repaint();
+	}
+	
+	public void setRetreatCaseColor() {
+		int place = this.pg.getPlayerCourant().getPlace();
+		int dist = this.pg.getSelectedCard().getValue();
+		if(this.pg.getTourCourant() == 1) this.predictMove1 = place - dist;
+		else this.predictMove1 = place + dist;
+		if(this.predictMove1 > 22 || this.predictMove1 < 0) this.predictMove1 = -1;
+		this.predictMove2 = -1;
+		this.repaint();
+	}
+	
+	public void setAttackCaseColor() {
+		int place = this.pg.getEnemyCourant().getPlace();
+		this.predictMove1 = place;
+		this.predictMove2 = -1;
+		this.repaint();
+	}
+	
+	public void setParryCase() {
+		this.parryCase = this.pg.getPlayerCourant().getPlace();
+		this.repaint();
+	}
+	
+	public void resetParryCase() {
+		this.parryCase = -1;
+		this.repaint();
+	}
+	
+	public void setPRCaseColor() {
+		int place = this.pg.getPlayerCourant().getPlace();
+		int dist = this.pg.getSelectedCard().getValue();
+		if(this.pg.getTourCourant() == 1) this.predictMove1 = place - dist;
+		else this.predictMove1 = place + dist;
+		if(this.predictMove1 > 22 || this.predictMove1 < 0) this.predictMove1 = -1;
+		this.parryCase = place;
+		this.repaint();
+	}
+	
+	public void resetCaseColor() {
+		this.predictMove1 = -1; 
+		this.predictMove2 = -1;
+		this.repaint();
 	}
 	
 	@Override
@@ -150,4 +249,6 @@ public class GrilleInterface extends JComponent implements Observateur{
 	public void miseAJour() {
 		this.repaint();
 	}
+
+	
 }

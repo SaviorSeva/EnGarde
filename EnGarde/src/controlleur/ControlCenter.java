@@ -3,24 +3,54 @@ package controlleur;
 import java.awt.Point;
 import java.util.ArrayList;
 
+import IAs.IA;
+import IAs.IAAleatoire;
 import modele.Carte;
 import modele.ExecPlayground;
 import modele.InterfaceElementPosition;
 import modele.InterfaceElementType;
 import modele.LockedBoolean;
+import modele.Playground;
+import patterns.Observateur;
 import vue.InterfaceSwing;
-import vue.PGInterface;
 
-public class ControlCenter {
+
+public class ControlCenter implements Observateur{
+	Playground pg;
 	ExecPlayground epg;
 	InterfaceSwing interSwing;
+	ArrayList<Point> elementPos;
+	IA ia;
 	
 	public ControlCenter(ExecPlayground epg) {
 		this.epg = epg;
+		this.pg = this.epg.getPg();
+		this.epg.ajouteObservateur(this);
+		switch(this.epg.getIAType()) {
+		case 0:
+			this.ia = null;
+			break;
+		case 1:
+			this.ia = new IAAleatoire(this.epg, this.pg);
+			break;
+		}
 	}
 	
 	public void ajouteInterfaceUtilisateur(InterfaceSwing ifs) {
 		this.interSwing = ifs;
+	}
+	
+	public void IAStep() {
+		if (epg.isIaRound()) {
+			ia.iaParryPhase();
+			
+			ia.pickMove();
+			pg.setDirectionDeplace(ia.getDirection());
+			pg.setSelected(ia.getIaCartes());
+			this.epg.confirmReceived();
+			ia.resetChoisir();
+		}else ia = new IAAleatoire(epg,pg);
+			//iaAleatoire.setParry(false);
 	}
 	
 	public void resetZoom(){
@@ -61,14 +91,17 @@ public class ControlCenter {
 	
 	public void clicSourisGrille(int sourisX, int sourisY) {
 		InterfaceElementPosition iep = this.getCaseByClick(sourisX, sourisY);
-		if(epg.pg.getTourCourant() == 1) {
-			int place = epg.pg.getBlancPos();
-			if(iep.getNombre() > place) epg.pg.setDirectionDeplace(1);
-			else epg.pg.setDirectionDeplace(2);
-		}else {
-			int place = epg.pg.getNoirPos();
-			if(iep.getNombre() > place) epg.pg.setDirectionDeplace(2);
-			else epg.pg.setDirectionDeplace(1);
+		if(iep.getEle() == InterfaceElementType.CASE) {
+			if(epg.pg.getTourCourant() == 1) {
+				int place = epg.pg.getBlancPos();
+				if(iep.getNombre() > place) epg.pg.setDirectionDeplace(1);
+				else epg.pg.setDirectionDeplace(2);
+			}else {
+				int place = epg.pg.getNoirPos();
+				if(iep.getNombre() > place) epg.pg.setDirectionDeplace(2);
+				else epg.pg.setDirectionDeplace(1);
+			}
+			this.interSwing.gi.setChoseCase(iep.getNombre());
 		}
 		this.interSwing.repaintGrille();
 	}
@@ -90,6 +123,31 @@ public class ControlCenter {
 					}
 				}
 			}
+			switch(this.pg.getWaitStatus()) {
+			case 1:
+				// Parry direct attack
+				this.interSwing.gi.setParryCase();
+				break;
+			case 2:
+				// Retreat only
+				this.interSwing.gi.setRetreatCaseColor();
+				break;
+			case 3:
+				// Move or direct attack
+				this.interSwing.gi.setMoveCaseColor();
+				break;
+			case 4:
+				// Indirect attack only
+				this.interSwing.gi.setAttackCaseColor();
+				break;
+			case 5:
+				// Parry indirect attack or retreat
+				this.interSwing.gi.setPRCaseColor();
+				break;
+			default:
+				System.err.println("Clic Carte Error Line 136");
+				break;
+			}
 		}
 		this.interSwing.repaintCarte();
 	}
@@ -97,11 +155,12 @@ public class ControlCenter {
 	public void clicSourisCarteDroite(int sourisX, int sourisY) {
 		InterfaceElementPosition iep = this.getCardByClick(sourisX, sourisY);
 		if(iep.getEle() == InterfaceElementType.CARTE) {
+			
 			for(int i=0; i<interSwing.ci.zoomCarte.size(); i++) {
 				if(i != iep.getNombre()) interSwing.ci.changeZoomTo(i, LockedBoolean.FALSE);
 				else this.interSwing.ci.changeZoomTo(iep.getNombre(), LockedBoolean.LOCKEDFALSE);
 			}
-			
+			this.interSwing.gi.resetCaseColor();
 		}
 		this.interSwing.repaintCarte();
 	}
@@ -122,9 +181,17 @@ public class ControlCenter {
 	
 	public void confirmReceived() {
 		this.epg.confirmReceived();
+		this.interSwing.gi.resetCaseColor();
+		this.interSwing.gi.resetChoseCase();
+		this.interSwing.gi.resetParryCase();
 	}
 	
 	public void clicCancel() {
 		this.epg.cancelReceived();
+	}
+
+	@Override
+	public void miseAJour() {
+		this.IAStep();
 	}
 }

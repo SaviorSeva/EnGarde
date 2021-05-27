@@ -6,7 +6,7 @@ import modele.Playground;
 public class Starter2 {
 	public static void main(String[] args) {
 		Playground pg = new Playground();
-		ExecPlayground epg = new ExecPlayground(pg);
+		ExecPlayground epg = new ExecPlayground(pg, false);
 		
 		epg.shuffleReste();
 

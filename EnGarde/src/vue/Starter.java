@@ -1,5 +1,6 @@
 package vue;
 
+import global.Configuration;
 import modele.ExecPlayground;
 import modele.Playground;
 
@@ -15,15 +16,34 @@ public class Starter {
 		
 		epg.restartNewRound();
 		
-		//System.out.println(pg.toString());
+		System.out.println(pg.toString());
 		*/
+		String iaActive = Configuration.instance().lis("IA");
 		Playground pg = new Playground();
-		ExecPlayground epg = new ExecPlayground(pg);
-		
-		epg.shuffleReste();
+		ExecPlayground epg;
+		switch (iaActive){
+			case "None" :
+				epg = new ExecPlayground(pg, 0);
+				
+				epg.shuffleReste();
 
-		InterfaceSwing.start(pg);
+				InterfaceSwing.start(pg, epg);
+				
+				epg.restartNewRound();
+				break;
+			case "IAAleatoire" :
+				System.out.println("RandomIA activated !");
+				
+				epg = new ExecPlayground(pg, 1);
+				
+				epg.shuffleReste();
+
+				InterfaceSwing.start(pg, epg);
+				
+				epg.restartNewRound();
+				break;
+		}
 		
-		epg.restartNewRound();
+		
 	}
 }

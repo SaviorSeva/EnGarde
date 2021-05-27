@@ -131,6 +131,10 @@ public class CarteInterface extends JComponent implements Observateur{
 		
 		// Paint player's 5 cards
 		for(int i=0; i<cartes.size(); i++) {
+			if(pg.getWaitStatus() == 1) {
+				int attVal = this.pg.getLastAttack().getAttValue().getValue();
+				for(int m=0; m<5; m++) if(cartes.get(m).getValue() != attVal) this.changeZoomTo(m, LockedBoolean.INVALID);
+			}
 			int picSelected = cartes.get(i).getValue();
 			if(zoomCarte.get(i).isTrue()) {
 				drawable.drawImage(	imgCarte[picSelected], 
