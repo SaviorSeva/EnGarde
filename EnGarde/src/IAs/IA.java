@@ -11,6 +11,7 @@ public abstract class IA {
     Playground pg;
     ArrayList<Carte> iaCartes;
     int iaPlayer;
+    
     public IA(ExecPlayground epg, Playground pg){
         this.epg = epg;
         this.pg = pg;
