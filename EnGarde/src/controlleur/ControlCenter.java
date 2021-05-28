@@ -44,15 +44,10 @@ public class ControlCenter implements Observateur{
 		ia = new IAAleatoire(epg,pg);
 		while (epg.isIaRound()){
 			if (!ia.getParry()) {
+				System.out.println("IA Cartes : " + pg.getCurrentPlayerCards());
 				ia.iaParryPhase();
 			}
-			else {
-				ia.pickMove();
-				pg.setDirectionDeplace(ia.getDirection());
-				pg.setSelected(ia.getIaCartes());
-				this.epg.confirmReceived();
-				ia.resetChoisir();
-			}
+			else ia.pickMove();
 		}
 	}
 	

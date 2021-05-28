@@ -49,6 +49,7 @@ public class IAAleatoire extends IA{
                 if (iaCartes.get(i).getValue() == epg.getDistance()) {
                     direction = 1;
                     choisir.set(i, true);
+                    jouerCarte(direction, choisir);
                     if (r == 0) break;
                 }
             }
@@ -68,39 +69,31 @@ public class IAAleatoire extends IA{
                     resetChoisir();
                     break;
                 case DIRECT:
-                    for (int i = 0; i < iaCartes.size() && nb < etreAtt.getAttnb(); i++)
-                        if (iaCartes.get(i).getValue() == pg.getLastAttack().getAttValue().getValue()){
-                            choisir.set(i, true);
-                            nb++;
-                        }
-                    System.out.println("AI choose to parry direct attack of " + pg.getLastAttack().getAttValue().getValue() + "with " + nb + "cards");
-                    epg.pg.setDirectionDeplace(0);
-                    pg.setSelected(choisir);
-                    epg.confirmReceived();
+                    nb = etreAtt.getAttnb();
+                    choisirParryCartes(nb, etreAtt.getAttValue().getValue());
+                    System.out.println("AI choose to parry direct attack of " + pg.getLastAttack().getAttValue().getValue() + "with " + etreAtt.getAttnb() + "cards");
+                    jouerCarte(0, choisir);
                     break;
                 case INDIRECT:
                     resetAllPossible(false);
                     nb = 0;
-                    for(int i=0; i<iaCartes.size(); i++) {
-                        if(iaCartes.get(i).getValue() == etreAtt.getAttValue().getValue()) nb++;
-                    }
-                    if(nb >= etreAtt.getAttnb()) {
-                        for (int i = 0; i < iaCartes.size(); i++) {
-                            if (iaCartes.get(i).getValue() == etreAtt.getAttValue().getValue()) choisir.set(i, true);
-                        }
+                    //Verifier si on peut resister
+                    for(int i=0; i<iaCartes.size()&&nb==etreAtt.getAttnb(); i++)
+                        if(iaCartes.get(i).getValue() == etreAtt.getAttValue().getValue())
+                            nb++;
+                    //Parry indirect attack
+                    if(nb == etreAtt.getAttnb()) {
+                        choisirParryCartes(nb, etreAtt.getAttValue().getValue());
                         System.out.println("AI choose to parry indirect attack of " + pg.getLastAttack().getAttValue().getValue() + "with " + etreAtt.getAttnb() + "cards");
-                        epg.pg.setDirectionDeplace(0);
-                        pg.setSelected(choisir);
-                        epg.confirmReceived();
+                        jouerCarte(0, choisir);
+                    //retreat
                     }else if(ceds.size()>0){
                         int r = random.nextInt(ceds.size());
                         int index = ceds.get(r).getIndex();
                         choisir.set(index, true);
                         direction = ceds.get(r).getDirection();
                         System.out.println("IA retreat " + ceds.get(r).getC());
-                        epg.pg.setDirectionDeplace(direction);
-                        pg.setSelected(choisir);
-                        epg.confirmReceived();
+                        jouerCarte(direction, choisir);
                     }else{
                         System.err.println("Probleme");
                     }
@@ -123,10 +116,12 @@ public class IAAleatoire extends IA{
                 choisir.set(index, true);
                 direction = ceds.get(r).getDirection();
                 System.out.println("Directiion : " + direction + "   Carte : " + ceds.get(r).getC().getValue());
+                jouerCarte(direction, choisir);
             }else {
                 System.out.println("AI has no card! OvO");
             }
         }
+        resetChoisir();
     }
 
     public int getDirection() {
@@ -145,10 +140,24 @@ public class IAAleatoire extends IA{
         parry = bool;
     }
 
+    public void choisirParryCartes(int nb, int attValue){
+        for (int i = 0; i < iaCartes.size() && nb > 0 ; i++)
+            if (iaCartes.get(i).getValue() == attValue){
+                choisir.set(i, true);
+                nb--;
+            }
+    }
+
     @Override
     public void resetChoisir(){
         for (int i = 0; i < iaCartes.size(); i++) {
             choisir.set(i, false);
         }
+    }
+
+    public void jouerCarte(int direction, ArrayList<Boolean> choisir){
+        pg.setDirectionDeplace(direction);
+        pg.setSelected(choisir);
+        epg.confirmReceived();
     }
 }
