@@ -1,0 +1,20 @@
+package vue;
+
+import modele.ExecPlayground;
+import modele.Playground;
+
+public class Starter2 {
+	public static void main(String[] args) {
+		Playground pg = new Playground();
+		ExecPlayground epg = new ExecPlayground(pg, false);
+		
+		epg.shuffleReste();
+
+		PGInterface.start(pg);
+		
+		epg.restartNewRound();
+		
+		System.out.println(pg.toString());
+		
+	}
+}

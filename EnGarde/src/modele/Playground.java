@@ -22,6 +22,12 @@ public class Playground extends Observable{
     
     private int waitStatus;
     
+    /*	startType == 0 two human
+ 	 	startType == 1 human play as white
+ 		startType == 2 human play as black
+ 	*/
+     private int startType;
+    
     public Playground() {
     	this.blanc = new Player(0);
     	this.noir = new Player(22);
@@ -34,6 +40,7 @@ public class Playground extends Observable{
     	
     	this.directionDeplace = 0;
     	this.waitStatus = 0;
+    	this.startType = 2;
     }
     
     // Getters et setters basiques
@@ -41,6 +48,7 @@ public class Playground extends Observable{
 		return directionDeplace;
 	}
 	public void setDirectionDeplace(int directionDeplace) {
+		System.out.println(directionDeplace);
 		this.directionDeplace = directionDeplace;
 	}
 	public Player getBlanc() {
@@ -146,6 +154,21 @@ public class Playground extends Observable{
     	return this.getNoirPos() - this.getBlancPos();
     }
     
+    public ArrayList<Carte> getCurrentPlayerCards(){
+		if(this.getTourCourant() == 1) return this.getBlancCartes();
+		else return this.getNoirCartes();
+	}
+    
+    public Carte getSelectedCard() {
+		Carte c = null;
+		for(int i=0; i<this.getSelected().size(); i++) {
+			if(this.getSelected().get(i)) {
+				c = this.getCurrentPlayerCards().get(i);
+			}
+		}
+		return c;
+	}
+    
     @Override
     public String toString() {
     	StringBuilder sb = new StringBuilder("          1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 ");
@@ -163,5 +186,7 @@ public class Playground extends Observable{
     	return sb.toString();
     }
     
-   
+    public int getStartType() {
+		return this.startType;
+	}
 }
