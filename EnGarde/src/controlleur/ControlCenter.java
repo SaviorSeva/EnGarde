@@ -41,14 +41,15 @@ public class ControlCenter implements Observateur{
 	}
 	
 	public void IAStep() {
-		ia = new IAAleatoire(epg,pg);
-		while (epg.isIaRound()){
-			if (!ia.getParry()) {
-				System.out.println("IA Cartes : " + pg.getCurrentPlayerCards());
-				ia.iaParryPhase();
-			}
-			else ia.pickMove();
+		switch(this.epg.getIAType()) {
+			case 0:
+				this.ia = null;
+				break;
+			case 1:
+				this.ia = new IAAleatoire(this.epg, this.pg);
+				break;
 		}
+		ia.iaStep();
 	}
 	
 	public void resetZoom(){
