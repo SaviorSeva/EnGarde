@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import IAs.IA;
 import IAs.IAAleatoire;
+import IAs.IAProba;
 import modele.Carte;
 import modele.ExecPlayground;
 import modele.InterfaceElementPosition;
@@ -33,6 +34,9 @@ public class ControlCenter implements Observateur{
 		case 1:
 			this.ia = new IAAleatoire(this.epg, this.pg);
 			break;
+		case 2:
+			this.ia = new IAProba(this.epg, this.pg);
+			break;
 		}
 	}
 	
@@ -47,6 +51,9 @@ public class ControlCenter implements Observateur{
 				break;
 			case 1:
 				this.ia = new IAAleatoire(this.epg, this.pg);
+				break;
+			case 2:
+				this.ia = new IAProba(this.epg, this.pg);
 				break;
 		}
 		ia.iaStep();

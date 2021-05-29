@@ -42,6 +42,17 @@ public class Starter {
 				
 				epg.restartNewRound();
 				break;
+			case "IAProba" :
+				System.out.println("ProbaIA activated !");
+
+				epg = new ExecPlayground(pg, 2);
+
+				epg.shuffleReste();
+
+				InterfaceSwing.start(pg, epg);
+
+				epg.restartNewRound();
+				break;
 		}
 		
 		
