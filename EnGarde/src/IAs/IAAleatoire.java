@@ -8,8 +8,7 @@ import java.util.Random;
 public class IAAleatoire extends IA{
     Random random;
 
-    ArrayList<Carte> canPlay;
-    ArrayList<CarteEtDirection> ceds;
+
     int direction;
 
     private boolean parry;
@@ -22,17 +21,6 @@ public class IAAleatoire extends IA{
         parry = false;
     }
 
-    public void resetAllPossible(boolean needAvance){
-        ceds.clear();
-        for(int i=0;i<iaCartes.size();i++) {
-            if (needAvance){
-                if (iaCartes.get(i).getValue() <= pg.getDistance())
-                    ceds.add(new CarteEtDirection(1, iaCartes.get(i), i));
-            }
-            if (iaCartes.get(i).getValue() <= this.pg.getPlayerCourant().getDistToStartPoint())
-                ceds.add(new CarteEtDirection(2, iaCartes.get(i), i));
-        }
-    }
 
     public boolean iaCanAttack(){
         if(epg.canAttack()) {

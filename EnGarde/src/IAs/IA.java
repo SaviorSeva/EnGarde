@@ -1,6 +1,7 @@
 package IAs;
 
 import modele.Carte;
+import modele.CarteEtDirection;
 import modele.ExecPlayground;
 import modele.Playground;
 
@@ -12,10 +13,13 @@ public abstract class IA {
     ArrayList<Carte> iaCartes;
     int iaPlayer;
     ArrayList<Boolean> choisir;
-    
+    ArrayList<CarteEtDirection> ceds;
+    int direction;
     public IA(ExecPlayground epg, Playground pg){
         this.epg = epg;
         this.pg = pg;
+        direction = 0;
+        ceds = new ArrayList<>();
         iaPlayer = epg.humanPlayer%2+1;
         if(iaPlayer == 1) iaCartes = pg.getBlancCartes();
         else if (iaPlayer == 2) iaCartes = pg.getNoirCartes();
@@ -44,7 +48,24 @@ public abstract class IA {
         resetChoisir();
     }
 
+    public int nbCarteI(int valeur){
+        int n = 0;
+        for (int i = 0; i < pg.getCurrentPlayerCards().size(); i++)
+            if(pg.getCurrentPlayerCards().get(i).getValue() == valeur) n++;
+        return n;
+    }
 
+    public void resetAllPossible(boolean needAvance){
+        ceds.clear();
+        for(int i=0;i<iaCartes.size();i++) {
+            if (needAvance){
+                if (iaCartes.get(i).getValue() <= pg.getDistance())
+                    ceds.add(new CarteEtDirection(1, iaCartes.get(i), i));
+            }
+            if (iaCartes.get(i).getValue() <= this.pg.getPlayerCourant().getDistToStartPoint())
+                ceds.add(new CarteEtDirection(2, iaCartes.get(i), i));
+        }
+    }
 
     public abstract void pickMove();
     
