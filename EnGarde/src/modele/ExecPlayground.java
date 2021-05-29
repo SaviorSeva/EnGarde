@@ -43,7 +43,7 @@ public class ExecPlayground extends Observable{
     	Carte c = this.pg.getReste().remove(0);
     	if(player == 1) this.pg.getBlanc().addCartes(c);
     	else if(player == 2) this.pg.getNoir().addCartes(c);
-    	return 0;
+    	return c.getValue();
     }
 	
 	public void avance(int valeur) {
@@ -166,28 +166,33 @@ public class ExecPlayground extends Observable{
 			this.jouerCarte();
 			this.currentAction.appendDirectAttackAction(c, nbSelected);
 			this.roundEnd(new Attack(AttackType.DIRECT, c, nbSelected));
-		}else if(this.pg.getDirectionDeplace() != 0){
-			// Move Forward
-			if(this.pg.getDirectionDeplace() == 1) {
-				this.avance(c.getValue());
-				this.currentAction.appendMoveForwardAction(c);
+		}else if(this.getNBSelectedCard() == 1) {
+			if(this.pg.getDirectionDeplace() != 0){
+				// Move Forward
+				if(this.pg.getDirectionDeplace() == 1) {
+					this.avance(c.getValue());
+					this.currentAction.appendMoveForwardAction(c);
+				}
+				// Move backward
+				else if(pg.getDirectionDeplace() == 2) {
+					this.retreat(c.getValue());
+					this.currentAction.appendMoveBackwardAction(c);
+				}
+				this.jouerCarte();
+				// Possibility of indirect attack
+				if(this.canAttack()) {
+					this.pg.setWaitStatus(4);
+				}else {
+					this.currentAction.appendNoAttackAction();
+					this.roundEnd(new Attack(AttackType.NONE, null, 0));
+				}
+			}else{
+				System.out.println("You must choose a Direction! ");
 			}
-			// Move backward
-			else if(pg.getDirectionDeplace() == 2) {
-				this.retreat(c.getValue());
-				this.currentAction.appendMoveBackwardAction(c);
-			}
-			this.jouerCarte();
-			// Possibility of indirect attack
-			if(this.canAttack()) {
-				this.pg.setWaitStatus(4);
-			}else {
-				this.currentAction.appendNoAttackAction();
-				this.roundEnd(new Attack(AttackType.NONE, null, 0));
-			}
-		}else{
-			System.out.println("You must choose a Direction! ");
+		}else {
+			System.out.println("You cannot move with more than 1 card ! ");
 		}
+			
 	}
 	
 	public ArrayList<Carte> getCurrentPlayerCards(){
@@ -237,9 +242,14 @@ public class ExecPlayground extends Observable{
 			this.restartNewRound();
 		}
 		else if(this.getCurrentPlayerCards().size() == 0) {
-			this.currentAction.appendNoAction();
-			
-			this.roundEnd(new Attack(AttackType.NONE, null, 0));
+			if(pg.getLastAttack().getAt() != AttackType.NONE) {
+				if(this.pg.getTourCourant() == 1) this.pg.getNoir().incrementPoint();
+				else this.pg.getBlanc().incrementPoint();
+				this.restartNewRound();
+			}else {
+				this.currentAction.appendNoAction();
+				this.roundEnd(new Attack(AttackType.NONE, null, 0));
+			}
 		}
 		else {
 			int pharerResultat = phaseParer(this.pg.getLastAttack());
@@ -297,9 +307,15 @@ public class ExecPlayground extends Observable{
 	
 	public void roundEnd(Attack att) {
 		ArrayList<Carte> cartes = this.getCurrentPlayerCards();
-		while(this.pg.getReste().size() != 0 && cartes.size() < 5) {
-			this.distribuerCarte(pg.getTourCourant());
+		if(this.pg.getReste().size() == 0) this.currentAction.appendNoGetCardAction();
+		else {
+			this.currentAction.appendStartGetCardAction();
+			while(this.pg.getReste().size() != 0 && cartes.size() < 5) {
+				int val = this.distribuerCarte(pg.getTourCourant());
+				this.currentAction.appendGetCardAction(val);
+			}
 		}
+		
 		this.pg.setWaitStatus(0);
 		this.pg.initialiseSelected();
 		this.pg.setDirectionDeplace(0);
@@ -369,20 +385,33 @@ public class ExecPlayground extends Observable{
 			}
 			break;
 		case 5:
-			c = this.getSelectedCard();
-			nbSelected = this.getNBSelectedCard();
-			if(c.getValue() == this.pg.getLastAttack().getAttValue().getValue() && nbSelected == this.pg.getLastAttack().getAttnb()) {
-				this.jouerCarte();
-				this.currentAction.appendParryAction(c, nbSelected);
-				enterE3();
-			}else {
-				System.out.println(	"You cannot parry the indirect attack of (" + 
-									this.pg.getLastAttack().getAttValue().getValue() + 
-									", " + 
-									this.pg.getLastAttack().getAttnb() + 
-									") with the selection of (" +
-									c.getValue() + ", " + nbSelected + ").");
-			}
+			if(this.pg.getDirectionDeplace() == 3) {
+				// Parry indirect attack
+				c = this.getSelectedCard();
+				nbSelected = this.getNBSelectedCard();
+				if(c.getValue() == this.pg.getLastAttack().getAttValue().getValue() && nbSelected == this.pg.getLastAttack().getAttnb()) {
+					this.jouerCarte();
+					this.currentAction.appendParryAction(c, nbSelected);
+					enterE3();
+				}else {
+					System.out.println(	"You cannot parry the indirect attack of (" + 
+										this.pg.getLastAttack().getAttValue().getValue() + 
+										", " + 
+										this.pg.getLastAttack().getAttnb() + 
+										") with the selection of (" +
+										c.getValue() + ", " + nbSelected + ").");
+				}
+			}else if(this.pg.getDirectionDeplace() == 2){
+				// retreat
+				c = this.getSelectedCard();
+				if(this.pg.getPlayerCourant().getDistToStartPoint() < c.getValue()) System.out.println("You cannot retreat due to the size of the playground.");
+				else {
+					this.jouerCarte();
+					this.currentAction.appendRetreatAction(c);
+		    		this.retreat(c.getValue());
+		    		this.roundEnd(new Attack(AttackType.NONE, null, 0));
+				}
+			}else System.out.println("You have to parry the attack or retreat !");
 			break;
 		default:
 			// Should not be executed
@@ -417,15 +446,7 @@ public class ExecPlayground extends Observable{
 			this.roundEnd(new Attack(AttackType.NONE, null, 0));
 			break;
 		case 5:
-			Carte c = this.getSelectedCard();
-			if(this.pg.getPlayerCourant().getDistToStartPoint() < c.getValue()) System.out.println("You cannot retreat due to the size of the playground.");
-			else {
-				this.jouerCarte();
-				this.currentAction.appendRetreatAction(c);
-	    		this.retreat(c.getValue());
-	    		this.roundEnd(new Attack(AttackType.NONE, null, 0));
-			}
-			
+			System.out.println("You have to parry the attack or retreat !");
 			break;
 		}
 		this.pg.metAJour();
@@ -435,7 +456,7 @@ public class ExecPlayground extends Observable{
 		Carte c = null;
 		for(int i=0; i<this.pg.getSelected().size(); i++) {
 			if(this.pg.getSelected().get(i)) {
-				c = this.getCurrentPlayerCards().get(i);
+				if(i < this.pg.getPlayerCourant().getCartes().size()) c = this.getCurrentPlayerCards().get(i);
 			}
 		}
 		return c;

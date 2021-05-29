@@ -1,8 +1,6 @@
 package modele;
 
 import java.util.ArrayList;
-import java.util.Collections;
-
 import patterns.Observable;
 
 public class Playground extends Observable{
@@ -16,17 +14,19 @@ public class Playground extends Observable{
     
     private int tourCourant;
     
-    private int directionDeplace; // 1-Avance, 2-Retrait, 0-Valeur initialise
+    private int directionDeplace; // 1-Avance, 2-Retrait, 3-PlayerPosition(for parry use), 0-Valeur initialise
     
     private ArrayList<Boolean> selected;
     
     private int waitStatus;
     
-    /*	startType == 0 two human
- 	 	startType == 1 human play as white
- 		startType == 2 human play as black
- 	*/
-     private int startType;
+    /*	
+     * startType == 0 two human
+     * startType == 1 human play as white
+     * startType == 2 human play as black
+     */
+ 
+    private int startType;
     
     public Playground() {
     	this.blanc = new Player(0);
@@ -48,7 +48,7 @@ public class Playground extends Observable{
 		return directionDeplace;
 	}
 	public void setDirectionDeplace(int directionDeplace) {
-		System.out.println(directionDeplace);
+		//System.out.println(directionDeplace);
 		this.directionDeplace = directionDeplace;
 	}
 	public Player getBlanc() {

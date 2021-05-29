@@ -7,13 +7,10 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Stroke;
 import java.util.ArrayList;
 
 import javax.swing.JComponent;
-import javax.swing.border.StrokeBorder;
 
-import modele.Carte;
 import modele.InterfaceElementPosition;
 import modele.InterfaceElementType;
 import modele.Playground;
@@ -48,6 +45,10 @@ public class GrilleInterface extends JComponent implements Observateur{
 		this.predictMove2 = -1;
 		this.parryCase = -1;
 		this.choseCase = -1;
+	}
+	
+	public boolean equalToHighlighted(int caseNB) {
+		return this.predictMove1 == caseNB || this.predictMove2 == caseNB || this.parryCase == caseNB;
 	}
 	
 	public void tracerGrille() {
@@ -149,9 +150,8 @@ public class GrilleInterface extends JComponent implements Observateur{
 			else drawable.drawOval(10 + i*ovalMargin, yStart, ovalSize, ovalSize);
 		}
 		for(int i=0; i<5; i++) {
-			if(i<blackScore) drawable.fillOval(10 + 23*this.caseWidth - i*ovalMargin - ovalSize
-					, yStart, ovalSize, ovalSize);
-			else drawable.drawOval(10 + 23*this.caseWidth - i*ovalMargin - ovalSize, yStart, ovalSize, ovalSize);
+			if(i<blackScore) drawable.fillOval(10 + 23*this.caseWidth - i*ovalMargin - ovalSize, yStart, ovalSize, ovalSize);
+			drawable.drawOval(10 + 23*this.caseWidth - i*ovalMargin - ovalSize, yStart, ovalSize, ovalSize);
 		}
 	}
 	
@@ -177,6 +177,7 @@ public class GrilleInterface extends JComponent implements Observateur{
 	
 	public void resetChoseCase() {
 		this.choseCase = -1;
+		this.pg.setDirectionDeplace(0);
 		this.repaint();
 	}
 	
@@ -220,6 +221,7 @@ public class GrilleInterface extends JComponent implements Observateur{
 	public void resetCaseColor() {
 		this.predictMove1 = -1; 
 		this.predictMove2 = -1;
+		this.parryCase = -1;
 		this.repaint();
 	}
 	

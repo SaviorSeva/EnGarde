@@ -14,6 +14,14 @@ public class Historique {
 		this.listAction.add(newAct);
 	}
 	
+	public int size(){
+		return this.listAction.size();
+	}
+	
+	public Action removeLastAction() {
+		return this.listAction.remove(this.listAction.size() - 1);
+	}
+	
 	@Override
 	public String toString() {
 		return listAction.toString();

@@ -12,6 +12,8 @@ import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
+import controlleur.AdapteurAnnulerActionCC;
+import controlleur.AdapteurAnnulerRoundCC;
 import controlleur.AdapteurCancelCC;
 import controlleur.AdapteurConfirmCC;
 import controlleur.AdapteurSourisCarte;
@@ -20,7 +22,6 @@ import controlleur.AdapteurTimerAttente;
 import controlleur.ControlCenter;
 import modele.ExecPlayground;
 import modele.InterfaceElementPosition;
-import modele.InterfaceElementType;
 import modele.Playground;
 
 public class InterfaceSwing implements Runnable{
@@ -30,7 +31,7 @@ public class InterfaceSwing implements Runnable{
 	public CarteInterface ci;
 	public JFrame frame;
 	public ControlCenter cc;
-	public JToggleButton confirmer, annuler, cancel;
+	public JToggleButton confirmer, annulerRound, cancel, annulerAction;
 	public JTextField infoArea;
 	public Timer chorno;
 	
@@ -56,6 +57,11 @@ public class InterfaceSwing implements Runnable{
 		ci.repaint();
 	}
 
+	public void repaintAll() {
+		gi.repaint();
+		ci.repaint();
+	}
+	
 	@Override
 	public void run() {
 		this.frame = new JFrame("En Garde !");
@@ -83,12 +89,24 @@ public class InterfaceSwing implements Runnable{
 		cancel.setFocusable(false);
 		boiteInfo.add(cancel);
 		
+		this.annulerRound = new JToggleButton("Annuler tour");
+		annulerRound.setAlignmentX(Component.LEFT_ALIGNMENT);
+		annulerRound.setFocusable(false);
+		boiteInfo.add(annulerRound);
+		
+		this.annulerAction = new JToggleButton("Annuler action");
+		annulerAction.setAlignmentX(Component.LEFT_ALIGNMENT);
+		annulerAction.setFocusable(false);
+		boiteInfo.add(annulerAction);
+		
 		this.infoArea = new JTextField("Some Text");
 		this.infoArea.setAlignmentX(Component.RIGHT_ALIGNMENT);
 		boiteInfo.add(infoArea);
 		
 		this.confirmer.addActionListener(new AdapteurConfirmCC(this.cc));
 		this.cancel.addActionListener(new AdapteurCancelCC(this.cc));
+		this.annulerRound.addActionListener(new AdapteurAnnulerRoundCC(this.cc));
+		this.annulerAction.addActionListener(new AdapteurAnnulerActionCC(this.cc));
 		
 		gi.addMouseListener(asg);
 		ci.addMouseListener(asc);

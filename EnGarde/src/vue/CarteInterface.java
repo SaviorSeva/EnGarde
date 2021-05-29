@@ -6,7 +6,6 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -118,8 +117,6 @@ public class CarteInterface extends JComponent implements Observateur{
 		
 		int tour = pg.getTourCourant();
 		
-		String s = "";
-		
 		ArrayList<Carte> cartes;
 		if(tour == 1) cartes = pg.getBlancCartes();
 		else cartes = pg.getNoirCartes();
@@ -133,7 +130,10 @@ public class CarteInterface extends JComponent implements Observateur{
 		for(int i=0; i<cartes.size(); i++) {
 			if(pg.getWaitStatus() == 1) {
 				int attVal = this.pg.getLastAttack().getAttValue().getValue();
-				for(int m=0; m<5; m++) if(cartes.get(m).getValue() != attVal) this.changeZoomTo(m, LockedBoolean.INVALID);
+				for(int m=0; m<this.pg.getCurrentPlayerCards().size(); m++) if(cartes.get(m).getValue() != attVal) this.changeZoomTo(m, LockedBoolean.INVALID);
+			}
+			if(pg.getWaitStatus() == 4) {
+				for(int m=0; m<this.pg.getCurrentPlayerCards().size(); m++) if(cartes.get(m).getValue() != this.pg.getDistance()) this.changeZoomTo(m, LockedBoolean.INVALID);
 			}
 			int picSelected = cartes.get(i).getValue();
 			if(zoomCarte.get(i).isTrue()) {

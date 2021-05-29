@@ -33,7 +33,7 @@ public class Action {
 		this.actionString += "N0,";
 	}
 	public void appendRetreatAction(Carte c) {
-		this.actionString += "R" + c.getValue() + ",MN0,NA0;";
+		this.actionString += "R" + c.getValue() + ",MN0,NA0,";
 	}
 	public void appendParryAction(Carte c, int nb) {
 		this.actionString += "P";
@@ -57,19 +57,37 @@ public class Action {
 		appendNoMovementAction();
 		this.actionString += "DA";
 		for(int i=0; i<nb; i++) this.actionString += c.getValue() + "";
-		this.actionString += ";";
+		this.actionString += ",";
 	}
 	public void appendIndirectAttackAction(Carte c, int nb) {
 		this.actionString += "IA";
 		for(int i=0; i<nb; i++) this.actionString += c.getValue() + "";
-		this.actionString += ";";
+		this.actionString += ",";
 	}
 	public void appendNoAttackAction() {
-		this.actionString += "NA0;";
+		this.actionString += "NA0,";
+	}
+	
+	// Get cards
+	public void appendNoGetCardAction() {
+		this.actionString += "NG0";
+	}
+	public void appendStartGetCardAction() {
+		this.actionString += "GE";
+	}
+	public void appendGetCardAction(int i) {
+		this.actionString += i + "";
 	}
 	
 	public void appendNoAction() {
-		this.actionString += "N0,MN0,NA0;";
+		this.actionString += "N0,MN0,NA0,";
 	}
+	
+	public void deleteAction() {
+		String actions[] = this.actionString.split(",");
+		actions[actions.length - 1] = "";
+		this.actionString = String.join(",", actions);
+	}
+	
 
 }
