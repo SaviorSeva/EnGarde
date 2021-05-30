@@ -77,7 +77,7 @@ public class IAAleatoire extends IA{
     }
 
     @Override
-    public void pickMove(){
+    public boolean pickMove(){
         if(!iaCanAttack()) {
             resetAllPossible(true);
             if (ceds.size() > 0) {
@@ -89,6 +89,7 @@ public class IAAleatoire extends IA{
                 jouerCarte(direction, choisir);
             }else System.out.println("AI has no card! OvO");
         }
+        return true;
     }
 
     @Override
@@ -100,12 +101,5 @@ public class IAAleatoire extends IA{
             }
             else this.pickMove();
         }
-    }
-
-    public int nbCarteI(int valeur){
-        int n = 0;
-        for (int i = 0; i < pg.getCurrentPlayerCards().size(); i++)
-            if(pg.getCurrentPlayerCards().get(i).getValue() == valeur) n++;
-        return n;
     }
 }

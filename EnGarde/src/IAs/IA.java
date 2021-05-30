@@ -67,11 +67,12 @@ public abstract class IA {
         }
     }
 
-    public abstract void pickMove();
+    public abstract boolean pickMove();
     
     public abstract void iaParryPhase();
 
     public abstract void iaStep();
+
 
 
 }

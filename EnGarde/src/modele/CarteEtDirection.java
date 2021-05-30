@@ -17,6 +17,12 @@ public class CarteEtDirection {
         this.c = null;
         this.index = 0;
     }
+
+    public CarteEtDirection(int direction, Carte c){
+        this.direction = direction;
+        this.c = c;
+    }
+
     public int getDirection() {
         return direction;
     }

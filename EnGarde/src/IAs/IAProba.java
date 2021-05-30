@@ -3,6 +3,7 @@ package IAs;
 
 import modele.*;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.PriorityQueue;
 import java.util.Random;
@@ -14,6 +15,7 @@ public class IAProba extends IA{
     Random random;
     private boolean parry;
     private PriorityQueue<IAAction> iaAction;
+    private CarteEtDirection move;
 
     public IAProba(ExecPlayground epg, Playground pg) {
         super(epg, pg);
@@ -98,14 +100,24 @@ public class IAProba extends IA{
     public void iaStep() {
         setCarteInconnu();
         setTableauProba();
-        System.out.println("Used : " + pg.getUsed());
-        System.out.println("NbInconnu : " + getNbInconnu());
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 6; j++) {
                 System.out.println("Proba de Inconnu " + (i+1) + " au moin avec " + j + " cartes : " + proba[i][j]);
             }
         }
-        iaCanAttack();
+        while (epg.isIaRound()){
+            if (!this.parry) {
+                System.out.println("IA Cartes : " + pg.getCurrentPlayerCards());
+                this.iaParryPhase();
+            }
+            else{
+                if (!this.pickMove()) {
+                    resetAllPossible(true);
+                    movement(pg.getDistance(), ceds);
+                }
+            }
+        }
+
 
         Iterator<IAAction> it = iaAction.iterator();
         while (it.hasNext()) {
@@ -128,13 +140,11 @@ public class IAProba extends IA{
     public void iaCanAttack(){
         boolean vue[] = new boolean[5];
         int dis = epg.getDistance();
-        int n = 0, val = 0;
+        int n = 0;
         //Direct attack possible
         for (Carte iaCarte : iaCartes) {
-            if (dis == iaCarte.getValue()) {
-                n++;
-                iaAction.add(new IAAction(new CarteEtDirection(), new Attack(AttackType.DIRECT, iaCarte, n), proba[dis-1][n]));
-            }
+            if (dis == iaCarte.getValue())
+                iaAction.add(new IAAction(new CarteEtDirection(), new Attack(AttackType.DIRECT, iaCarte, n), proba[dis-1][nbCarteI(dis)]));
         }
         //Indirect attack et move possible
         resetAllPossible(true);
@@ -144,26 +154,69 @@ public class IAProba extends IA{
             for (int j = 0; j < iaCartes.size(); j++) {
                 if(vue[iaCartes.get(index).getValue()-1]) break;
                 if (ced.getDirection() == 1)
-                    val = dis - iaCartes.get(index).getValue();
+                    dis = dis - iaCartes.get(index).getValue();
                 else if (ced.getDirection() == 2)
-                    val = dis + iaCartes.get(index).getValue();
-                if (j != ced.getIndex() && val > 0) {
-                    if (val == iaCartes.get(j).getValue()) {
-                        n++;
-                        iaAction.add(new IAAction(ced, new Attack(AttackType.INDIRECT, iaCartes.get(j), n), proba[val-1][n]));
-                    }//else iaAction.add(new IAAction(ced, new Attack(AttackType.NONE, null, 0), 0));
-
+                    dis = dis + iaCartes.get(index).getValue();
+                iaAction.add(new IAAction(ced, new Attack(AttackType.NONE, null, 0), dis/10));
+                //move et attack(Indirect attack)
+                if (j != ced.getIndex() && dis > 0) {
+                    if (dis == iaCartes.get(j).getValue())
+                        iaAction.add(new IAAction(ced, new Attack(AttackType.INDIRECT, iaCartes.get(j), n), proba[dis-1][nbCarteI(dis)]));
                 }
             }
             vue[ced.getC().getValue()-1] = true;
         }
         //jouerCarte(1, choisir);
-
     }
     @Override
-    public void pickMove() {
+    public boolean pickMove() {
+        iaCanAttack();
+        //选概率最高的打，如果概率都不高return false, 在iastep里执行movement + cancel
+        return true;
 
     }
+
+    public void movement(int dis, ArrayList<CarteEtDirection> ceds){
+        int min = 10, in = 0, dir = 0, max = 0;
+        if(pg.getEnemyCourant().getCartes().size()==0){
+            dir = 1;
+            in = 0;
+        }
+        else if(dis>10) {
+            for (int j = 0; j < iaCartes.size(); j++){
+                if((pg.getEnemyCourant().getDistToStartPoint() - pg.getPlayerCourant().getDistToStartPoint())<=0) {
+                    if (min > iaCartes.get(j).getValue()) {
+                        min = iaCartes.get(j).getValue();
+                        dir = 1;
+                        in = j;
+                    }
+                }else {
+                    if (max < iaCartes.get(j).getValue()) {
+                        max = iaCartes.get(j).getValue();
+                        dir = 1;
+                        in = j;
+                    }
+                }
+            }
+        }else{
+            int val = 0;
+            for(CarteEtDirection ced : ceds){
+                //目前撤退到dis为8的附近，可改进，根据自己手牌和对方手牌来判断哪个dis不会被直接攻击到，或者哪个距离可以格挡
+                if(ced.getDirection()==1) val = Math.abs(8 - (dis - ced.getC().getValue()));
+                else if(ced.getDirection()==2) val = Math.abs(8 - (dis + ced.getC().getValue()));
+                if(min>val){
+                    min = val;
+                    in = ced.getIndex();
+                    dir = ced.getDirection();
+                }
+            }
+        }
+
+        move = new CarteEtDirection(dir, iaCartes.get(in));
+        System.out.println("Movement : " + move.getDirection());
+        System.out.println("Movement : " + move.getC().getValue());
+    }
+
 
     @Override
     public void iaParryPhase(){
@@ -191,10 +244,10 @@ public class IAProba extends IA{
                     jouerCarte(0, choisir);
                     //retreat
                 }else if(ceds.size()>0){
-                    int r = random.nextInt(ceds.size());
-                    choisir.set(ceds.get(r).getIndex(), true);
-                    direction = ceds.get(r).getDirection();
-                    System.out.println("IA retreat " + ceds.get(r).getC());
+                    movement(pg.getDistance(),ceds);
+                    choisir.set(move.getIndex(), true);
+                    direction = move.getDirection();
+                    System.out.println("IA retreat " + move.getC());
                     jouerCarte(direction, choisir);
                 } else System.err.println("Probleme");
                 break;
