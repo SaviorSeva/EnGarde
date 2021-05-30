@@ -89,25 +89,30 @@ public class InterfaceSwing implements Runnable{
 		cancel.setFocusable(false);
 		boiteInfo.add(cancel);
 		
+		// Bouton annuler tour
 		this.annulerRound = new JToggleButton("Annuler tour");
 		annulerRound.setAlignmentX(Component.LEFT_ALIGNMENT);
 		annulerRound.setFocusable(false);
 		boiteInfo.add(annulerRound);
 		
+		// Bouton annuler action
 		this.annulerAction = new JToggleButton("Annuler action");
 		annulerAction.setAlignmentX(Component.LEFT_ALIGNMENT);
 		annulerAction.setFocusable(false);
 		boiteInfo.add(annulerAction);
 		
+		// Creer un boite de text pour afficher des infos utiles
 		this.infoArea = new JTextField("Some Text");
 		this.infoArea.setAlignmentX(Component.RIGHT_ALIGNMENT);
 		boiteInfo.add(infoArea);
 		
+		// Des actionlisteners pour les boutons
 		this.confirmer.addActionListener(new AdapteurConfirmCC(this.cc));
 		this.cancel.addActionListener(new AdapteurCancelCC(this.cc));
 		this.annulerRound.addActionListener(new AdapteurAnnulerRoundCC(this.cc));
 		this.annulerAction.addActionListener(new AdapteurAnnulerActionCC(this.cc));
 		
+		// Des listeners pour les interfaces
 		gi.addMouseListener(asg);
 		ci.addMouseListener(asc);
 		ci.addMouseMotionListener(asc);

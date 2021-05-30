@@ -7,6 +7,7 @@ public class Playground extends Observable{
     private Player blanc;
     private Player noir;
     
+    // deux pile de carte, soit pas encore utilisée soit déjà utilisée dans le jeu
     private ArrayList<Carte> reste;
     private ArrayList<Carte> used;
     
@@ -51,7 +52,6 @@ public class Playground extends Observable{
 		return directionDeplace;
 	}
 	public void setDirectionDeplace(int directionDeplace) {
-		//System.out.println(directionDeplace);
 		this.directionDeplace = directionDeplace;
 	}
 	public Player getBlanc() {
@@ -123,6 +123,7 @@ public class Playground extends Observable{
     	return (this.blanc.getPlace() != i) && (this.noir.getPlace() != i);
     }
     
+    // retourne le joueur de tour courant soit blanc soit noir
     public Player getPlayerCourant() {
     	if(getTourCourant() == 1) return this.blanc;
     	else return this.noir;

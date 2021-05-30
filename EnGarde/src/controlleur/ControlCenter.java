@@ -42,6 +42,7 @@ public class ControlCenter implements Observateur{
 		this.interSwing = ifs;
 	}
 	
+	// Faire un step d'IA
 	public void IAStep() {
 		if (epg.isIaRound()) {
 			ia.iaParryPhase();
@@ -63,6 +64,7 @@ public class ControlCenter implements Observateur{
 		this.interSwing.ci.initialiseZoom();
 	}
 	
+	// Retourne l'info sur le case cliqué
 	public InterfaceElementPosition getCaseByClick(int x, int y) {
 		InterfaceElementPosition res = null; 
 		boolean changed = false;
@@ -77,6 +79,7 @@ public class ControlCenter implements Observateur{
 		return res;
 	}
 	
+	// Retourne les infos sur la carte cliqué
 	public InterfaceElementPosition getCardByClick(int x, int y) {
 		InterfaceElementPosition res = null; 
 		boolean changed = false;
@@ -91,16 +94,21 @@ public class ControlCenter implements Observateur{
 		return res;
 	}
 	
+	// les procédures à faire après clique de souris sur les grilles
 	public void clicSourisGrille(int sourisX, int sourisY) {
 		InterfaceElementPosition iep = this.getCaseByClick(sourisX, sourisY);
 		if(this.epg.getSelectedCard() != null) {
 			if(iep.getEle() == InterfaceElementType.CASE && this.interSwing.gi.equalToHighlighted(iep.getNombre())) {
 				if(epg.pg.getTourCourant() == 1) {
+					// si tour blanc, et si on clique sur droite de place, on avance
+					// sinon on retraite
 					int place = epg.pg.getBlancPos();
 					if(iep.getNombre() > place) epg.pg.setDirectionDeplace(1);
 					else if(iep.getNombre() < place) epg.pg.setDirectionDeplace(2);
 					else epg.pg.setDirectionDeplace(3);
 				}else {
+					// si tour noir, et si on clique sur droite de place, on retraite
+					// sinon on avance
 					int place = epg.pg.getNoirPos();
 					if(iep.getNombre() > place) epg.pg.setDirectionDeplace(2);
 					else if(iep.getNombre() < place) epg.pg.setDirectionDeplace(1);
@@ -112,6 +120,7 @@ public class ControlCenter implements Observateur{
 		}
 	}
 	
+	// Deselectionner un grille
 	public void clicSourisGrilleDroite(int sourisX, int sourisY) {
 		InterfaceElementPosition iep = this.getCaseByClick(sourisX, sourisY);
 		if(iep.getEle() == InterfaceElementType.CASE) {
@@ -129,6 +138,7 @@ public class ControlCenter implements Observateur{
 		this.interSwing.gi.resetParryCase();
 	}
 	
+	// les procédure à faire après clique de souris sur carte 
 	public void clicSourisCarte(int sourisX, int sourisY) {
 		InterfaceElementPosition iep = this.getCardByClick(sourisX, sourisY);
 		if(iep.getEle() == InterfaceElementType.CARTE && !this.interSwing.ci.zoomCarte.get(iep.getNombre()).isInvalid()) {
@@ -194,12 +204,14 @@ public class ControlCenter implements Observateur{
 		this.interSwing.repaintCarte();
 	}
 	
+	// Reinitialiser le zoom
 	public void resetCartes() {
 		for(int i=0; i<interSwing.ci.zoomCarte.size(); i++) {
 			interSwing.ci.changeZoomTo(i, LockedBoolean.FALSE);
 		}
 	}
 	
+	// les procédure après clique de souris droite sur la carte
 	public void clicSourisCarteDroite(int sourisX, int sourisY) {
 		InterfaceElementPosition iep = this.getCardByClick(sourisX, sourisY);
 		if(iep.getEle() == InterfaceElementType.CARTE) {
@@ -217,6 +229,7 @@ public class ControlCenter implements Observateur{
 		this.interSwing.repaintCarte();
 	}
 
+	// les procédures quand le souris est sur la carte ou sur background
 	public void deplaceSourisCarte(int sourisX, int sourisY) {
 		InterfaceElementPosition iep = this.getCardByClick(sourisX, sourisY);
 		
@@ -231,6 +244,7 @@ public class ControlCenter implements Observateur{
 		this.interSwing.repaintCarte();
 	} 
 	
+	// Clic sur bouton confirmer
 	public void confirmReceived() {
 		this.epg.confirmReceived();
 		this.interSwing.ci.initialiseZoom();
@@ -239,6 +253,7 @@ public class ControlCenter implements Observateur{
 		this.interSwing.gi.resetParryCase();
 	}
 	
+	// Clic sur bouton cancel
 	public void clicCancel() {
 		this.epg.cancelReceived();
 		this.interSwing.ci.initialiseZoom();
@@ -252,6 +267,7 @@ public class ControlCenter implements Observateur{
 		this.IAStep();
 	}
 	
+	// Clic sur bouton annuler tour
 	public void annulerRound() {
 		if(this.epg.hist.listAction.size() == 0) {
 			System.out.println("There is no more round to recover.");
@@ -279,6 +295,7 @@ public class ControlCenter implements Observateur{
 		
 	}
 	
+	// Prendre des carte de joueur et le remettre au pile
 	public void returnCardToPool(String s) {
 		if(s.substring(0, 2).equals("GE")) {
 			for(int i=s.length()-1; i>=2; i--) {
@@ -293,6 +310,7 @@ public class ControlCenter implements Observateur{
 		}
 	}
 	
+	// Annuler le dernier etape d'attaquer
 	public void resetAttack(String s) {
 		switch(s.substring(0, 2)) {
 		case "NA" :
@@ -304,6 +322,7 @@ public class ControlCenter implements Observateur{
 		}
 	}
 	
+	// Annuler le dernier mouvement
 	public void resetMove(String s) {
 		if(s.charAt(2) != '0') {
 			int moveVal;
@@ -329,6 +348,7 @@ public class ControlCenter implements Observateur{
 		}
 	}
 	
+	// Annuler le dernier action de parer
 	public void resetParry(String s) {
 		switch(s.charAt(0)) {
 		case 'P':
@@ -342,6 +362,7 @@ public class ControlCenter implements Observateur{
 		}
 	}
 
+	// Prendre l'attaque avant precedent
 	public Attack getAttackBeforeLast(String s) {
 		switch(s.substring(0, 2)) {
 		case "NA":
@@ -358,6 +379,7 @@ public class ControlCenter implements Observateur{
 		}
 	}
 
+	// Annuler une seul action
 	public void annulerAction() {
 		String actionString = this.epg.currentAction.getActionString();
 		String actions[] = actionString.split(",");
