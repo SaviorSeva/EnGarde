@@ -68,7 +68,10 @@ public class ExecPlayground extends Observable{
 			this.distribuerCarte(1);
 			this.distribuerCarte(2);
 		}
-    	this.pg.setTourCourant(1);
+    	
+    	this.pg.incrementRoundCount();
+    	if(this.pg.getRoundCount() % 2 == 1) this.pg.setTourCourant(1);
+    	else this.pg.setTourCourant(2);
     	
     	this.roundStart(new Attack(AttackType.NONE, null, 0));
     }

@@ -104,27 +104,13 @@ public class GrilleInterface extends JComponent implements Observateur{
 		// Joueur Blanc
 		drawable.setColor(Color.WHITE);
 		drawable.fillOval(caseXStart+b*caseWidth, (int)(this.caseHeight - this.caseWidth)/2, caseWidth, caseWidth);
-		if(pg.getTourCourant() == 1) {
-			int xpoints[] = {(int)(caseXStart+(b+0.25)*caseWidth), (int)(caseXStart+(b+0.75)*caseWidth), (int)(caseXStart+(b+0.5)*caseWidth)};
-			int triangleStart = (this.caseHeight - this.caseWidth) / 6;
-			int triangleEnd =  (this.caseHeight - this.caseWidth) / 3;
-		    int ypoints[] = {triangleStart, triangleStart, triangleEnd};
-		    int npoints = 3;
-		    drawable.fillPolygon(xpoints, ypoints, npoints);
-		}
+		if(this.pg.getTourCourant() == 1) tracerIndicateur(b, 1);
 			
 		
 		// Joueur Noir
 		drawable.setColor(Color.BLACK);
 		drawable.fillOval(caseXStart+n*caseWidth, (int)(this.caseHeight - this.caseWidth)/2, caseWidth, caseWidth);
-		if(pg.getTourCourant() == 2) {
-			int xpoints[] = {(int)(caseXStart+(n+0.25)*caseWidth), (int)(caseXStart+(n+0.75)*caseWidth), (int)(caseXStart+(n+0.5)*caseWidth)};
-			int triangleStart = (this.caseHeight - this.caseWidth) / 6;
-			int triangleEnd = (this.caseHeight - this.caseWidth) / 3;
-		    int ypoints[] = {triangleStart, triangleStart, triangleEnd};
-		    int npoints = 3;
-		    drawable.fillPolygon(xpoints, ypoints, npoints);
-		}
+		if(this.pg.getTourCourant() == 2) tracerIndicateur(n, 2);
 	
 		// Distance
 		int distYEnd = (int)(caseHeight * 1.15);
@@ -135,6 +121,21 @@ public class GrilleInterface extends JComponent implements Observateur{
 		int strX = 23*this.caseWidth/2 - metrics.stringWidth(text) / 2;
 		drawable.setFont(font);
 		drawable.drawString(text, strX, distYEnd);
+	}
+	
+	public void tracerIndicateur(int place, int tour) {
+		int xpoints[] = {(int)(caseXStart+(place+0.25)*caseWidth), (int)(caseXStart+(place+0.75)*caseWidth), (int)(caseXStart+(place+0.5)*caseWidth)};
+		int triangleStart = (this.caseHeight - this.caseWidth) / 4;
+		int triangleEnd =  7 * (this.caseHeight - this.caseWidth) / 16;
+	    int ypoints[] = {triangleStart, triangleStart, triangleEnd};
+	    int npoints = 3;
+	    drawable.fillPolygon(xpoints, ypoints, npoints);
+	    
+	    Font font = new Font("TimesRoman", Font.BOLD + Font.ITALIC, (int)(25*this.proportionCaseY));
+	    FontMetrics metrics = gra.getFontMetrics(font);
+	    int strX = this.caseWidth/2 - metrics.stringWidth(tour + "P") / 2;
+		drawable.setFont(font);
+		drawable.drawString(tour + "P", (int)(caseXStart + strX+place*caseWidth), 3 * (this.caseHeight - this.caseWidth) / 16);
 	}
 	
 	public void tracerScore() {

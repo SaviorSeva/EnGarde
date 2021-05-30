@@ -258,16 +258,10 @@ public class ControlCenter implements Observateur{
 		}else {
 			Action lastAction = this.epg.hist.removeLastAction();
 			String lastActions[] = lastAction.getActionString().split(",");
-			// for(int i=0; i<actions.length; i++) System.out.println(actions[i]);
-			System.out.println(this.pg.getEnemyCourant().getCartes().toString());
 			this.returnCardToPool(lastActions[3]);
-			System.out.println(this.pg.getEnemyCourant().getCartes().toString());
 			this.resetAttack(lastActions[2]);
-			System.out.println(this.pg.getEnemyCourant().getCartes().toString());
 			this.resetMove(lastActions[1]);
-			System.out.println(this.pg.getEnemyCourant().getCartes().toString());
 			this.resetParry(lastActions[0]);
-			System.out.println(this.pg.getEnemyCourant().getCartes().toString());
 			Attack attBL;
 			if(this.epg.hist.listAction.size() != 0) {
 				Action actBeforeLast = this.epg.hist.listAction.get(this.epg.hist.listAction.size() - 1);

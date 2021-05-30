@@ -20,6 +20,8 @@ public class Playground extends Observable{
     
     private int waitStatus;
     
+    private int roundCount;
+    
     /*	
      * startType == 0 two human
      * startType == 1 human play as white
@@ -41,6 +43,7 @@ public class Playground extends Observable{
     	this.directionDeplace = 0;
     	this.waitStatus = 0;
     	this.startType = 2;
+    	this.roundCount = 0;
     }
     
     // Getters et setters basiques
@@ -189,4 +192,17 @@ public class Playground extends Observable{
     public int getStartType() {
 		return this.startType;
 	}
+
+	public int getRoundCount() {
+		return roundCount;
+	}
+
+	public void incrementRoundCount() {
+		this.roundCount = this.roundCount + 1;
+	}
+
+	public void setStartType(int startType) {
+		this.startType = startType;
+	}
+    
 }
