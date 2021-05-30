@@ -48,7 +48,7 @@ public class IAAleatoire extends IA{
                 resetChoisir();
                 break;
             case DIRECT:
-                choisirParryCartes(etreAtt.getAttnb(), etreAtt.getAttValue().getValue());
+                choisirParryOrAttackCartes(etreAtt.getAttnb(), etreAtt.getAttValue().getValue());
                 System.out.println("AI choose to parry direct attack of " + pg.getLastAttack().getAttValue().getValue() + "with " + etreAtt.getAttnb() + "cards");
                 jouerCarte(0, choisir);
                 break;
@@ -59,7 +59,7 @@ public class IAAleatoire extends IA{
                     if(iaCartes.get(i).getValue() == etreAtt.getAttValue().getValue()) nb++;
                 //Parry indirect attack
                 if(nb == etreAtt.getAttnb()) {
-                    choisirParryCartes(nb, etreAtt.getAttValue().getValue());
+                    choisirParryOrAttackCartes(nb, etreAtt.getAttValue().getValue());
                     System.out.println("AI choose to parry indirect attack of " + pg.getLastAttack().getAttValue().getValue() + "with " + etreAtt.getAttnb() + "cards");
                     jouerCarte(0, choisir);
                 //retreat

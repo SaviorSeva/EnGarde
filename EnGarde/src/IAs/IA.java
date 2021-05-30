@@ -33,7 +33,7 @@ public abstract class IA {
         }
     }
 
-    public void choisirParryCartes(int nb, int attValue){
+    public void choisirParryOrAttackCartes(int nb, int attValue){
         for (int i = 0; i < iaCartes.size() && nb > 0 ; i++)
             if (iaCartes.get(i).getValue() == attValue){
                 choisir.set(i, true);

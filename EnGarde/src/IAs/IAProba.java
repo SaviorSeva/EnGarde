@@ -16,6 +16,7 @@ public class IAProba extends IA{
     private boolean parry;
     private PriorityQueue<IAAction> iaAction;
     private CarteEtDirection move;
+    private double seuilIntension;
 
     public IAProba(ExecPlayground epg, Playground pg) {
         super(epg, pg);
@@ -28,6 +29,7 @@ public class IAProba extends IA{
         }
         nbInconnu = 0;
         proba = new double[5][6];
+        seuilIntension = 0.2; /** 攻击阈值 **/
     }
 
     public void setCarteInconnu(){
@@ -111,13 +113,9 @@ public class IAProba extends IA{
                 this.iaParryPhase();
             }
             else{
-                if (!this.pickMove()) {
-                    resetAllPossible(true);
-                    movement(pg.getDistance(), ceds);
-                }
+                this.pickMove();
             }
         }
-
 
         Iterator<IAAction> it = iaAction.iterator();
         while (it.hasNext()) {
@@ -137,14 +135,16 @@ public class IAProba extends IA{
 //        System.out.println("Inconnu4 : " + this.inconnu[3]);
 //        System.out.println("Inconnu5 : " + this.inconnu[4]);
     }
+
     public void iaCanAttack(){
         boolean vue[] = new boolean[5];
         int dis = epg.getDistance();
         int n = 0;
         //Direct attack possible
         for (Carte iaCarte : iaCartes) {
-            if (dis == iaCarte.getValue())
-                iaAction.add(new IAAction(new CarteEtDirection(), new Attack(AttackType.DIRECT, iaCarte, n), proba[dis-1][nbCarteI(dis)]));
+            if (dis == iaCarte.getValue()) {
+                iaAction.add(new IAAction(new CarteEtDirection(), new Attack(AttackType.DIRECT, iaCarte, nbCarteI(iaCarte.getValue())), 1 - proba[dis-1][nbCarteI(dis)]));
+            }
         }
         //Indirect attack et move possible
         resetAllPossible(true);
@@ -152,28 +152,57 @@ public class IAProba extends IA{
             int index = ced.getIndex();
             n = 0;
             for (int j = 0; j < iaCartes.size(); j++) {
-                if(vue[iaCartes.get(index).getValue()-1]) break;
+                if (vue[iaCartes.get(index).getValue()-1]) break;
                 if (ced.getDirection() == 1)
                     dis = dis - iaCartes.get(index).getValue();
                 else if (ced.getDirection() == 2)
                     dis = dis + iaCartes.get(index).getValue();
-                iaAction.add(new IAAction(ced, new Attack(AttackType.NONE, null, 0), dis/10));
                 //move et attack(Indirect attack)
                 if (j != ced.getIndex() && dis > 0) {
                     if (dis == iaCartes.get(j).getValue())
-                        iaAction.add(new IAAction(ced, new Attack(AttackType.INDIRECT, iaCartes.get(j), n), proba[dis-1][nbCarteI(dis)]));
+                        iaAction.add(new IAAction(ced, new Attack(AttackType.INDIRECT, iaCartes.get(j), nbCarteI(iaCartes.get(j).getValue())), 1 - proba[dis-1][nbCarteI(dis)]));
                 }
             }
             vue[ced.getC().getValue()-1] = true;
         }
         //jouerCarte(1, choisir);
     }
-    @Override
+
     public boolean pickMove() {
         iaCanAttack();
-        //选概率最高的打，如果概率都不高return false, 在iastep里执行movement + cancel
-        return true;
+        if (iaAction.size() != 0) {
+            IAAction pickAttack = iaAction.remove();
+            if (pickAttack.probaReussite >= seuilIntension){
+                switch (pickAttack.attack.getAt()) {
+                    case DIRECT:
+                        choisirParryOrAttackCartes(pickAttack.attack.getAttnb(), pickAttack.attack.getAttValue().getValue());
+                        jouerCarte(1, choisir);
+                        break;
+                    case INDIRECT:
+                        choisir.set(pickAttack.move.getIndex(), true);
+                        jouerCarte(pickAttack.move.getDirection(), choisir);
+                        choisirParryOrAttackCartes(pickAttack.attack.getAttnb(), pickAttack.attack.getAttValue().getValue());
+                        jouerCarte(1, choisir);
+                        break;
+                    default:
+                        System.out.println("Wrong type of attack! ");
+                        break;
+                }
+                return true;
+            }
+        }
 
+        /** Mouvement **/
+        resetAllPossible(true);
+        movement(pg.getDistance(), ceds);
+        choisir.set(move.getIndex(), true);
+        jouerCarte(move.getDirection(),choisir);
+        if (epg.canAttack()){
+            epg.cancelReceived();
+        }
+
+        return false;
+        //选概率最高的打，如果概率都不高return false, 在iastep里执行movement + cancel
     }
 
     public void movement(int dis, ArrayList<CarteEtDirection> ceds){
@@ -212,9 +241,9 @@ public class IAProba extends IA{
             }
         }
 
-        move = new CarteEtDirection(dir, iaCartes.get(in));
-        System.out.println("Movement : " + move.getDirection());
-        System.out.println("Movement : " + move.getC().getValue());
+        move = new CarteEtDirection(dir, iaCartes.get(in), in);
+        System.out.println("Movement direction: " + move.getDirection());
+        System.out.println("Movement value: " + move.getC().getValue());
     }
 
 
@@ -228,7 +257,7 @@ public class IAProba extends IA{
                 resetChoisir();
                 break;
             case DIRECT:
-                choisirParryCartes(etreAtt.getAttnb(), etreAtt.getAttValue().getValue());
+                choisirParryOrAttackCartes(etreAtt.getAttnb(), etreAtt.getAttValue().getValue());
                 System.out.println("AI choose to parry direct attack of " + pg.getLastAttack().getAttValue().getValue() + "with " + etreAtt.getAttnb() + "cards");
                 jouerCarte(0, choisir);
                 break;
@@ -239,7 +268,7 @@ public class IAProba extends IA{
                     if(iaCartes.get(i).getValue() == etreAtt.getAttValue().getValue()) nb++;
                 //Parry indirect attack
                 if(nb == etreAtt.getAttnb()) {
-                    choisirParryCartes(nb, etreAtt.getAttValue().getValue());
+                    choisirParryOrAttackCartes(nb, etreAtt.getAttValue().getValue());
                     System.out.println("AI choose to parry indirect attack of " + pg.getLastAttack().getAttValue().getValue() + "with " + etreAtt.getAttnb() + "cards");
                     jouerCarte(0, choisir);
                     //retreat
