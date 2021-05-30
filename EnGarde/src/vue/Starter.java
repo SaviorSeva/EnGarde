@@ -20,7 +20,7 @@ public class Starter {
 		
 		System.out.println(pg.toString());
 		*/
-		InterfaceInitialise.start();
+		//InterfaceInitialise.start();
 		String iaActive = Configuration.instance().lis("IA");
 		Playground pg = new Playground();
 		ExecPlayground epg;
@@ -41,7 +41,7 @@ public class Starter {
 		}
 
 		epg.shuffleReste();
-		//InterfaceSwing.start(pg, epg);
+		InterfaceSwing.start(pg, epg);
 		epg.restartNewRound();
 		
 	}

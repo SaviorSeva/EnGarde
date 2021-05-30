@@ -1,10 +1,21 @@
 package vue;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.Image;
+import java.awt.Insets;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
+import javax.imageio.ImageIO;
+import javax.swing.BorderFactory;
 import javax.swing.Box;
+import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JTextField;
@@ -16,6 +27,7 @@ import controlleur.AdapteurAnnulerActionCC;
 import controlleur.AdapteurAnnulerRoundCC;
 import controlleur.AdapteurCancelCC;
 import controlleur.AdapteurConfirmCC;
+import controlleur.AdapteurPleinEcranCC;
 import controlleur.AdapteurSourisCarte;
 import controlleur.AdapteurSourisGrille;
 import controlleur.AdapteurTimerAttente;
@@ -30,8 +42,10 @@ public class InterfaceSwing implements Runnable{
 	public TitreInterface ti;
 	public CarteInterface ci;
 	public JFrame frame;
+	boolean maximized;
 	public ControlCenter cc;
-	public JToggleButton confirmer, annulerRound, cancel, annulerAction;
+	public JToggleButton confirmer, annulerRound, cancel, annulerAction, pleinEcran, save, load, restart, help;
+	public Image pleinEcranImage, saveImage, loadImage, restartImage, helpImage;
 	public JTextField infoArea;
 	public Timer chorno;
 	
@@ -43,6 +57,21 @@ public class InterfaceSwing implements Runnable{
 		this.cc = new ControlCenter(epg);
 		this.cc.ajouteInterfaceUtilisateur(this);
 		this.chorno = new Timer(1000, new AdapteurTimerAttente(cc));
+		try {
+			this.pleinEcranImage = ImageIO.read(new File("./res/images/fullscreen.png"));
+			this.pleinEcranImage = this.pleinEcranImage.getScaledInstance(50, 50, Image.SCALE_DEFAULT);
+			this.saveImage = ImageIO.read(new File("./res/images/save.png"));
+			this.saveImage = this.saveImage.getScaledInstance(50, 50, Image.SCALE_DEFAULT);
+			this.loadImage = ImageIO.read(new File("./res/images/load.png"));
+			this.loadImage = this.loadImage.getScaledInstance(50, 50, Image.SCALE_DEFAULT);
+			this.restartImage = ImageIO.read(new File("./res/images/restart.png"));
+			this.restartImage = this.restartImage.getScaledInstance(50, 50, Image.SCALE_DEFAULT);
+			this.helpImage = ImageIO.read(new File("./res/images/help.png"));
+			this.helpImage = this.helpImage.getScaledInstance(50, 50, Image.SCALE_DEFAULT);
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public ArrayList<InterfaceElementPosition> getGrillePos() {
@@ -68,7 +97,8 @@ public class InterfaceSwing implements Runnable{
 		
 		//pggraphique.addMouseListener(as);
 		//pggraphique.addMouseMotionListener(as);
-	
+		
+		Box boiteTitre = Box.createHorizontalBox();
 		Box boiteInfo = Box.createHorizontalBox();
 		Box boiteContenu = Box.createVerticalBox();
 		
@@ -101,6 +131,46 @@ public class InterfaceSwing implements Runnable{
 		annulerAction.setFocusable(false);
 		boiteInfo.add(annulerAction);
 		
+		// Bouton pleinEcran
+		ImageIcon pleinEcranIcon = new ImageIcon(pleinEcranImage);
+		this.pleinEcran = new JToggleButton(pleinEcranIcon);
+		pleinEcran.setAlignmentX(Component.LEFT_ALIGNMENT);
+		pleinEcran.setFocusable(false);
+		pleinEcran.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
+		pleinEcran.setContentAreaFilled(false);
+		
+		// Bouton load
+		ImageIcon loadIcon = new ImageIcon(loadImage);
+		this.load = new JToggleButton(loadIcon);
+		load.setAlignmentX(Component.LEFT_ALIGNMENT);
+		load.setFocusable(false);
+		load.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
+		load.setContentAreaFilled(false);
+		
+		// Bouton save
+		ImageIcon saveIcon = new ImageIcon(saveImage);
+		this.save = new JToggleButton(saveIcon);
+		save.setAlignmentX(Component.LEFT_ALIGNMENT);
+		save.setFocusable(false);
+		save.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
+		save.setContentAreaFilled(false);
+		
+		// Bouton restart
+		ImageIcon restartIcon = new ImageIcon(restartImage);
+		this.restart = new JToggleButton(restartIcon);
+		restart.setAlignmentX(Component.LEFT_ALIGNMENT);
+		restart.setFocusable(false);
+		restart.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
+		restart.setContentAreaFilled(false);
+		
+		// Bouton help
+		ImageIcon helpIcon = new ImageIcon(helpImage);
+		this.help = new JToggleButton(helpIcon);
+		help.setAlignmentX(Component.LEFT_ALIGNMENT);
+		help.setFocusable(false);
+		help.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
+		help.setContentAreaFilled(false);
+		
 		// Creer un boite de text pour afficher des infos utiles
 		this.infoArea = new JTextField("Some Text");
 		this.infoArea.setAlignmentX(Component.RIGHT_ALIGNMENT);
@@ -111,13 +181,22 @@ public class InterfaceSwing implements Runnable{
 		this.cancel.addActionListener(new AdapteurCancelCC(this.cc));
 		this.annulerRound.addActionListener(new AdapteurAnnulerRoundCC(this.cc));
 		this.annulerAction.addActionListener(new AdapteurAnnulerActionCC(this.cc));
+		this.pleinEcran.addActionListener(new AdapteurPleinEcranCC(this.cc));
 		
 		// Des listeners pour les interfaces
 		gi.addMouseListener(asg);
 		ci.addMouseListener(asc);
 		ci.addMouseMotionListener(asc);
 
-		boiteContenu.add(ti);
+		boiteTitre.add(ti);
+		boiteTitre.add(pleinEcran);
+		boiteTitre.add(load);
+		boiteTitre.add(save);
+		boiteTitre.add(restart);
+		boiteTitre.add(help);
+		
+		
+		boiteContenu.add(boiteTitre);
 		boiteContenu.add(gi);
 		gi.setAlignmentX(JComponent.CENTER_ALIGNMENT);
 		boiteContenu.add(ci);
@@ -133,6 +212,17 @@ public class InterfaceSwing implements Runnable{
 		// this.chorno.start();
 	}
 	
+	public void toggleFullscreen() {
+		GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		GraphicsDevice device = env.getDefaultScreenDevice();
+		if (maximized) {
+			device.setFullScreenWindow(null);
+			maximized = false;
+		} else {
+			device.setFullScreenWindow(frame);
+			maximized = true;
+		}
+	}
 	
 	public static void start(Playground j, ExecPlayground epg) {
 		// Swing s'exécute dans un thread séparé. En aucun cas il ne faut accéder directement
