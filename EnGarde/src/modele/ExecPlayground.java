@@ -30,6 +30,16 @@ public class ExecPlayground extends Observable{
 		else return false;
 	}
 
+	public boolean isIaAleatoireRound() {
+		if(IAType == 3 && pg.getTourCourant()==1) return true;
+		else return false;
+	}
+
+	public boolean isIaProbaRound() {
+		if(IAType == 3 && pg.getTourCourant()==2) return true;
+		else return false;
+	}
+
 	public Playground getPg() {
 		return this.pg;
 	}
@@ -228,7 +238,10 @@ public class ExecPlayground extends Observable{
 	
 	public void roundStart(Attack att) {
 		pg.setLastAttack(att);
-		
+		if(pg.getPlayerCourant().getPoint()==50) {
+			System.out.println("Winner" + pg.getTourCourant() + 50);
+			System.out.println("Loser" + pg.getEnemyCourant().getPoint());
+		}
 		if(this.pg.getBlancCartes().size() == 0 && this.pg.getNoirCartes().size() == 0) {
 			int distBlanc = this.pg.getBlanc().getDistToStartPoint();
 			int distNoir = this.pg.getNoir().getDistToStartPoint();
@@ -291,7 +304,8 @@ public class ExecPlayground extends Observable{
 	    	}
 		}
 
-		if (this.IAType != 0 && this.isIaRound()) {
+		if(this.IAType==3) this.metAJour();
+		else if (this.IAType != 0 && this.isIaRound()) {
 			this.metAJour();
 		}
 	}

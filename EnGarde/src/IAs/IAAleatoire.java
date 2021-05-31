@@ -21,7 +21,6 @@ public class IAAleatoire extends IA{
         parry = false;
     }
 
-
     public boolean iaCanAttack(){
         if(epg.canAttack()) {
             int nb = 0;
@@ -49,7 +48,7 @@ public class IAAleatoire extends IA{
                 break;
             case DIRECT:
                 choisirParryOrAttackCartes(etreAtt.getAttnb(), etreAtt.getAttValue().getValue());
-                System.out.println("AI choose to parry direct attack of " + pg.getLastAttack().getAttValue().getValue() + "with " + etreAtt.getAttnb() + "cards");
+                System.out.println("AI alea choose to parry direct attack of " + pg.getLastAttack().getAttValue().getValue() + "with " + etreAtt.getAttnb() + "cards");
                 jouerCarte(0, choisir);
                 break;
             case INDIRECT:
@@ -60,14 +59,14 @@ public class IAAleatoire extends IA{
                 //Parry indirect attack
                 if(nb == etreAtt.getAttnb()) {
                     choisirParryOrAttackCartes(nb, etreAtt.getAttValue().getValue());
-                    System.out.println("AI choose to parry indirect attack of " + pg.getLastAttack().getAttValue().getValue() + "with " + etreAtt.getAttnb() + "cards");
+                    System.out.println("AI alea choose to parry indirect attack of " + pg.getLastAttack().getAttValue().getValue() + "with " + etreAtt.getAttnb() + "cards");
                     jouerCarte(0, choisir);
                 //retreat
                 }else if(ceds.size()>0){
                     int r = random.nextInt(ceds.size());
                     choisir.set(ceds.get(r).getIndex(), true);
                     direction = ceds.get(r).getDirection();
-                    System.out.println("IA retreat " + ceds.get(r).getC());
+                    System.out.println("IA alea retreat " + ceds.get(r).getC());
                     jouerCarte(direction, choisir);
                 } else System.err.println("Probleme");
                 break;
@@ -87,16 +86,16 @@ public class IAAleatoire extends IA{
                 direction = ceds.get(r).getDirection();
                 System.out.println("Directiion : " + direction + "   Carte : " + ceds.get(r).getC().getValue());
                 jouerCarte(direction, choisir);
-            }else System.out.println("AI has no card! OvO");
+            }else System.out.println("AI alea has no card! OvO");
         }
         return true;
     }
 
     @Override
     public void iaStep(){
-        while (epg.isIaRound()){
+        while (epg.isIaRound()||epg.isIaAleatoireRound()){
             if (!this.parry) {
-                System.out.println("IA Cartes : " + pg.getCurrentPlayerCards());
+                System.out.println("IA alea Cartes : " + pg.getCurrentPlayerCards());
                 this.iaParryPhase();
             }
             else this.pickMove();

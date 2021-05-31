@@ -53,6 +53,17 @@ public class Starter {
 
 				epg.restartNewRound();
 				break;
+			case "IAAleatoireVsIAProba" :
+				System.out.println("IAale Vs IAprob activated !");
+
+				epg = new ExecPlayground(pg, 3);
+
+				epg.shuffleReste();
+
+				InterfaceSwing.start(pg, epg);
+
+				epg.restartNewRound();
+				break;
 		}
 		
 		

@@ -22,6 +22,8 @@ public class ControlCenter implements Observateur{
 	InterfaceSwing interSwing;
 	ArrayList<Point> elementPos;
 	IA ia;
+	IA iaAlea;
+	IA iaProba;
 	
 	public ControlCenter(ExecPlayground epg) {
 		this.epg = epg;
@@ -55,8 +57,24 @@ public class ControlCenter implements Observateur{
 			case 2:
 				this.ia = new IAProba(this.epg, this.pg);
 				break;
+			case 3:
+				this.iaAlea = new IAProba(this.epg, this.pg);
+				this.iaProba = new IAProba(this.epg, this.pg);
+				break;
 		}
-		ia.iaStep();
+		if(this.epg.getIAType()==3) {
+			if(epg.isIaAleatoireRound()){
+				System.out.println("iaAlea");
+				System.out.println("");
+				iaAlea.iaStep();
+				System.out.println("");
+			}else if(epg.isIaProbaRound()){
+				System.out.println("iaProba");
+				System.out.println("");
+				iaProba.iaStep();
+			}
+		}else ia.iaStep();
+
 	}
 	
 	public void resetZoom(){

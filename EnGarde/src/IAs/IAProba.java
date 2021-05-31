@@ -33,7 +33,7 @@ public class IAProba extends IA{
         }
         nbInconnu = 0;
         proba = new double[5][6];
-        seuilIntension = 0.2; /** 攻击阈值 **/
+        seuilIntension = 0.5; /** 攻击阈值 **/
     }
 
     public void setCarteInconnu(){
@@ -79,7 +79,6 @@ public class IAProba extends IA{
         long b = (factorial(N - K) / (factorial(n - k) * factorial((N - K) - (n - k))));
         long c = (factorial(N) / (factorial(n) * factorial(N - n)));
 
-        //return resultat = (double) Math.round((a * b) * 10000 / c)/10000;
         return (double) (a * b) / c;
     }
 
@@ -104,10 +103,10 @@ public class IAProba extends IA{
 
     @Override
     public void iaStep() {
-        if(epg.isIaRound()){
+        if(epg.isIaRound() || epg.isIaProbaRound()){
             setCarteInconnu();
             setTableauProba();
-            System.out.println("IA Cartes : " + pg.getCurrentPlayerCards());
+            System.out.println("IA Proba Cartes : " + pg.getCurrentPlayerCards());
             this.iaParryPhase();
             if(!isRetreat) this.pickMove();
         }
@@ -117,16 +116,6 @@ public class IAProba extends IA{
                 System.out.println("Proba de Inconnu " + (i+1) + " au moin avec " + j + " cartes : " + proba[i][j]);
             }
         }
-//        Iterator<IAAction> it = iaAction.iterator();
-//        while (it.hasNext()) {
-//            IAAction i = it.next();
-//            System.out.println("Direction :" + i.move.getDirection());
-//            System.out.println("ATT V: " + i.attack.getAttValue());
-//            System.out.println("ATT nb: " + i.attack.getAttnb());
-//            System.out.println("Att type" + i.attack.getAt());
-//            System.out.println("Proba : " + i.probaReussite);
-//        }
-
     }
 
     public void iaCanAttack(){
@@ -151,7 +140,7 @@ public class IAProba extends IA{
                     dis = dis - iaCartes.get(index).getValue();
                 else if (ced.getDirection() == 2)
                     dis = dis + iaCartes.get(index).getValue();
-                System.out.println("Dis : " + dis);
+                //System.out.println("Dis : " + dis);
                 //move et attack(Indirect attack)
                 if (j != ced.getIndex() && dis > 0) {
                     if (dis == iaCartes.get(j).getValue()){
@@ -207,10 +196,9 @@ public class IAProba extends IA{
         movement(pg.getDistance(), ceds);
         choisir.set(move.getIndex(), true);
         jouerCarte(move.getDirection(),choisir);
-        if (epg.canAttack()){
+        if (epg.cartesContains(epg.getDistance())){
             epg.cancelReceived();
         }
-
         return false;
         //选概率最高的打，如果概率都不高return false, 在iastep里执行movement + cancel
     }
@@ -259,7 +247,7 @@ public class IAProba extends IA{
                         in = i;
                         break;
                     }
-                    if(m>proba[disApres-1][nbCarteI(disApres)+1]){
+                    if(m>proba[Math.min(disApres-1, 4)][nbCarteI(disApres)+1]){
                         in = i;
                         m=proba[disApres-1][nbCarteI(disApres)+1];
                     }
@@ -294,7 +282,7 @@ public class IAProba extends IA{
                 //Parry indirect attack
                 if(nb == etreAtt.getAttnb()) {
                     choisirParryOrAttackCartes(nb, etreAtt.getAttValue().getValue());
-                    System.out.println("AI choose to parry indirect attack of " + pg.getLastAttack().getAttValue().getValue() + "with " + etreAtt.getAttnb() + "cards");
+                    System.out.println("AI Proba choose to parry indirect attack of " + pg.getLastAttack().getAttValue().getValue() + "with " + etreAtt.getAttnb() + "cards");
                     jouerCarte(0, choisir);
                     //retreat
                 }else if(ceds.size()>0){
@@ -302,7 +290,7 @@ public class IAProba extends IA{
                     movement(pg.getDistance(),ceds);
                     choisir.set(move.getIndex(), true);
                     direction = move.getDirection();
-                    System.out.println("IA retreat " + move.getC());
+                    System.out.println("IA Proba retreat " + move.getC());
                     jouerCarte(direction, choisir);
                 } else System.err.println("Probleme");
                 break;
@@ -310,5 +298,4 @@ public class IAProba extends IA{
                 break;
         }
     }
-
 }
