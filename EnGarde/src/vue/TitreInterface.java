@@ -36,7 +36,6 @@ public class TitreInterface extends JComponent{
 	
 	@Override
 	public void paintComponent(Graphics g) {
-		
 		this.width = getSize().width;
 		int height = getSize().height;
 	

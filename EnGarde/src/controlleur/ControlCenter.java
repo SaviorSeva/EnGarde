@@ -58,7 +58,7 @@ public class ControlCenter implements Observateur{
 				this.ia = new IAProba(this.epg, this.pg);
 				break;
 			case 3:
-				this.iaAlea = new IAProba(this.epg, this.pg);
+				this.iaAlea = new IAAleatoire(this.epg, this.pg);
 				this.iaProba = new IAProba(this.epg, this.pg);
 				break;
 		}
@@ -67,11 +67,12 @@ public class ControlCenter implements Observateur{
 				System.out.println("iaAlea");
 				System.out.println("");
 				iaAlea.iaStep();
-				System.out.println("");
+				System.out.println("iaAlea fin");
 			}else if(epg.isIaProbaRound()){
 				System.out.println("iaProba");
 				System.out.println("");
 				iaProba.iaStep();
+				System.out.println("iaProba fin");
 			}
 		}else ia.iaStep();
 

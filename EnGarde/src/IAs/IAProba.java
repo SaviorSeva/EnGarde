@@ -103,7 +103,7 @@ public class IAProba extends IA{
 
     @Override
     public void iaStep() {
-        if(epg.isIaRound() || epg.isIaProbaRound()){
+        if(/*epg.isIaRound() || */epg.isIaProbaRound()){
             setCarteInconnu();
             setTableauProba();
             System.out.println("IA Proba Cartes : " + pg.getCurrentPlayerCards());
@@ -206,8 +206,12 @@ public class IAProba extends IA{
     public void movement(int dis, ArrayList<CarteEtDirection> ceds){
         int min = 10, in = 0, dir = 0, max = 0;
         if(pg.getEnemyCourant().getCartes().size()==0){
-            dir = 1;
-            in = 0;
+            for(CarteEtDirection ced : ceds){
+                //可改进，对面无法移动的情况，手牌可以任意组合
+                dir = ced.getDirection();
+                in = ced.getIndex();
+                if(ced.getDirection()==1) break;
+            }
         }
         else if(dis>10) {
             for (int j = 0; j < iaCartes.size(); j++){
@@ -249,7 +253,7 @@ public class IAProba extends IA{
                     }
                     if(m>proba[Math.min(disApres-1, 4)][nbCarteI(disApres)+1]){
                         in = i;
-                        m=proba[disApres-1][nbCarteI(disApres)+1];
+                        m=proba[Math.min(disApres-1, 4)][nbCarteI(disApres)+1];
                     }
                 }
             }
@@ -264,26 +268,26 @@ public class IAProba extends IA{
     @Override
     public void iaParryPhase(){
         Attack etreAtt = pg.getLastAttack();
-        int nb = 0;
+        iaCartes = pg.getCurrentPlayerCards();
         switch (etreAtt.getAt()) {
             case NONE:
                 resetChoisir();
                 break;
             case DIRECT:
                 choisirParryOrAttackCartes(etreAtt.getAttnb(), etreAtt.getAttValue().getValue());
-                System.out.println("AI choose to parry direct attack of " + pg.getLastAttack().getAttValue().getValue() + "with " + etreAtt.getAttnb() + "cards");
+                System.out.println("AI Proba choose to parry direct attack of " + pg.getLastAttack().getAttValue().getValue() + "with " + etreAtt.getAttnb() + "cards");
                 jouerCarte(0, choisir);
+                iaCartes = pg.getCurrentPlayerCards();
                 break;
             case INDIRECT:
                 resetAllPossible(false);
-                //Verifier si on peut resister
-                for(int i=0; i<iaCartes.size() && nb<etreAtt.getAttnb(); i++)
-                    if(iaCartes.get(i).getValue() == etreAtt.getAttValue().getValue()) nb++;
                 //Parry indirect attack
-                if(nb == etreAtt.getAttnb()) {
-                    choisirParryOrAttackCartes(nb, etreAtt.getAttValue().getValue());
+                if(nbCarteI(etreAtt.getAttValue().getValue()) >= etreAtt.getAttnb()) {
+                    choisirParryOrAttackCartes(etreAtt.getAttnb(), etreAtt.getAttValue().getValue());
                     System.out.println("AI Proba choose to parry indirect attack of " + pg.getLastAttack().getAttValue().getValue() + "with " + etreAtt.getAttnb() + "cards");
+                    for (int i = 0; i < choisir.size(); i++) { System.out.println("choisir : " + choisir.get(i));}
                     jouerCarte(0, choisir);
+                    iaCartes = pg.getCurrentPlayerCards();
                     //retreat
                 }else if(ceds.size()>0){
                     isRetreat = true;

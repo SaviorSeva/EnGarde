@@ -238,9 +238,10 @@ public class ExecPlayground extends Observable{
 	
 	public void roundStart(Attack att) {
 		pg.setLastAttack(att);
-		if(pg.getPlayerCourant().getPoint()==50) {
-			System.out.println("Winner" + pg.getTourCourant() + 50);
-			System.out.println("Loser" + pg.getEnemyCourant().getPoint());
+		if(pg.getPlayerCourant().getPoint()==10) {
+			System.out.println("Winner : " + pg.getTourCourant()+ "  " + 10);
+			System.out.println("Loser : " + pg.getEnemyCourant().getPoint());
+			System.exit(0);
 		}
 		if(this.pg.getBlancCartes().size() == 0 && this.pg.getNoirCartes().size() == 0) {
 			int distBlanc = this.pg.getBlanc().getDistToStartPoint();

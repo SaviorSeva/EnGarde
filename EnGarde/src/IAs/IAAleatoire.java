@@ -93,7 +93,7 @@ public class IAAleatoire extends IA{
 
     @Override
     public void iaStep(){
-        while (epg.isIaRound()||epg.isIaAleatoireRound()){
+        while (/*epg.isIaRound()||*/epg.isIaAleatoireRound()){
             if (!this.parry) {
                 System.out.println("IA alea Cartes : " + pg.getCurrentPlayerCards());
                 this.iaParryPhase();
