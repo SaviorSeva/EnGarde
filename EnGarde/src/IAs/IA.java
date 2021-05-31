@@ -28,6 +28,7 @@ public abstract class IA {
     }
 
     public void resetChoisir(){
+        iaCartes = pg.getCurrentPlayerCards();
         for (int i = 0; i < iaCartes.size(); i++) {
             choisir.set(i, false);
         }
