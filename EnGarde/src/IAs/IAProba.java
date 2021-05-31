@@ -13,13 +13,14 @@ class IAActionComparator implements Comparator<IAAction> {
 }
 
 public class IAProba extends IA{
-    private int inconnu[];
+    final int []inconnu;
     private int nbInconnu;
-    private double proba[][];
+    final double [][]proba;
     Random random;
     private PriorityQueue<IAAction> iaAction;
     private CarteEtDirection move;
-    private double seuilIntension;
+    final double seuilIntension;
+    final int dynamique = 8;
     private boolean isRetreat;
 
     public IAProba(ExecPlayground epg, Playground pg) {
@@ -33,7 +34,7 @@ public class IAProba extends IA{
         }
         nbInconnu = 0;
         proba = new double[5][6];
-        seuilIntension = 0.5; /** 攻击阈值 **/
+        seuilIntension = 0.5; /* 攻击阈值 */
     }
 
     public void setCarteInconnu(){
@@ -86,7 +87,7 @@ public class IAProba extends IA{
         int n = pg.getCurrentEnemyPlayerCards().size();
         int N = getNbInconnu();
 
-        /** i = 0 means carte 1, i = 4 means carte 5 **/
+        /* i = 0 means carte 1, i = 4 means carte 5 */
 
         for (int i = 0; i < 5; i++)
             for (int k = 0; k < 6; k++) {
@@ -119,9 +120,8 @@ public class IAProba extends IA{
     }
 
     public void iaCanAttack(){
-        boolean vue[] = new boolean[5];
+        boolean []vue = new boolean[5];
         int dis = epg.getDistance();
-        int n = 0;
         //Direct attack possible
         for (Carte iaCarte : iaCartes) {
             if (dis == iaCarte.getValue()) {
@@ -156,17 +156,15 @@ public class IAProba extends IA{
     public boolean pickMove() {
         iaCanAttack();
         if (iaAction.size() != 0) {
-            Iterator it = iaAction.iterator();
-            while(it.hasNext()){
-                IAAction i = (IAAction) it.next();
+            for (IAAction i : iaAction) {
                 System.out.println("proba : " + i.probaReussite);
-                if(i.attack.getAt()==AttackType.INDIRECT){
+                if (i.attack.getAt() == AttackType.INDIRECT) {
                     System.out.println("move : " + i.move.getC().getValue());
                 }
                 System.out.println("Type att : " + i.attack.getAt());
                 System.out.println("Att value : " + i.attack.getAttValue());
                 System.out.println("Att nb : " + i.attack.getAttnb());
-                System.out.println("");
+                System.out.println(" ");
 
             }
             IAAction pickAttack = iaAction.remove();
@@ -191,7 +189,7 @@ public class IAProba extends IA{
             }
         }
         System.out.println("Mouvement！！！");
-        /** Mouvement **/
+        /* Mouvement */
         resetAllPossible(true);
         movement(pg.getDistance(), ceds);
         choisir.set(move.getIndex(), true);
@@ -232,7 +230,7 @@ public class IAProba extends IA{
         }else{
             int val = 0;
             for(CarteEtDirection ced : ceds){
-                int dynamique = 7; //5+Math.round(5*((23-pg.getPlayerCourant().getDistToStartPoint())/23));
+                 //5+Math.round(5*((23-pg.getPlayerCourant().getDistToStartPoint())/23));
                 //目前撤退到dis为8的附近，可改进，8 可动态，在确定对方手牌时可增加判断条件，或离出发点过近时
                 if(ced.getDirection()==1) val = Math.abs(dynamique - (dis - ced.getC().getValue()));
                 else if(ced.getDirection()==2) val = Math.abs(dynamique - (dis + ced.getC().getValue()));
@@ -287,7 +285,9 @@ public class IAProba extends IA{
                 if(nbCarteI(etreAtt.getAttValue().getValue()) >= etreAtt.getAttnb()) {
                     choisirParryOrAttackCartes(etreAtt.getAttnb(), etreAtt.getAttValue().getValue());
                     System.out.println("AI Proba choose to parry indirect attack of " + pg.getLastAttack().getAttValue().getValue() + "with " + etreAtt.getAttnb() + "cards");
-                    for (int i = 0; i < choisir.size(); i++) { System.out.println("choisir : " + choisir.get(i));}
+                    for (Boolean aBoolean : choisir) {
+                        System.out.println("choisir : " + aBoolean);
+                    }
                     jouerCarte(0, choisir);
                     iaCartes = pg.getCurrentPlayerCards();
                     //retreat
