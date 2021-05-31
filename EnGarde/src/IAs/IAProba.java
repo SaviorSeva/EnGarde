@@ -103,7 +103,7 @@ public class IAProba extends IA{
 
     @Override
     public void iaStep() {
-        if(/*epg.isIaRound() || */epg.isIaProbaRound()){
+        if(epg.isIaRound() || epg.isIaProbaRound()){
             setCarteInconnu();
             setTableauProba();
             System.out.println("IA Proba Cartes : " + pg.getCurrentPlayerCards());
@@ -232,9 +232,10 @@ public class IAProba extends IA{
         }else{
             int val = 0;
             for(CarteEtDirection ced : ceds){
+                int dynamique = 7; //5+Math.round(5*((23-pg.getPlayerCourant().getDistToStartPoint())/23));
                 //目前撤退到dis为8的附近，可改进，8 可动态，在确定对方手牌时可增加判断条件，或离出发点过近时
-                if(ced.getDirection()==1) val = Math.abs(8 - (dis - ced.getC().getValue()));
-                else if(ced.getDirection()==2) val = Math.abs(8 - (dis + ced.getC().getValue()));
+                if(ced.getDirection()==1) val = Math.abs(dynamique - (dis - ced.getC().getValue()));
+                else if(ced.getDirection()==2) val = Math.abs(dynamique - (dis + ced.getC().getValue()));
                 if(min>val){
                     min = val;
                     in = ced.getIndex();
@@ -243,16 +244,17 @@ public class IAProba extends IA{
             }
             if(dir == 2 && dis + iaCartes.get(in).getValue() <=5){
                 double m = 1.0;
-                for (int i = 0; i < iaCartes.size(); i++) {
+                resetAllPossible(false);
+                for(CarteEtDirection ced : ceds){
                     //如果不得不撤退到5以内的位置，选择一个对手直接攻击我成功率最低的位置
-                    int disApres = dis + iaCartes.get(i).getValue();
+                    int disApres = dis + ced.getC().getValue();
                     dir = 2;
                     if(nbCarteI(disApres)>3){
-                        in = i;
+                        in = ced.getIndex();
                         break;
                     }
                     if(m>proba[Math.min(disApres-1, 4)][nbCarteI(disApres)+1]){
-                        in = i;
+                        in = ced.getIndex();
                         m=proba[Math.min(disApres-1, 4)][nbCarteI(disApres)+1];
                     }
                 }
