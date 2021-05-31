@@ -100,40 +100,29 @@ public class IAProba extends IA{
 
     @Override
     public void iaStep() {
-        setCarteInconnu();
-        setTableauProba();
-        for (int i = 0; i < 5; i++) {
-            for (int j = 0; j < 6; j++) {
-                System.out.println("Proba de Inconnu " + (i+1) + " au moin avec " + j + " cartes : " + proba[i][j]);
-            }
-        }
-        while (epg.isIaRound()){
-            if (!this.parry) {
-                System.out.println("IA Cartes : " + pg.getCurrentPlayerCards());
-                this.iaParryPhase();
-            }
-            else{
-                this.pickMove();
-            }
+        if(epg.isIaRound()){
+            setCarteInconnu();
+            setTableauProba();
+            System.out.println("IA Cartes : " + pg.getCurrentPlayerCards());
+            this.iaParryPhase();
+            this.pickMove();
         }
 
-        Iterator<IAAction> it = iaAction.iterator();
-        while (it.hasNext()) {
-            IAAction i = it.next();
-            System.out.println("Direction :" + i.move.getDirection());
-            System.out.println("ATT V: " + i.attack.getAttValue());
-            System.out.println("ATT nb: " + i.attack.getAttnb());
-            System.out.println("Att type" + i.attack.getAt());
-            System.out.println("Proba : " + i.probaReussite);
-        }
+//        for (int i = 0; i < 5; i++) {
+//            for (int j = 0; j < 6; j++) {
+//                System.out.println("Proba de Inconnu " + (i+1) + " au moin avec " + j + " cartes : " + proba[i][j]);
+//            }
+//        }
+//        Iterator<IAAction> it = iaAction.iterator();
+//        while (it.hasNext()) {
+//            IAAction i = it.next();
+//            System.out.println("Direction :" + i.move.getDirection());
+//            System.out.println("ATT V: " + i.attack.getAttValue());
+//            System.out.println("ATT nb: " + i.attack.getAttnb());
+//            System.out.println("Att type" + i.attack.getAt());
+//            System.out.println("Proba : " + i.probaReussite);
+//        }
 
-//        System.out.println("Used : " + pg.getUsed());
-//        System.out.println("NbInconnu : " + getNbInconnu());
-//        System.out.println("Inconnu1 : " + this.inconnu[0]);
-//        System.out.println("Inconnu2 : " + this.inconnu[1]);
-//        System.out.println("Inconnu3 : " + this.inconnu[2]);
-//        System.out.println("Inconnu4 : " + this.inconnu[3]);
-//        System.out.println("Inconnu5 : " + this.inconnu[4]);
     }
 
     public void iaCanAttack(){
@@ -150,13 +139,14 @@ public class IAProba extends IA{
         resetAllPossible(true);
         for (CarteEtDirection ced : ceds) {
             int index = ced.getIndex();
-            n = 0;
             for (int j = 0; j < iaCartes.size(); j++) {
+                dis = epg.getDistance();
                 if (vue[iaCartes.get(index).getValue()-1]) break;
                 if (ced.getDirection() == 1)
                     dis = dis - iaCartes.get(index).getValue();
                 else if (ced.getDirection() == 2)
                     dis = dis + iaCartes.get(index).getValue();
+                System.out.println("Dis : " + dis);
                 //move et attack(Indirect attack)
                 if (j != ced.getIndex() && dis > 0) {
                     if (dis == iaCartes.get(j).getValue())
@@ -165,7 +155,6 @@ public class IAProba extends IA{
             }
             vue[ced.getC().getValue()-1] = true;
         }
-        //jouerCarte(1, choisir);
     }
 
     public boolean pickMove() {
@@ -173,6 +162,7 @@ public class IAProba extends IA{
         if (iaAction.size() != 0) {
             IAAction pickAttack = iaAction.remove();
             if (pickAttack.probaReussite >= seuilIntension){
+                System.out.println("ATTACK!!!");
                 switch (pickAttack.attack.getAt()) {
                     case DIRECT:
                         choisirParryOrAttackCartes(pickAttack.attack.getAttnb(), pickAttack.attack.getAttValue().getValue());
@@ -191,7 +181,7 @@ public class IAProba extends IA{
                 return true;
             }
         }
-
+        System.out.println("Mouvement！！！");
         /** Mouvement **/
         resetAllPossible(true);
         movement(pg.getDistance(), ceds);
@@ -284,7 +274,5 @@ public class IAProba extends IA{
                 break;
         }
     }
-
-
 
 }
