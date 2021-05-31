@@ -5,7 +5,7 @@ import modele.CarteEtDirection;
 
 import java.util.ArrayList;
 
-public class IAAction implements Comparable<IAAction> {
+public class IAAction  {
     public CarteEtDirection move;
     public Attack attack;
     public double probaReussite;
@@ -16,10 +16,4 @@ public class IAAction implements Comparable<IAAction> {
 
     }
 
-
-    @Override
-    public int compareTo(IAAction iaAction) {
-        if((this.probaReussite - iaAction.probaReussite)<0) return 1;
-        else return 0;
-    }
 }

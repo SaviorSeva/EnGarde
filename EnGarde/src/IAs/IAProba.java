@@ -3,27 +3,31 @@ package IAs;
 
 import modele.*;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.PriorityQueue;
-import java.util.Random;
+import java.util.*;
+class IAActionComparator implements Comparator<IAAction> {
+    public int compare(IAAction iaAction, IAAction t1) {
+        if((iaAction.probaReussite - t1.probaReussite)>0) return -1;
+        else if((iaAction.probaReussite - t1.probaReussite)==0 && t1.attack.getAt()==AttackType.DIRECT) return 1;
+        else return 1;
+    }
+}
 
 public class IAProba extends IA{
     private int inconnu[];
     private int nbInconnu;
     private double proba[][];
     Random random;
-    private boolean parry;
     private PriorityQueue<IAAction> iaAction;
     private CarteEtDirection move;
     private double seuilIntension;
+    private boolean isRetreat;
 
     public IAProba(ExecPlayground epg, Playground pg) {
         super(epg, pg);
         random = new Random();
-        parry = false;
+        isRetreat = false;
         inconnu = new int[5];
-        iaAction = new PriorityQueue<>();
+        iaAction = new PriorityQueue<>(new IAActionComparator());
         for (int i = 0; i <5 ; i++) {
             inconnu[i] = 5;
         }
@@ -105,14 +109,14 @@ public class IAProba extends IA{
             setTableauProba();
             System.out.println("IA Cartes : " + pg.getCurrentPlayerCards());
             this.iaParryPhase();
-            this.pickMove();
+            if(!isRetreat) this.pickMove();
         }
 
-//        for (int i = 0; i < 5; i++) {
-//            for (int j = 0; j < 6; j++) {
-//                System.out.println("Proba de Inconnu " + (i+1) + " au moin avec " + j + " cartes : " + proba[i][j]);
-//            }
-//        }
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 6; j++) {
+                System.out.println("Proba de Inconnu " + (i+1) + " au moin avec " + j + " cartes : " + proba[i][j]);
+            }
+        }
 //        Iterator<IAAction> it = iaAction.iterator();
 //        while (it.hasNext()) {
 //            IAAction i = it.next();
@@ -132,7 +136,8 @@ public class IAProba extends IA{
         //Direct attack possible
         for (Carte iaCarte : iaCartes) {
             if (dis == iaCarte.getValue()) {
-                iaAction.add(new IAAction(new CarteEtDirection(), new Attack(AttackType.DIRECT, iaCarte, nbCarteI(iaCarte.getValue())), 1 - proba[dis-1][nbCarteI(dis)]));
+                iaAction.offer(new IAAction(new CarteEtDirection(), new Attack(AttackType.DIRECT, iaCarte, nbCarteI(iaCarte.getValue())), 1 - proba[dis-1][nbCarteI(dis)]));
+                break;
             }
         }
         //Indirect attack et move possible
@@ -149,20 +154,35 @@ public class IAProba extends IA{
                 System.out.println("Dis : " + dis);
                 //move et attack(Indirect attack)
                 if (j != ced.getIndex() && dis > 0) {
-                    if (dis == iaCartes.get(j).getValue())
-                        iaAction.add(new IAAction(ced, new Attack(AttackType.INDIRECT, iaCartes.get(j), nbCarteI(iaCartes.get(j).getValue())), 1 - proba[dis-1][nbCarteI(dis)]));
+                    if (dis == iaCartes.get(j).getValue()){
+                        iaAction.offer(new IAAction(ced, new Attack(AttackType.INDIRECT, iaCartes.get(j), nbCarteI(iaCartes.get(j).getValue())), 1 - proba[dis-1][nbCarteI(dis)]));
+                        vue[ced.getC().getValue()-1] = true;
+                    }
                 }
             }
-            vue[ced.getC().getValue()-1] = true;
+
         }
     }
 
     public boolean pickMove() {
         iaCanAttack();
         if (iaAction.size() != 0) {
+            Iterator it = iaAction.iterator();
+            while(it.hasNext()){
+                IAAction i = (IAAction) it.next();
+                System.out.println("proba : " + i.probaReussite);
+                if(i.attack.getAt()==AttackType.INDIRECT){
+                    System.out.println("move : " + i.move.getC().getValue());
+                }
+                System.out.println("Type att : " + i.attack.getAt());
+                System.out.println("Att value : " + i.attack.getAttValue());
+                System.out.println("Att nb : " + i.attack.getAttnb());
+                System.out.println("");
+
+            }
             IAAction pickAttack = iaAction.remove();
+            System.out.println("ProbaReussite !!! : " + pickAttack.probaReussite);
             if (pickAttack.probaReussite >= seuilIntension){
-                System.out.println("ATTACK!!!");
                 switch (pickAttack.attack.getAt()) {
                     case DIRECT:
                         choisirParryOrAttackCartes(pickAttack.attack.getAttnb(), pickAttack.attack.getAttValue().getValue());
@@ -220,13 +240,29 @@ public class IAProba extends IA{
         }else{
             int val = 0;
             for(CarteEtDirection ced : ceds){
-                //目前撤退到dis为8的附近，可改进，根据自己手牌和对方手牌来判断哪个dis不会被直接攻击到，或者哪个距离可以格挡
+                //目前撤退到dis为8的附近，可改进，8 可动态，在确定对方手牌时可增加判断条件，或离出发点过近时
                 if(ced.getDirection()==1) val = Math.abs(8 - (dis - ced.getC().getValue()));
                 else if(ced.getDirection()==2) val = Math.abs(8 - (dis + ced.getC().getValue()));
                 if(min>val){
                     min = val;
                     in = ced.getIndex();
                     dir = ced.getDirection();
+                }
+            }
+            if(dir == 2 && dis + iaCartes.get(in).getValue() <=5){
+                double m = 1.0;
+                for (int i = 0; i < iaCartes.size(); i++) {
+                    //如果不得不撤退到5以内的位置，选择一个对手直接攻击我成功率最低的位置
+                    int disApres = dis + iaCartes.get(i).getValue();
+                    dir = 2;
+                    if(nbCarteI(disApres)>3){
+                        in = i;
+                        break;
+                    }
+                    if(m>proba[disApres-1][nbCarteI(disApres)+1]){
+                        in = i;
+                        m=proba[disApres-1][nbCarteI(disApres)+1];
+                    }
                 }
             }
         }
@@ -239,7 +275,6 @@ public class IAProba extends IA{
 
     @Override
     public void iaParryPhase(){
-        parry = true;
         Attack etreAtt = pg.getLastAttack();
         int nb = 0;
         switch (etreAtt.getAt()) {
@@ -263,6 +298,7 @@ public class IAProba extends IA{
                     jouerCarte(0, choisir);
                     //retreat
                 }else if(ceds.size()>0){
+                    isRetreat = true;
                     movement(pg.getDistance(),ceds);
                     choisir.set(move.getIndex(), true);
                     direction = move.getDirection();
