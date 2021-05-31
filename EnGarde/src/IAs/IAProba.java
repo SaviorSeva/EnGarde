@@ -33,7 +33,7 @@ public class IAProba extends IA{
         }
         nbInconnu = 0;
         proba = new double[5][6];
-        seuilIntension = 0.2; /** 攻击阈值 **/
+        seuilIntension = 0.5; /** 攻击阈值 **/
     }
 
     public void setCarteInconnu(){
@@ -107,7 +107,7 @@ public class IAProba extends IA{
         if(epg.isIaRound()){
             setCarteInconnu();
             setTableauProba();
-            System.out.println("IA Cartes : " + pg.getCurrentPlayerCards());
+            System.out.println("IA Proba Cartes : " + pg.getCurrentPlayerCards());
             this.iaParryPhase();
             if(!isRetreat) this.pickMove();
         }
@@ -151,7 +151,7 @@ public class IAProba extends IA{
                     dis = dis - iaCartes.get(index).getValue();
                 else if (ced.getDirection() == 2)
                     dis = dis + iaCartes.get(index).getValue();
-                System.out.println("Dis : " + dis);
+                //System.out.println("Dis : " + dis);
                 //move et attack(Indirect attack)
                 if (j != ced.getIndex() && dis > 0) {
                     if (dis == iaCartes.get(j).getValue()){
@@ -207,10 +207,9 @@ public class IAProba extends IA{
         movement(pg.getDistance(), ceds);
         choisir.set(move.getIndex(), true);
         jouerCarte(move.getDirection(),choisir);
-        if (epg.canAttack()){
+        if (epg.cartesContains(epg.getDistance())){
             epg.cancelReceived();
         }
-
         return false;
         //选概率最高的打，如果概率都不高return false, 在iastep里执行movement + cancel
     }
@@ -218,8 +217,12 @@ public class IAProba extends IA{
     public void movement(int dis, ArrayList<CarteEtDirection> ceds){
         int min = 10, in = 0, dir = 0, max = 0;
         if(pg.getEnemyCourant().getCartes().size()==0){
-            dir = 1;
-            in = 0;
+            for(CarteEtDirection ced : ceds){
+                //可改进，对面无法移动的情况，手牌可以任意组合
+                dir = ced.getDirection();
+                in = ced.getIndex();
+                if(ced.getDirection()==1) break;
+            }
         }
         else if(dis>10) {
             for (int j = 0; j < iaCartes.size(); j++){
@@ -240,9 +243,10 @@ public class IAProba extends IA{
         }else{
             int val = 0;
             for(CarteEtDirection ced : ceds){
+                int dynamique = 7; //5+Math.round(5*((23-pg.getPlayerCourant().getDistToStartPoint())/23));
                 //目前撤退到dis为8的附近，可改进，8 可动态，在确定对方手牌时可增加判断条件，或离出发点过近时
-                if(ced.getDirection()==1) val = Math.abs(8 - (dis - ced.getC().getValue()));
-                else if(ced.getDirection()==2) val = Math.abs(8 - (dis + ced.getC().getValue()));
+                if(ced.getDirection()==1) val = Math.abs(dynamique - (dis - ced.getC().getValue()));
+                else if(ced.getDirection()==2) val = Math.abs(dynamique - (dis + ced.getC().getValue()));
                 if(min>val){
                     min = val;
                     in = ced.getIndex();
@@ -251,17 +255,18 @@ public class IAProba extends IA{
             }
             if(dir == 2 && dis + iaCartes.get(in).getValue() <=5){
                 double m = 1.0;
-                for (int i = 0; i < iaCartes.size(); i++) {
+                resetAllPossible(false);
+                for(CarteEtDirection ced : ceds){
                     //如果不得不撤退到5以内的位置，选择一个对手直接攻击我成功率最低的位置
-                    int disApres = dis + iaCartes.get(i).getValue();
+                    int disApres = dis + ced.getC().getValue();
                     dir = 2;
                     if(nbCarteI(disApres)>3){
-                        in = i;
+                        in = ced.getIndex();
                         break;
                     }
-                    if(m>proba[disApres-1][nbCarteI(disApres)+1]){
-                        in = i;
-                        m=proba[disApres-1][nbCarteI(disApres)+1];
+                    if(m>proba[Math.min(disApres-1, 4)][nbCarteI(disApres)+1]){
+                        in = ced.getIndex();
+                        m=proba[Math.min(disApres-1, 4)][nbCarteI(disApres)+1];
                     }
                 }
             }
@@ -276,33 +281,33 @@ public class IAProba extends IA{
     @Override
     public void iaParryPhase(){
         Attack etreAtt = pg.getLastAttack();
-        int nb = 0;
+        iaCartes = pg.getCurrentPlayerCards();
         switch (etreAtt.getAt()) {
             case NONE:
                 resetChoisir();
                 break;
             case DIRECT:
                 choisirParryOrAttackCartes(etreAtt.getAttnb(), etreAtt.getAttValue().getValue());
-                System.out.println("AI choose to parry direct attack of " + pg.getLastAttack().getAttValue().getValue() + "with " + etreAtt.getAttnb() + "cards");
+                System.out.println("AI Proba choose to parry direct attack of " + pg.getLastAttack().getAttValue().getValue() + "with " + etreAtt.getAttnb() + "cards");
                 jouerCarte(0, choisir);
+                iaCartes = pg.getCurrentPlayerCards();
                 break;
             case INDIRECT:
                 resetAllPossible(false);
-                //Verifier si on peut resister
-                for(int i=0; i<iaCartes.size() && nb<etreAtt.getAttnb(); i++)
-                    if(iaCartes.get(i).getValue() == etreAtt.getAttValue().getValue()) nb++;
                 //Parry indirect attack
-                if(nb == etreAtt.getAttnb()) {
-                    choisirParryOrAttackCartes(nb, etreAtt.getAttValue().getValue());
-                    System.out.println("AI choose to parry indirect attack of " + pg.getLastAttack().getAttValue().getValue() + "with " + etreAtt.getAttnb() + "cards");
+                if(nbCarteI(etreAtt.getAttValue().getValue()) >= etreAtt.getAttnb()) {
+                    choisirParryOrAttackCartes(etreAtt.getAttnb(), etreAtt.getAttValue().getValue());
+                    System.out.println("AI Proba choose to parry indirect attack of " + pg.getLastAttack().getAttValue().getValue() + "with " + etreAtt.getAttnb() + "cards");
+                    for (int i = 0; i < choisir.size(); i++) { System.out.println("choisir : " + choisir.get(i));}
                     jouerCarte(0, choisir);
+                    iaCartes = pg.getCurrentPlayerCards();
                     //retreat
                 }else if(ceds.size()>0){
                     isRetreat = true;
                     movement(pg.getDistance(),ceds);
                     choisir.set(move.getIndex(), true);
                     direction = move.getDirection();
-                    System.out.println("IA retreat " + move.getC());
+                    System.out.println("IA Proba retreat " + move.getC());
                     jouerCarte(direction, choisir);
                 } else System.err.println("Probleme");
                 break;
@@ -310,5 +315,4 @@ public class IAProba extends IA{
                 break;
         }
     }
-
 }
