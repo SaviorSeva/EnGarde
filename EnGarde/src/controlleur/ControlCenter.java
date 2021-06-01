@@ -21,6 +21,7 @@ import modele.Playground;
 import patterns.Observateur;
 import vue.InterfaceInitialise;
 import vue.InterfaceSwing;
+import vue.LoadInterface;
 import vue.SaveInterface;
 
 public class ControlCenter implements Observateur{
@@ -471,6 +472,11 @@ public class ControlCenter implements Observateur{
 		SaveInterface si = new SaveInterface(this);
 		si.run();
 	}
+	
+	public void openLoadGameInterface() {
+		LoadInterface li = new LoadInterface(this);
+		li.run();
+	}
 
 	public void generateSaveGame(String text) {
 		String s = this.epg.generateSaveString();
@@ -495,11 +501,14 @@ public class ControlCenter implements Observateur{
 				out.print(s);
 				out.close();
 			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 	    }
 			
 		
+	}
+
+	public void loadGame(String string) {
+		System.out.println(string);
 	}
 }

@@ -204,6 +204,11 @@ public class InterfaceSwing implements Runnable{
 				cc.openSaveGameInterface();
 			}
 		});
+		this.load.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				cc.openLoadGameInterface();
+			}
+		});
 		
 		// Des listeners pour les interfaces
 		gi.addMouseListener(asg);
