@@ -24,4 +24,17 @@ public enum AttackType {
 	public boolean isIndirect() {
 		return this.type == 1;
 	}
+	
+	public static AttackType generatedAttackByValue(int val) {
+		switch(val) {
+		case 0:
+			return NONE;
+		case 1:
+			return DIRECT;
+		case 2:
+			return INDIRECT;
+		default:
+			return null;
+		}
+	}
 }

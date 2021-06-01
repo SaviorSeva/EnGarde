@@ -6,8 +6,8 @@ import java.awt.Component;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Image;
-import java.awt.Insets;
-import java.awt.image.BufferedImage;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -16,18 +16,13 @@ import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JTextField;
-import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
-import controlleur.AdapteurAnnulerActionCC;
-import controlleur.AdapteurAnnulerRoundCC;
-import controlleur.AdapteurCancelCC;
-import controlleur.AdapteurConfirmCC;
-import controlleur.AdapteurPleinEcranCC;
 import controlleur.AdapteurSourisCarte;
 import controlleur.AdapteurSourisGrille;
 import controlleur.AdapteurTimerAttente;
@@ -44,7 +39,7 @@ public class InterfaceSwing implements Runnable{
 	public JFrame frame;
 	boolean maximized;
 	public ControlCenter cc;
-	public JToggleButton confirmer, annulerRound, cancel, annulerAction, pleinEcran, save, load, restart, help;
+	public JButton confirmer, annulerRound, cancel, annulerAction, pleinEcran, save, load, restart, help;
 	public Image pleinEcranImage, saveImage, loadImage, restartImage, helpImage;
 	public JTextField infoArea;
 	public Timer chorno;
@@ -108,32 +103,32 @@ public class InterfaceSwing implements Runnable{
 		// Info Label
 		
 		// Bouton confirmer
-		this.confirmer = new JToggleButton("Confirmer");
+		this.confirmer = new JButton("Confirmer");
 		confirmer.setAlignmentX(Component.LEFT_ALIGNMENT);
 		confirmer.setFocusable(false);
 		boiteInfo.add(confirmer);
 		
 		// Bouton cancel
-		this.cancel = new JToggleButton("Cancel");
+		this.cancel = new JButton("Cancel");
 		cancel.setAlignmentX(Component.LEFT_ALIGNMENT);
 		cancel.setFocusable(false);
 		boiteInfo.add(cancel);
 		
 		// Bouton annuler tour
-		this.annulerRound = new JToggleButton("Annuler tour");
+		this.annulerRound = new JButton("Annuler tour");
 		annulerRound.setAlignmentX(Component.LEFT_ALIGNMENT);
 		annulerRound.setFocusable(false);
 		boiteInfo.add(annulerRound);
 		
 		// Bouton annuler action
-		this.annulerAction = new JToggleButton("Annuler action");
+		this.annulerAction = new JButton("Annuler action");
 		annulerAction.setAlignmentX(Component.LEFT_ALIGNMENT);
 		annulerAction.setFocusable(false);
 		boiteInfo.add(annulerAction);
 		
 		// Bouton pleinEcran
 		ImageIcon pleinEcranIcon = new ImageIcon(pleinEcranImage);
-		this.pleinEcran = new JToggleButton(pleinEcranIcon);
+		this.pleinEcran = new JButton(pleinEcranIcon);
 		pleinEcran.setAlignmentX(Component.LEFT_ALIGNMENT);
 		pleinEcran.setFocusable(false);
 		pleinEcran.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
@@ -141,7 +136,7 @@ public class InterfaceSwing implements Runnable{
 		
 		// Bouton load
 		ImageIcon loadIcon = new ImageIcon(loadImage);
-		this.load = new JToggleButton(loadIcon);
+		this.load = new JButton(loadIcon);
 		load.setAlignmentX(Component.LEFT_ALIGNMENT);
 		load.setFocusable(false);
 		load.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
@@ -149,7 +144,7 @@ public class InterfaceSwing implements Runnable{
 		
 		// Bouton save
 		ImageIcon saveIcon = new ImageIcon(saveImage);
-		this.save = new JToggleButton(saveIcon);
+		this.save = new JButton(saveIcon);
 		save.setAlignmentX(Component.LEFT_ALIGNMENT);
 		save.setFocusable(false);
 		save.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
@@ -157,7 +152,7 @@ public class InterfaceSwing implements Runnable{
 		
 		// Bouton restart
 		ImageIcon restartIcon = new ImageIcon(restartImage);
-		this.restart = new JToggleButton(restartIcon);
+		this.restart = new JButton(restartIcon);
 		restart.setAlignmentX(Component.LEFT_ALIGNMENT);
 		restart.setFocusable(false);
 		restart.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
@@ -165,7 +160,7 @@ public class InterfaceSwing implements Runnable{
 		
 		// Bouton help
 		ImageIcon helpIcon = new ImageIcon(helpImage);
-		this.help = new JToggleButton(helpIcon);
+		this.help = new JButton(helpIcon);
 		help.setAlignmentX(Component.LEFT_ALIGNMENT);
 		help.setFocusable(false);
 		help.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
@@ -177,11 +172,38 @@ public class InterfaceSwing implements Runnable{
 		boiteInfo.add(infoArea);
 		
 		// Des actionlisteners pour les boutons
-		this.confirmer.addActionListener(new AdapteurConfirmCC(this.cc));
-		this.cancel.addActionListener(new AdapteurCancelCC(this.cc));
-		this.annulerRound.addActionListener(new AdapteurAnnulerRoundCC(this.cc));
-		this.annulerAction.addActionListener(new AdapteurAnnulerActionCC(this.cc));
-		this.pleinEcran.addActionListener(new AdapteurPleinEcranCC(this.cc));
+		this.confirmer.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				cc.confirmReceived();
+				cc.initialiseZoom();
+			}
+		});
+		this.cancel.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				cc.clicCancel();
+			}
+		});
+		this.annulerRound.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				while(cc.epg.currentAction.getNBActionValide() != 0) cc.annulerAction();
+				cc.annulerRound();
+			}
+		});
+		this.annulerAction.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				cc.annulerAction();
+			}
+		});
+		this.pleinEcran.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				toggleFullscreen();
+			}
+		});
+		this.save.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				cc.openSaveGameInterface();
+			}
+		});
 		
 		// Des listeners pour les interfaces
 		gi.addMouseListener(asg);
@@ -194,8 +216,7 @@ public class InterfaceSwing implements Runnable{
 		boiteTitre.add(save);
 		boiteTitre.add(restart);
 		boiteTitre.add(help);
-		
-		
+
 		boiteContenu.add(boiteTitre);
 		boiteContenu.add(gi);
 		gi.setAlignmentX(JComponent.CENTER_ALIGNMENT);

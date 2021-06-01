@@ -1,0 +1,9 @@
+Blanc:name=1P,place=0,startPlace=0,point=0,cartes=12345;
+Noir:name=2P,place=22,startPlace=22,point=0,cartes=12345;
+Reste:123451234512345;
+Used:;
+LastAttack:0,0,0;
+Tour:1;WaitStatus:3;RoundCount:1;StartType:0;
+CurrentAction:N0,;
+Historique:;
+IAType:0;

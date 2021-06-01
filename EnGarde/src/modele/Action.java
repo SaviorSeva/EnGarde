@@ -103,6 +103,26 @@ public class Action {
 		actions[actions.length - 1] = "";
 		this.actionString = String.join(",", actions);
 	}
-	
 
+	public int getNBActionValide() {
+		if(this.actionString == null || this.actionString.equals("")) return 0;
+		else {
+			String act[] = this.actionString.split(",");
+			int res = 0;
+			for(int i=0; i<act.length; i++) {
+				switch(i) {
+				case 0:
+					if(act[i].charAt(0) == 'P' || act[i].charAt(0) == 'R') res++;
+					break;
+				case 1:
+					if(!act[i].equals("MN0")) res++;
+					break;
+				case 2:
+					if(act[i].charAt(0) != 'N') res++;
+					break;
+				}
+			}
+			return res;
+		}
+	}
 }

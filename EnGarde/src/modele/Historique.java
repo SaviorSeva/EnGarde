@@ -26,4 +26,13 @@ public class Historique {
 	public String toString() {
 		return listAction.toString();
 	}
+	
+	public String generateHistString() {
+		StringBuilder sb = new StringBuilder();
+		for(int i=0; i<this.listAction.size(); i++) {
+			sb.append(this.listAction.get(i).getActionString() + " ");
+		}
+		return sb.toString();
+	}
+	
 }

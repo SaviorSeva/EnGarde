@@ -22,20 +22,21 @@ public class Starter {
 		*/
 		//InterfaceInitialise.start();
 		String iaActive = Configuration.instance().lis("IA");
-		Playground pg = new Playground();
+		Playground pg;
 		ExecPlayground epg;
 		switch (iaActive){
 		case "IAAleatoire" :
 			System.out.println("RandomIA activated !");
-			
+			pg = new Playground(1);
 			epg = new ExecPlayground(pg, 1);
 			
 			break;	
 		
 		default :
-				epg = new ExecPlayground(pg, 0);
-				
-				break;
+			pg = new Playground(0);
+			epg = new ExecPlayground(pg, 0);
+			
+			break;
 			
 			
 		}

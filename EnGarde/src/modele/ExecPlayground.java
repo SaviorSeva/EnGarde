@@ -261,7 +261,7 @@ public class ExecPlayground extends Observable{
 		// variable unableToMove renvoie False, sinon elle contient True
 		for(int i=0; i<cs.size() && unableToMove; i++) {
 			int val = cs.get(i).getValue();
-			if(this.pg.getDistance() >= val || this.pg.getPlayerCourant().getDistToStartPoint() > val) unableToMove = false;
+			if(this.pg.getDistance() >= val || this.pg.getPlayerCourant().getDistToStartPlace() > val) unableToMove = false;
 		}
 		// si on ne peut pas déplacer ou attaquer, on perde le Round courant puis recommencer un nouvelle Round
 		if(unableToMove) {
@@ -279,8 +279,8 @@ public class ExecPlayground extends Observable{
 		
 		// 1. si les deux joueurs n'ont plus de carte, passez au règlement
 		if(this.pg.getBlancCartes().size() == 0 && this.pg.getNoirCartes().size() == 0) {
-			int distBlanc = this.pg.getBlanc().getDistToStartPoint();
-			int distNoir = this.pg.getNoir().getDistToStartPoint();
+			int distBlanc = this.pg.getBlanc().getDistToStartPlace();
+			int distNoir = this.pg.getNoir().getDistToStartPlace();
 			// la joueur dont la distance entre joueur et départ est la plus grand obtient un point
 			// puis recommencer le prochain Round
 			if(distBlanc > distNoir) this.pg.getBlanc().incrementPoint();
@@ -331,7 +331,7 @@ public class ExecPlayground extends Observable{
 				ArrayList<Carte> cs = this.getCurrentPlayerCards();
 				boolean unableToRetreat = true;
 				for(int i=0; i<cs.size() && unableToRetreat; i++) {
-					if(this.pg.getPlayerCourant().getDistToStartPoint() >= cs.get(i).getValue()) unableToRetreat = false;
+					if(this.pg.getPlayerCourant().getDistToStartPlace() >= cs.get(i).getValue()) unableToRetreat = false;
 				}
 				// si on ne peut pas retraite, on perd directement
 				if(unableToRetreat) {
@@ -410,7 +410,7 @@ public class ExecPlayground extends Observable{
 		case 2:
 			c = this.getSelectedCard();
 			// si on ne peut pas retraiter avec cette carte, on affiche des infos pour rechoisir
-			if(this.pg.getPlayerCourant().getDistToStartPoint() < c.getValue()) System.out.println("You cannot retreat due to the size of the playground (case 2).");
+			if(this.pg.getPlayerCourant().getDistToStartPlace() < c.getValue()) System.out.println("You cannot retreat due to the size of the playground (case 2).");
 			// sinon on peut jouer avec action retraiter
 			else{
 				this.jouerCarte();
@@ -436,7 +436,7 @@ public class ExecPlayground extends Observable{
 			else if(this.pg.getDirectionDeplace() == 2) {
 				// 3.2 si la direction de movement est "retrait"
 				// si la distance depuis point départ est inférieur à la valeur de carte, on ne peut pas retraiter puis afficher l'info
-				if(this.pg.getPlayerCourant().getDistToStartPoint() < c.getValue()) System.out.println("You cannot retreat due to the size of the playground (case 3).");
+				if(this.pg.getPlayerCourant().getDistToStartPlace() < c.getValue()) System.out.println("You cannot retreat due to the size of the playground (case 3).");
 				// sinon on peut déplacer avec cette carte
 				else this.phaseDeplacer(c);
 			}else 
@@ -484,7 +484,7 @@ public class ExecPlayground extends Observable{
 			}else if(this.pg.getDirectionDeplace() == 2){
 				// Retreat
 				c = this.getSelectedCard();
-				if(this.pg.getPlayerCourant().getDistToStartPoint() < c.getValue()) System.out.println("You cannot retreat due to the size of the playground.");
+				if(this.pg.getPlayerCourant().getDistToStartPlace() < c.getValue()) System.out.println("You cannot retreat due to the size of the playground.");
 				else {
 					this.jouerCarte();
 					this.currentAction.appendRetreatAction(c);
@@ -572,5 +572,14 @@ public class ExecPlayground extends Observable{
 		int dist = this.pg.getDistance();
 		if(this.cartesContains(dist)) return true;
 		return false;
+	}
+
+	public String generateSaveString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(this.pg.generateSaveString());
+		sb.append("CurrentAction:" + this.currentAction.actionString + ";\n");
+		sb.append("Historique:" + this.hist.generateHistString() + ";\n");
+		sb.append("IAType:" + this.IAType + ";\n");
+		return sb.toString();
 	}
 }

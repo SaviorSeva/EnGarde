@@ -1,6 +1,10 @@
 package controlleur;
 
 import java.awt.Point;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 import IAs.IA;
@@ -15,14 +19,16 @@ import modele.InterfaceElementType;
 import modele.LockedBoolean;
 import modele.Playground;
 import patterns.Observateur;
+import vue.InterfaceInitialise;
 import vue.InterfaceSwing;
+import vue.SaveInterface;
 
 public class ControlCenter implements Observateur{
-	Playground pg;
-	ExecPlayground epg;
-	InterfaceSwing interSwing;
-	ArrayList<Point> elementPos;
-	IA ia;
+	public Playground pg;
+	public ExecPlayground epg;
+	public InterfaceSwing interSwing;
+	public ArrayList<Point> elementPos;
+	public IA ia;
 	
 	public ControlCenter(ExecPlayground epg) {
 		this.epg = epg;
@@ -342,7 +348,7 @@ public class ControlCenter implements Observateur{
 				this.poolToEnemyPlayerCard(moveVal, 1);
 			default:
 				// Shouldn't be executed
-				System.err.println("Error resetMove() in ControlCenter.java at Line 311");
+				System.err.println("Error resetMove() in ControlCenter.java at Line 345");
 				break;
 			}
 		}
@@ -355,7 +361,12 @@ public class ControlCenter implements Observateur{
 		case 'R':
 			int parryVal = Character.getNumericValue(s.charAt(1));
 			int parryNb = s.length() - 1;
-			this.poolToCurrentPlayerCard(parryVal, parryNb);
+			System.out.println("parryNb = " + parryNb);
+			this.poolToEnemyPlayerCard(parryVal, parryNb);
+			if(s.charAt(0) == 'R') {
+				if(pg.getTourCourant() == 1) this.pg.getNoir().setPlace(this.pg.getNoir().getPlace() - parryVal);
+				else this.pg.getBlanc().setPlace(this.pg.getBlanc().getPlace() + parryVal);
+			}
 			break;
 		default:
 			break;
@@ -413,7 +424,9 @@ public class ControlCenter implements Observateur{
 			this.pg.setWaitStatus(3);
 			break;
 		case 1:
-			if(actions[0] == null || actions[0].equals("N0")) System.out.println("Reached round start.");
+			if(actions[0].equals("N0") || actions[0].equals("")) {
+				System.out.println("Reached round start.");
+			}
 			else if(actions[0].charAt(0) == 'P') {
 				int parryVal = Character.getNumericValue(actions[0].charAt(1));
 				int parryNB = actions[0].length() - 1;
@@ -421,6 +434,9 @@ public class ControlCenter implements Observateur{
 				this.epg.currentAction.deleteAction();
 				this.epg.roundStart(this.pg.getLastAttack());
 			}
+			break;
+		case 0:
+			System.out.println("Reached round start.");
 			break;
 		default:
 			// Shouldn't be executed
@@ -449,5 +465,41 @@ public class ControlCenter implements Observateur{
 			// Remove the card from the pool of used cards
 			this.pg.getUsed().remove(this.pg.getUsed().size() - 1);
 		}
+	}
+	
+	public void openSaveGameInterface() {
+		SaveInterface si = new SaveInterface(this);
+		si.run();
+	}
+
+	public void generateSaveGame(String text) {
+		String s = this.epg.generateSaveString();
+		boolean fileExist = false;
+		
+	    try {
+	    	File f = new File("./res/savefile/" + text);
+	    	if (f.createNewFile()) {
+	    		System.out.println("File created: " + f.getName());
+	    	} else {
+	    		System.out.println("File already exists.");
+	    		fileExist = true;
+	    	}
+	    } catch (IOException e) {
+	    	System.out.println("An error occurred.");
+	    	e.printStackTrace();
+	    }
+	    
+	    if(!fileExist) {
+	    	try {
+				PrintWriter out = new PrintWriter("./res/savefile/" + text);
+				out.print(s);
+				out.close();
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	    }
+			
+		
 	}
 }

@@ -28,12 +28,12 @@ public class Playground extends Observable{
      * startType == 1 human play as white
      * startType == 2 human play as black
      */
- 
+    
     private int startType;
     
-    public Playground() {
-    	this.blanc = new Player(0);
-    	this.noir = new Player(22);
+    public Playground(int startType) {
+    	this.blanc = new Player(0, "1P");
+    	this.noir = new Player(22, "2P");
     	
     	this.reste = new ArrayList<Carte>();
     	this.used = new ArrayList<Carte>();
@@ -43,7 +43,7 @@ public class Playground extends Observable{
     	
     	this.directionDeplace = 0;
     	this.waitStatus = 0;
-    	this.startType = 2;
+    	this.startType = startType;
     	this.roundCount = 0;
     }
     
@@ -204,6 +204,42 @@ public class Playground extends Observable{
 
 	public void setStartType(int startType) {
 		this.startType = startType;
+	}
+
+	public String generateSaveString() {
+		StringBuilder sb = new StringBuilder();
+		// Joueur Blanc
+		sb.append(this.blanc.generatePlayerString("Blanc"));
+		
+		// Joueur Noir
+		sb.append(this.noir.generatePlayerString("Noir"));
+		
+		// Pile Reste
+		sb.append("Reste:");
+		for(int i=0; i<this.reste.size(); i++) sb.append(this.reste.get(i).getValue());
+		sb.append(";\n");
+		
+		// Pile used
+		sb.append("Used:");
+		for(int i=0; i<this.used.size(); i++) sb.append(this.used.get(i).getValue());
+		sb.append(";\n");
+		
+		// Dernier Attaque
+		sb.append("LastAttack:" + this.lastAttack.generateAttackString() + ";\n");
+		
+		// Tour Courant
+		sb.append("Tour:" + this.tourCourant + ";");
+		
+		// Wait Status
+		sb.append("WaitStatus:" + this.waitStatus + ";");
+		
+		// Round nb
+		sb.append("RoundCount:" + this.roundCount + ";");
+		
+		// Start Type
+		sb.append("StartType:" + this.startType + ";\n");
+		
+		return sb.toString();
 	}
     
 }

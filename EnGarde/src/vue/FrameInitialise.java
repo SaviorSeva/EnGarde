@@ -9,12 +9,14 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.BoxLayout;
 import java.awt.GridLayout;
 import javax.swing.JRadioButton;
+import javax.swing.Box;
+import javax.swing.JComboBox;
+import javax.swing.JButton;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import javax.swing.JLabel;
 
 public class FrameInitialise extends JFrame {
-	/**
-	 * @wbp.nonvisual location=-33,57
-	 */
-	private final JRadioButton radioButton = new JRadioButton("New radio button");
 
 	/**
 	 * Launch the application.
@@ -40,6 +42,30 @@ public class FrameInitialise extends JFrame {
 		setBounds(100, 100, 800, 450);
 		getContentPane().setLayout(new GridLayout(1, 0, 0, 0));
 		getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.X_AXIS));
+		
+		Box verticalBox = Box.createVerticalBox();
+		getContentPane().add(verticalBox);
+		
+		
+		
+		JLabel lblNewLabel = new JLabel("Page charger");
+		verticalBox.add(lblNewLabel);
+		
+		JComboBox comboBox = new JComboBox();
+		verticalBox.add(comboBox);
+		
+		Box horizontalBox = Box.createHorizontalBox();
+		verticalBox.add(horizontalBox);
+		
+		JButton btnNewButton = new JButton("Charger");
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
+		horizontalBox.add(btnNewButton);
+		
+		JButton btnNewButton_1 = new JButton("Quitter");
+		horizontalBox.add(btnNewButton_1);
 	}
 
 }
