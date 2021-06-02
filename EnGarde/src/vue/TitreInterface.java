@@ -22,7 +22,7 @@ public class TitreInterface extends JComponent{
 	
 	public TitreInterface() {
 		try {
-			imgTitle = ImageIO.read(new File("./res/images/title.png"));
+			imgTitle = ImageIO.read(new File("./EnGarde/res/images/title.png"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -35,7 +35,6 @@ public class TitreInterface extends JComponent{
 	
 	@Override
 	public void paintComponent(Graphics g) {
-		
 		this.width = getSize().width;
 		int height = getSize().height;
 	

@@ -25,20 +25,29 @@ public class Starter {
 		Playground pg;
 		ExecPlayground epg;
 		switch (iaActive){
-		case "IAAleatoire" :
-			System.out.println("RandomIA activated !");
-			pg = new Playground(1);
-			epg = new ExecPlayground(pg, 1);
-			
-			break;	
-		
-		default :
-			pg = new Playground(0);
-			epg = new ExecPlayground(pg, 0);
-			
-			break;
-			
-			
+			case "IAAleatoire" :
+				System.out.println("RandomIA activated !");
+				pg = new Playground(0);
+				epg = new ExecPlayground(pg, 1);
+
+				break;
+			case "IAProba" :
+				System.out.println("ProbaIA activated !");
+				pg = new Playground(0);
+				epg = new ExecPlayground(pg, 2);
+
+				break;
+			case "IAAleatoireVsIAProba" :
+				System.out.println("IAale Vs IAprob activated !");
+				pg = new Playground(0);
+				epg = new ExecPlayground(pg, 3);
+
+				break;
+			default :
+				pg = new Playground(0);
+				epg = new ExecPlayground(pg, 0);
+
+				break;
 		}
 
 		epg.shuffleReste();

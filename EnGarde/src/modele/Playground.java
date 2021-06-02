@@ -162,6 +162,11 @@ public class Playground extends Observable{
 		if(this.getTourCourant() == 1) return this.getBlancCartes();
 		else return this.getNoirCartes();
 	}
+
+	public ArrayList<Carte> getCurrentEnemyPlayerCards(){
+		if(this.getTourCourant() == 2) return this.getBlancCartes();
+		else return this.getNoirCartes();
+	}
     
     public Carte getSelectedCard() {
 		Carte c = null;

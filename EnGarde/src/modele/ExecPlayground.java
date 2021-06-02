@@ -30,6 +30,16 @@ public class ExecPlayground extends Observable{
 		else return false;
 	}
 
+	public boolean isIaAleatoireRound() {
+		if(IAType == 3 && pg.getTourCourant()==1) return true;
+		else return false;
+	}
+
+	public boolean isIaProbaRound() {
+		if(IAType == 3 && pg.getTourCourant()==2) return true;
+		else return false;
+	}
+
 	public Playground getPg() {
 		return this.pg;
 	}
@@ -39,7 +49,7 @@ public class ExecPlayground extends Observable{
 		return pg.getDistance();
 	}
 	
-	
+
 	public int distribuerCarte(int player) {
 		// si ni blanc ni blanc joueur, erreur
     	if(player != 1 && player != 2) return -1;
@@ -78,7 +88,7 @@ public class ExecPlayground extends Observable{
 			this.distribuerCarte(1);
 			this.distribuerCarte(2);
 		}
-    	
+
     	this.pg.incrementRoundCount();
     	if(this.pg.getRoundCount() % 2 == 1) this.pg.setTourCourant(1);
     	else this.pg.setTourCourant(2);
@@ -147,7 +157,7 @@ public class ExecPlayground extends Observable{
 		// sinon celle de joueur noir
 		if(this.pg.getTourCourant() == 1) cartes = this.pg.getBlancCartes();
 		else cartes = this.pg.getNoirCartes();
-		
+
 		int nb = 0;
 		switch(dernierAttaque.getAt()) {
 		// si pas d'action attaque retourne 1
@@ -223,12 +233,12 @@ public class ExecPlayground extends Observable{
 				// si aucun direction est selectionne
 				System.out.println("You must choose a Direction! ");
 			}
-			
+
 		}else {
 			// s'il chosit plus d'un carte
 			System.out.println("You cannot move with more than 1 card ! ");
 		}
-			
+
 	}
 	
 	// obtenir les cartes de joueur courant
@@ -256,8 +266,8 @@ public class ExecPlayground extends Observable{
 	public void enterE3() {
 		ArrayList<Carte> cs = this.getCurrentPlayerCards();
 		boolean unableToMove = true;
-		
-		// on cherche s'il exite de carte pour qu'on puisse déplacer, si oui, 
+
+		// on cherche s'il exite de carte pour qu'on puisse déplacer, si oui,
 		// variable unableToMove renvoie False, sinon elle contient True
 		for(int i=0; i<cs.size() && unableToMove; i++) {
 			int val = cs.get(i).getValue();
@@ -269,14 +279,24 @@ public class ExecPlayground extends Observable{
 			this.pg.getEnemyCourant().incrementPoint();
 			this.restartNewRound();
 		}else {
-			// si oui on rentre dans l'etat 3, c'est à dire on attend le joueur choisi un / des carte(s) puis confirmer 
+			// si oui on rentre dans l'etat 3, c'est à dire on attend le joueur choisi un / des carte(s) puis confirmer
 			this.pg.setWaitStatus(3);
 		}
 	}
 	
 	public void roundStart(Attack att) {
 		pg.setLastAttack(att);
-		
+		if(pg.getPlayerCourant().getPoint()+pg.getEnemyCourant().getPoint()==20) {
+			if(pg.getPlayerCourant().getPoint()>pg.getEnemyCourant().getPoint()){
+				System.out.println("Winner est : " + pg.getTourCourant() + " Point: " + pg.getPlayerCourant().getPoint());
+				System.out.println("Loser est : " + pg.getEnemyCourant().startPoint +" Point: " + pg.getEnemyCourant().getPoint());
+			}else{
+				System.out.println("Winner est : " + pg.getEnemyCourant().startPoint + "  Point: " + pg.getEnemyCourant().getPoint());
+				System.out.println("Loser : " + "  " + pg.getTourCourant()+ "  Point: " + pg.getPlayerCourant().getPoint());
+			}
+			System.exit(0);
+		}
+
 		// 1. si les deux joueurs n'ont plus de carte, passez au règlement
 		if(this.pg.getBlancCartes().size() == 0 && this.pg.getNoirCartes().size() == 0) {
 			int distBlanc = this.pg.getBlanc().getDistToStartPlace();
@@ -338,7 +358,7 @@ public class ExecPlayground extends Observable{
 					System.out.println("You cannnot retreat. You lose !");
 					this.pg.getEnemyCourant().incrementPoint();
 					this.restartNewRound();
-				//sinon on rentre dans l'état 2: choisir la carte pour défendre	
+				//sinon on rentre dans l'état 2: choisir la carte pour défendre
 				}else this.pg.setWaitStatus(2);
 				break;
 			case 4:
@@ -353,7 +373,9 @@ public class ExecPlayground extends Observable{
 				break;
 	    	}
 		}
-		if(this.IAType != 0 && this.isIaRound()) {
+
+		if(this.IAType==3) this.metAJour();
+		else if (this.IAType != 0 && this.isIaRound()) {
 			this.metAJour();
 		}
 	}
@@ -392,14 +414,14 @@ public class ExecPlayground extends Observable{
 			nbSelected = this.getNBSelectedCard();
 			// si la valeur de carte de dernier attaque égale à carte choisi, et le nombre de cartes choisi égale à cel de dernier attaque
 			// on peut jouer avec cette carte
-			if(c == null) System.out.println("You must pick a card to parry !"); 
+			if(c == null) System.out.println("You must pick a card to parry !");
 			else if(c.getValue() == this.pg.getLastAttack().getAttValue().getValue() && nbSelected == this.pg.getLastAttack().getAttnb()) {
 				this.jouerCarte();
 				this.currentAction.appendParryAction(c, nbSelected);
 				enterE3();
 			}else {
-				//sinon on ne peut pas défendre avec cette carte choisi	
-				System.out.println(	"You cannot parry the direct attack of (" + 
+				//sinon on ne peut pas défendre avec cette carte choisi
+				System.out.println(	"You cannot parry the direct attack of (" +
 									this.pg.getLastAttack().getAttValue().getValue() + 
 									", " + 
 									this.pg.getLastAttack().getAttnb() + 
@@ -423,10 +445,10 @@ public class ExecPlayground extends Observable{
 			// 1. si on n'a pas d'action, rien à faire
 			if(this.currentAction.getActionString().equals("")) this.currentAction.appendNoParryAction();
 			c = this.getSelectedCard();
-			
-			// 2. si on n'a pas encore choisi la carte, afficher l'info 
+
+			// 2. si on n'a pas encore choisi la carte, afficher l'info
 			if(c == null) System.out.println("You must pick a card!");
-			
+
 			// 3. si on a bien choisi la carte, on vérifie
 			else if(c.getValue() > this.pg.getDistance() && this.pg.getDirectionDeplace() == 1)
 				// 3.1 si la valeur de carte est supérieur à distance entre joueurs et avec la direction "avancer"
@@ -440,7 +462,7 @@ public class ExecPlayground extends Observable{
 				// sinon on peut déplacer avec cette carte
 				else this.phaseDeplacer(c);
 			}else 
-				// 3.3 on peut soit retraiter soit avancer avec carte inférieur à 
+				// 3.3 on peut soit retraiter soit avancer avec carte inférieur à
 				// la distance depuis point départ ou la distance entre deux joueurs
 				this.phaseDeplacer(c);
 			break;
@@ -448,7 +470,7 @@ public class ExecPlayground extends Observable{
 			// Indirect Attack
 			Carte indirectCarte = this.getSelectedCard();
 			nbSelected = this.getNBSelectedCard();
-			// si la carte choisi égale à la distance entre deux joueurs, 
+			// si la carte choisi égale à la distance entre deux joueurs,
 			// on joue avec cette carte et l'ajoute dans liste d'action enfin finaliser round courant
 			if(indirectCarte.getValue() == this.pg.getDistance()) {
 				this.jouerCarte();
@@ -474,10 +496,10 @@ public class ExecPlayground extends Observable{
 					enterE3();
 				}else {
 					// si l'un des deux n'est pas satisfait, on affiche l'info de "ne peut pas défendre attaque indirect avec carte choisi"
-					System.out.println(	"You cannot parry the indirect attack of (" + 
-										this.pg.getLastAttack().getAttValue().getValue() + 
-										", " + 
-										this.pg.getLastAttack().getAttnb() + 
+					System.out.println(	"You cannot parry the indirect attack of (" +
+										this.pg.getLastAttack().getAttValue().getValue() +
+										", " +
+										this.pg.getLastAttack().getAttnb() +
 										") with the selection of (" +
 										c.getValue() + ", " + nbSelected + ").");
 				}
@@ -548,7 +570,7 @@ public class ExecPlayground extends Observable{
 		return c;
 	}
 	
-	// compter nombre de carte choisi 
+	// compter nombre de carte choisi
 	public int getNBSelectedCard() {
 		int res = 0;
 		for(int i=0; i<this.pg.getSelected().size(); i++) {

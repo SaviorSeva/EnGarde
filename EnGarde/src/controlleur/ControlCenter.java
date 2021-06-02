@@ -9,6 +9,7 @@ import java.util.ArrayList;
 
 import IAs.IA;
 import IAs.IAAleatoire;
+import IAs.IAProba;
 import modele.Action;
 import modele.Attack;
 import modele.AttackType;
@@ -25,11 +26,13 @@ import vue.LoadInterface;
 import vue.SaveInterface;
 
 public class ControlCenter implements Observateur{
-	public Playground pg;
-	public ExecPlayground epg;
-	public InterfaceSwing interSwing;
-	public ArrayList<Point> elementPos;
-	public IA ia;
+	Playground pg;
+	ExecPlayground epg;
+	InterfaceSwing interSwing;
+	ArrayList<Point> elementPos;
+	IA ia;
+	IA iaAlea;
+	IA iaProba;
 	
 	public ControlCenter(ExecPlayground epg) {
 		this.epg = epg;
@@ -42,6 +45,9 @@ public class ControlCenter implements Observateur{
 		case 1:
 			this.ia = new IAAleatoire(this.epg, this.pg);
 			break;
+		case 2:
+			this.ia = new IAProba(this.epg, this.pg);
+			break;
 		}
 	}
 	
@@ -51,16 +57,35 @@ public class ControlCenter implements Observateur{
 	
 	// Faire un step d'IA
 	public void IAStep() {
-		if (epg.isIaRound()) {
-			ia.iaParryPhase();
-			
-			ia.pickMove();
-			pg.setDirectionDeplace(ia.getDirection());
-			pg.setSelected(ia.getIaCartes());
-			this.epg.confirmReceived();
-			ia.resetChoisir();
-		}else ia = new IAAleatoire(epg,pg);
-			//iaAleatoire.setParry(false);
+		switch(this.epg.getIAType()) {
+			case 0:
+				this.ia = null;
+				break;
+			case 1:
+				this.ia = new IAAleatoire(this.epg, this.pg);
+				break;
+			case 2:
+				this.ia = new IAProba(this.epg, this.pg);
+				break;
+			case 3:
+				this.iaAlea = new IAAleatoire(this.epg, this.pg);
+				this.iaProba = new IAProba(this.epg, this.pg);
+				break;
+		}
+		if(this.epg.getIAType()==3) {
+			if(epg.isIaAleatoireRound()){
+				System.out.println("iaAlea");
+				System.out.println("");
+				iaAlea.iaStep();
+				System.out.println("iaAlea fin");
+			}else if(epg.isIaProbaRound()){
+				System.out.println("iaProba");
+				System.out.println("");
+				iaProba.iaStep();
+				System.out.println("iaProba fin");
+			}
+		}else ia.iaStep();
+
 	}
 	
 	public void resetZoom(){
@@ -86,7 +111,6 @@ public class ControlCenter implements Observateur{
 		return res;
 	}
 	
-	// Retourne les infos sur la carte cliqué
 	public InterfaceElementPosition getCardByClick(int x, int y) {
 		InterfaceElementPosition res = null; 
 		boolean changed = false;
@@ -126,7 +150,7 @@ public class ControlCenter implements Observateur{
 			this.interSwing.repaintGrille();
 		}
 	}
-	
+
 	// Deselectionner un grille
 	public void clicSourisGrilleDroite(int sourisX, int sourisY) {
 		InterfaceElementPosition iep = this.getCaseByClick(sourisX, sourisY);
@@ -138,14 +162,14 @@ public class ControlCenter implements Observateur{
 			this.interSwing.repaintAll();
 		}
 	}
-	
+
 	public void resetGrille() {
 		this.interSwing.gi.resetCaseColor();
 		this.interSwing.gi.resetChoseCase();
 		this.interSwing.gi.resetParryCase();
 	}
-	
-	// les procédure à faire après clique de souris sur carte 
+
+	// les procédure à faire après clique de souris sur carte
 	public void clicSourisCarte(int sourisX, int sourisY) {
 		InterfaceElementPosition iep = this.getCardByClick(sourisX, sourisY);
 		if(iep.getEle() == InterfaceElementType.CARTE && !this.interSwing.ci.zoomCarte.get(iep.getNombre()).isInvalid()) {
@@ -217,11 +241,12 @@ public class ControlCenter implements Observateur{
 			interSwing.ci.changeZoomTo(i, LockedBoolean.FALSE);
 		}
 	}
-	
+
 	// les procédure après clique de souris droite sur la carte
 	public void clicSourisCarteDroite(int sourisX, int sourisY) {
 		InterfaceElementPosition iep = this.getCardByClick(sourisX, sourisY);
 		if(iep.getEle() == InterfaceElementType.CARTE) {
+			
 			for(int i=0; i<interSwing.ci.zoomCarte.size(); i++) {
 				if(i != iep.getNombre()) interSwing.ci.changeZoomTo(i, LockedBoolean.FALSE);
 				else this.interSwing.ci.changeZoomTo(iep.getNombre(), LockedBoolean.LOCKEDFALSE);
@@ -273,7 +298,7 @@ public class ControlCenter implements Observateur{
 	public void miseAJour() {
 		this.IAStep();
 	}
-	
+
 	// Clic sur bouton annuler tour
 	public void annulerRound() {
 		if(this.epg.hist.listAction.size() == 0) {
@@ -299,9 +324,9 @@ public class ControlCenter implements Observateur{
 			this.epg.roundStart(attBL);
 			this.interSwing.repaintAll();
 		}
-		
+
 	}
-	
+
 	// Prendre des carte de joueur et le remettre au pile
 	public void returnCardToPool(String s) {
 		if(s.substring(0, 2).equals("GE")) {
@@ -316,7 +341,7 @@ public class ControlCenter implements Observateur{
 			}
 		}
 	}
-	
+
 	// Annuler le dernier etape d'attaquer
 	public void resetAttack(String s) {
 		switch(s.substring(0, 2)) {
@@ -328,7 +353,7 @@ public class ControlCenter implements Observateur{
 			this.poolToEnemyPlayerCard(attVal, attNb);
 		}
 	}
-	
+
 	// Annuler le dernier mouvement
 	public void resetMove(String s) {
 		if(s.charAt(2) != '0') {
@@ -354,7 +379,7 @@ public class ControlCenter implements Observateur{
 			}
 		}
 	}
-	
+
 	// Annuler le dernier action de parer
 	public void resetParry(String s) {
 		switch(s.charAt(0)) {
@@ -447,7 +472,7 @@ public class ControlCenter implements Observateur{
 		this.pg.initialiseSelected();
 		this.interSwing.ci.initialiseZoom();
 	}
-	
+
 	public void poolToCurrentPlayerCard(int val, int nb) {
 		for(int i=0; i<nb; i++) {
 			// Give the card back to player
@@ -457,7 +482,7 @@ public class ControlCenter implements Observateur{
 			this.pg.getUsed().remove(this.pg.getUsed().size() - 1);
 		}
 	}
-	
+
 	public void poolToEnemyPlayerCard(int val, int nb) {
 		for(int i=0; i<nb; i++) {
 			// Give the card back to player
@@ -467,12 +492,12 @@ public class ControlCenter implements Observateur{
 			this.pg.getUsed().remove(this.pg.getUsed().size() - 1);
 		}
 	}
-	
+
 	public void openSaveGameInterface() {
 		SaveInterface si = new SaveInterface(this);
 		si.run();
 	}
-	
+
 	public void openLoadGameInterface() {
 		LoadInterface li = new LoadInterface(this);
 		li.run();
@@ -481,7 +506,7 @@ public class ControlCenter implements Observateur{
 	public void generateSaveGame(String text) {
 		String s = this.epg.generateSaveString();
 		boolean fileExist = false;
-		
+
 	    try {
 	    	File f = new File("./res/savefile/" + text);
 	    	if (f.createNewFile()) {
@@ -494,7 +519,7 @@ public class ControlCenter implements Observateur{
 	    	System.out.println("An error occurred.");
 	    	e.printStackTrace();
 	    }
-	    
+
 	    if(!fileExist) {
 	    	try {
 				PrintWriter out = new PrintWriter("./res/savefile/" + text);
@@ -504,8 +529,8 @@ public class ControlCenter implements Observateur{
 				e.printStackTrace();
 			}
 	    }
-			
-		
+
+
 	}
 
 	public void loadGame(String string) {

@@ -5,10 +5,22 @@ public class CarteEtDirection {
     private Carte c;
     private int index;
 
+
     public CarteEtDirection(int direction, Carte c, int i){
         this.direction = direction;
         this.c = c;
         this.index = i;
+    }
+
+    public CarteEtDirection(){
+        this.direction = 0;
+        this.c = null;
+        this.index = 0;
+    }
+
+    public CarteEtDirection(int direction, Carte c){
+        this.direction = direction;
+        this.c = c;
     }
 
     public int getDirection() {
