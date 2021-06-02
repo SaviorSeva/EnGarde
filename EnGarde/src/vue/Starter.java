@@ -22,37 +22,44 @@ public class Starter {
 		*/
 		//InterfaceInitialise.start();
 		String iaActive = Configuration.instance().lis("IA");
-		Playground pg;
-		ExecPlayground epg;
-		switch (iaActive){
-			case "IAAleatoire" :
-				System.out.println("RandomIA activated !");
-				pg = new Playground(1);
-				epg = new ExecPlayground(pg, 1);
+		String joueur = Configuration.instance().lis("Joueur");
+		int jou = joueur.equals("Blanc") ? 1 : (joueur.equals("Noir") ? 2 : -1);
+		if (jou == -1 && !iaActive.equals("None")) {
+			if(jou == -1) System.err.println("Parametre Joueur Erreur !");
+			else System.err.println("Parametre IA Erreur !");
+		}else {
+			Playground pg;
+			ExecPlayground epg;
+			switch (iaActive){
+				case "IAAleatoire" :
+					System.out.println("RandomIA activated !");
+					pg = new Playground(jou);
+					epg = new ExecPlayground(pg, 1);
 
-				break;
-			case "IAProba" :
-				System.out.println("ProbaIA activated !");
-				pg = new Playground(1);
-				epg = new ExecPlayground(pg, 2);
+					break;
+				case "IAProba" :
+					System.out.println("ProbaIA activated !");
+					pg = new Playground(jou);
+					epg = new ExecPlayground(pg, 2);
 
-				break;
-			case "IAAleatoireVsIAProba" :
-				System.out.println("IAale Vs IAprob activated !");
-				pg = new Playground(1);
-				epg = new ExecPlayground(pg, 3);
+					break;
+				case "IAAleatoireVsIAProba" :
+					System.out.println("IAale Vs IAprob activated !");
+					pg = new Playground(jou);
+					epg = new ExecPlayground(pg, 3);
 
-				break;
-			default :
-				pg = new Playground(0);
-				epg = new ExecPlayground(pg, 0);
+					break;
+				default :
+					pg = new Playground(0);
+					epg = new ExecPlayground(pg, 0);
 
-				break;
+					break;
+			}
+
+			epg.shuffleReste();
+			InterfaceSwing.start(pg, epg);
+			epg.restartNewRound();
 		}
-
-		epg.shuffleReste();
-		InterfaceSwing.start(pg, epg);
-		epg.restartNewRound();
 		
 	}
 }

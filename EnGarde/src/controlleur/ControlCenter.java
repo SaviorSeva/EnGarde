@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import IAs.IA;
@@ -33,6 +35,8 @@ public class ControlCenter implements Observateur{
 	IA ia;
 	IA iaAlea;
 	IA iaProba;
+	LoadInterface li;
+	SaveInterface si;
 	
 	public ControlCenter(ExecPlayground epg) {
 		this.epg = epg;
@@ -494,12 +498,12 @@ public class ControlCenter implements Observateur{
 	}
 
 	public void openSaveGameInterface() {
-		SaveInterface si = new SaveInterface(this);
+		this.si = new SaveInterface(this);
 		si.run();
 	}
 
 	public void openLoadGameInterface() {
-		LoadInterface li = new LoadInterface(this);
+		this.li = new LoadInterface(this);
 		li.run();
 	}
 
@@ -529,11 +533,90 @@ public class ControlCenter implements Observateur{
 				e.printStackTrace();
 			}
 	    }
-
-
+	    this.si.frame.setVisible(false);
+	}
+	
+	public String removeAllNewLine(String s) {
+		String newString = "";
+		for(int i=0; i<s.length(); i++) if(s.charAt(i) != '\n') newString += s.charAt(i);
+		return newString;
 	}
 
 	public void loadGame(String string) {
-		System.out.println(string);
+		String content = "";
+		boolean loaded = false;
+		try {
+			content = new String (Files.readAllBytes(Paths.get("./res/savefile/" + string)));
+			loaded = true;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+		
+		if(loaded) {
+			content = removeAllNewLine(content);
+			String[] playgroundStrings = content.split(";");
+			for(int i=0; i<playgroundStrings.length; i++) {
+				System.out.println(i + " : " + playgroundStrings[i]);
+				switch(i) {
+				case 0:
+					// Charger Joueur Blanc
+					this.pg.setJoueurByString(1, playgroundStrings[0]);
+					break;
+				case 1:
+					// Charger Joueur Noir
+					this.pg.setJoueurByString(2, playgroundStrings[1]);
+					break;
+				case 2:
+					// Charger Pile Reste
+					this.pg.setPileByString(1, playgroundStrings[2]);
+					break;
+				case 3:
+					// Charger Pile Used
+					this.pg.setPileByString(2, playgroundStrings[3]);
+					for(int m=0; m<this.pg.getUsed().size(); m++) System.out.println(this.pg.getUsed().get(m));
+					break;
+				case 4:
+					// Charger Dernier Attaque
+					this.pg.setAttackByString(playgroundStrings[4]);
+					break;
+				case 5:
+				case 6:
+				case 7:
+				case 8:
+					/* 
+					 * 5 - Changer Tour Courant
+					 * 6 - Changer WaitStatus
+					 * 7 - Changer RoundCount
+					 * 8 - Changer StartType
+					 */
+					this.pg.setParamByString(i, playgroundStrings[i]);
+					break;
+				case 9:
+					// Changer current action string
+					this.epg.setCurrentActionByString(playgroundStrings[9]);
+					break;
+				case 10:
+					// Changer historique
+					this.epg.setHistoriqueByString(playgroundStrings[10]);
+					break;
+				case 11:
+					this.epg.setAITypeByString(playgroundStrings[11]);
+					break;
+				default :
+					// Shouldn't be executed
+					System.err.println(i + " : loadGame() Error in ContorlCenter.java");
+					break;		
+				}
+					
+			}
+			this.interSwing.repaintAll();
+			this.li.frame.setVisible(false);
+		}
+		
+	}
+
+	@Override
+	public void changeText(String s) {
+		this.interSwing.infoArea.setText(s);
 	}
 }

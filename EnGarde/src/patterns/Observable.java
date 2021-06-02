@@ -55,4 +55,14 @@ public class Observable {
 			o.miseAJour();
 		}
 	}
+
+	public void metAJour(String s) {
+		Iterator<Observateur> it;
+	
+		it = observateurs.iterator();
+		while (it.hasNext()) {
+			Observateur o = it.next();
+			o.changeText(s);
+		}
+	}
 }

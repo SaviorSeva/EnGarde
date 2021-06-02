@@ -34,5 +34,9 @@ public class Historique {
 		}
 		return sb.toString();
 	}
+
+	public void add(Action currentAction) {
+		this.listAction.add(currentAction);
+	}
 	
 }

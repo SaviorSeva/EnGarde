@@ -11,6 +11,10 @@ public class Action {
 		this.actionString = a.getActionString();
 	}
 	
+	public Action(String s) {
+		this.actionString = s;
+	}
+	
 	public void clear() {
 		this.actionString = "";
 	}

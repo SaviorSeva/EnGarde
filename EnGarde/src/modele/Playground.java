@@ -246,5 +246,98 @@ public class Playground extends Observable{
 		
 		return sb.toString();
 	}
-    
+
+	public void setJoueurByString(int joueur, String s) {
+		String params[] = s.split(",");
+		Player p = (joueur==1 ? this.getBlanc() : this.getNoir());
+		String valeur[];
+		for(int i=0; i<params.length; i++) {
+			valeur = params[i].split("=");
+			switch(i) {
+			case 0:
+				p.setName(valeur[1]);
+				break;
+			case 1:
+				p.setPlace(Integer.parseInt(valeur[1]));
+				break;
+			case 2:
+				p.setstartPlace(Integer.parseInt(valeur[1]));
+				break;
+			case 3:
+				p.setPoint(Integer.parseInt(valeur[1]));
+				break;
+			case 4:
+				ArrayList<Carte> cartes = new ArrayList<Carte>();
+				for(int l=0; l<valeur[1].length(); l++) {
+					cartes.add(Carte.generateCarteFromInt(valeur[1].charAt(l) - '0'));
+				}
+				p.setCartes(cartes);
+				break;
+			default:
+				// Shouldn't be executed
+				System.err.println("1 : setJoueurByString() Error in Playground.java");
+				break;
+			}
+		}
+	}
+
+	public void setPileByString(int pile, String s) {
+		String params[] = s.split(":");
+		ArrayList<Carte> cartes = new ArrayList<Carte>();
+		if(params.length != 1) {
+			for(int i=0; i<params[1].length(); i++) {
+				cartes.add(Carte.generateCarteFromInt(params[1].charAt(i) - '0'));
+			}
+		}
+		if(pile == 1) this.reste = cartes;
+		if(pile == 2) this.used = cartes;
+	}
+
+	public void setAttackByString(String string) {
+		String params[] = string.split(":");
+		String variables[] = params[1].split(",");
+		
+		switch(variables[0]) {
+		case "0":
+			this.lastAttack = new Attack(AttackType.NONE, null, 0);
+			break;
+		case "1":
+		case "2":
+			AttackType at;
+			if(variables[0].equals("1")) at = AttackType.INDIRECT;
+			else at = AttackType.DIRECT;
+			Carte c = Carte.generateCarteFromInt(Integer.parseInt(variables[1]));
+			int nb = Integer.parseInt(variables[2]);
+			this.lastAttack = new Attack(at, c, nb);
+			break;
+		default:
+			// Shouldn't be executed
+			System.err.println("4 : setAttackByString() Error in Playground.java");
+			break;	
+		}
+	}
+
+	public void setParamByString(int i, String string) {
+		String params[] = string.split(":");
+		switch(i) {
+		case 5:
+			this.setTourCourant(Integer.parseInt(params[1]));
+			break;
+		case 6 :
+			this.setWaitStatus(Integer.parseInt(params[1]));
+			break;
+		case 7:
+			this.roundCount = Integer.parseInt(params[1]);
+			break;
+		case 8:
+			this.startType = Integer.parseInt(params[1]);
+			break;
+		default :
+			// Shouldn't be executed
+			System.err.println(i + " : setParamByString() Error in Playground.java");
+			break;	
+		}
+		
+	}
+
 }

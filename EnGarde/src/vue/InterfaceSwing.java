@@ -3,6 +3,7 @@ package vue;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Image;
@@ -209,6 +210,8 @@ public class InterfaceSwing implements Runnable{
 				cc.openLoadGameInterface();
 			}
 		});
+		
+		this.infoArea.setFont(new Font("TimesRoman", Font.PLAIN, 25));
 		
 		// Des listeners pour les interfaces
 		gi.addMouseListener(asg);

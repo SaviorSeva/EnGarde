@@ -399,6 +399,7 @@ public class ExecPlayground extends Observable{
 		// on ajoute l'action courant dans l'historique
 		hist.addCopy(this.currentAction);
 		System.out.println(this.currentAction.toString());
+		this.metAJour(this.currentAction.toString());
 		System.out.println(this.hist.toString());
 		this.currentAction.clear();
 		// commencer le tour de joueur suivant
@@ -603,5 +604,25 @@ public class ExecPlayground extends Observable{
 		sb.append("Historique:" + this.hist.generateHistString() + ";\n");
 		sb.append("IAType:" + this.IAType + ";\n");
 		return sb.toString();
+	}
+
+	public void setCurrentActionByString(String string) {
+		String params[] = string.split(":");
+		if(params.length == 1) this.currentAction.setActionString("");
+		else this.currentAction.setActionString((params[1]));
+	}
+	
+	public void setHistoriqueByString(String string) {
+		String params[] = string.split(":");
+		this.hist = new Historique();
+		if(params.length != 1) {
+			String actions[] = params[1].split(" ");
+			for(int i=0; i<actions.length; i++) this.hist.add(new Action(actions[i]));
+		}
+	}
+	
+	public void setAITypeByString(String string) {
+		String params[] = string.split(":");
+		this.IAType = Integer.parseInt(params[1]);
 	}
 }

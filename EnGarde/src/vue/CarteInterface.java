@@ -222,4 +222,9 @@ public class CarteInterface extends JComponent implements Observateur{
 		this.repaint();
 	}
 
+	@Override
+	public void changeText(String s) {
+		// TODO Auto-generated method stub
+	}
+
 }
