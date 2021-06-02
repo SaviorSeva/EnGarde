@@ -45,7 +45,7 @@ public class CarteInterface extends JComponent implements Observateur{
 		
 		// on introduit 6 images de cartes dont 5 recto et 1 verso de carte
 		for(int i=0; i<6; i++) {
-			File imgFile = new File("./EnGarde/res/images/carte" + i + ".png");
+			File imgFile = new File("./res/images/carte" + i + ".png");
 			try {
 				imgCarte[i] = ImageIO.read(imgFile);
 				this.grayscaledCarte[i] = ImageIO.read(imgFile);

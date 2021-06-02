@@ -27,19 +27,19 @@ public class Starter {
 		switch (iaActive){
 			case "IAAleatoire" :
 				System.out.println("RandomIA activated !");
-				pg = new Playground(0);
+				pg = new Playground(1);
 				epg = new ExecPlayground(pg, 1);
 
 				break;
 			case "IAProba" :
 				System.out.println("ProbaIA activated !");
-				pg = new Playground(0);
+				pg = new Playground(1);
 				epg = new ExecPlayground(pg, 2);
 
 				break;
 			case "IAAleatoireVsIAProba" :
 				System.out.println("IAale Vs IAprob activated !");
-				pg = new Playground(0);
+				pg = new Playground(1);
 				epg = new ExecPlayground(pg, 3);
 
 				break;

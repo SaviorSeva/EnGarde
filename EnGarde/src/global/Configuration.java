@@ -28,7 +28,7 @@ public class Configuration {
 	private Configuration() {
 		prop = new Properties();
 		try {
-			File file = new File("./EnGarde/res/defaut.cfg");
+			File file = new File("./res/defaut.cfg");
 			InputStream propIn = new FileInputStream(file);
 			prop.load(propIn);
 		}catch (Exception e) {

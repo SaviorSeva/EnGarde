@@ -27,7 +27,7 @@ import vue.SaveInterface;
 
 public class ControlCenter implements Observateur{
 	Playground pg;
-	ExecPlayground epg;
+	public ExecPlayground epg;
 	InterfaceSwing interSwing;
 	ArrayList<Point> elementPos;
 	IA ia;
