@@ -1,11 +1,18 @@
 package controlleur;
 
 import java.awt.Point;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 import IAs.IA;
 import IAs.IAAleatoire;
 import IAs.IAProba;
+import modele.Action;
+import modele.Attack;
+import modele.AttackType;
 import modele.Carte;
 import modele.ExecPlayground;
 import modele.InterfaceElementPosition;
@@ -13,18 +20,21 @@ import modele.InterfaceElementType;
 import modele.LockedBoolean;
 import modele.Playground;
 import patterns.Observateur;
+import vue.InterfaceInitialise;
 import vue.InterfaceSwing;
-
+import vue.LoadInterface;
+import vue.SaveInterface;
 
 public class ControlCenter implements Observateur{
-	Playground pg;
-	ExecPlayground epg;
-	InterfaceSwing interSwing;
-	ArrayList<Point> elementPos;
-	IA ia;
+	public Playground pg;
+	public ExecPlayground epg;
+	public InterfaceSwing interSwing;
+	public ArrayList<Point> elementPos;
+	public IA ia;
 	IA iaAlea;
 	IA iaProba;
-	
+
+
 	public ControlCenter(ExecPlayground epg) {
 		this.epg = epg;
 		this.pg = this.epg.getPg();
@@ -46,6 +56,7 @@ public class ControlCenter implements Observateur{
 		this.interSwing = ifs;
 	}
 	
+	// Faire un step d'IA
 	public void IAStep() {
 		switch(this.epg.getIAType()) {
 			case 0:
@@ -86,6 +97,7 @@ public class ControlCenter implements Observateur{
 		this.interSwing.ci.initialiseZoom();
 	}
 	
+	// Retourne l'info sur le case cliqué
 	public InterfaceElementPosition getCaseByClick(int x, int y) {
 		InterfaceElementPosition res = null; 
 		boolean changed = false;
@@ -100,6 +112,7 @@ public class ControlCenter implements Observateur{
 		return res;
 	}
 	
+	// Retourne les infos sur la carte cliqué
 	public InterfaceElementPosition getCardByClick(int x, int y) {
 		InterfaceElementPosition res = null; 
 		boolean changed = false;
@@ -114,44 +127,77 @@ public class ControlCenter implements Observateur{
 		return res;
 	}
 	
+	// les procédures à faire après clique de souris sur les grilles
 	public void clicSourisGrille(int sourisX, int sourisY) {
 		InterfaceElementPosition iep = this.getCaseByClick(sourisX, sourisY);
-		if(iep.getEle() == InterfaceElementType.CASE) {
-			if(epg.pg.getTourCourant() == 1) {
-				int place = epg.pg.getBlancPos();
-				if(iep.getNombre() > place) epg.pg.setDirectionDeplace(1);
-				else epg.pg.setDirectionDeplace(2);
-			}else {
-				int place = epg.pg.getNoirPos();
-				if(iep.getNombre() > place) epg.pg.setDirectionDeplace(2);
-				else epg.pg.setDirectionDeplace(1);
+		if(this.epg.getSelectedCard() != null) {
+			if(iep.getEle() == InterfaceElementType.CASE && this.interSwing.gi.equalToHighlighted(iep.getNombre())) {
+				if(epg.pg.getTourCourant() == 1) {
+					// si tour blanc, et si on clique sur droite de place, on avance
+					// sinon on retraite
+					int place = epg.pg.getBlancPos();
+					if(iep.getNombre() > place) epg.pg.setDirectionDeplace(1);
+					else if(iep.getNombre() < place) epg.pg.setDirectionDeplace(2);
+					else epg.pg.setDirectionDeplace(3);
+				}else {
+					// si tour noir, et si on clique sur droite de place, on retraite
+					// sinon on avance
+					int place = epg.pg.getNoirPos();
+					if(iep.getNombre() > place) epg.pg.setDirectionDeplace(2);
+					else if(iep.getNombre() < place) epg.pg.setDirectionDeplace(1);
+					else epg.pg.setDirectionDeplace(3);
+				}
+				this.interSwing.gi.setChoseCase(iep.getNombre());
 			}
-			this.interSwing.gi.setChoseCase(iep.getNombre());
+			this.interSwing.repaintGrille();
 		}
-		this.interSwing.repaintGrille();
 	}
-	
+
+	// Deselectionner un grille
+	public void clicSourisGrilleDroite(int sourisX, int sourisY) {
+		InterfaceElementPosition iep = this.getCaseByClick(sourisX, sourisY);
+		if(iep.getEle() == InterfaceElementType.CASE) {
+			this.interSwing.gi.resetChoseCase();
+		}else {
+			this.resetGrille();
+			this.resetCartes();
+			this.interSwing.repaintAll();
+		}
+	}
+
+	public void resetGrille() {
+		this.interSwing.gi.resetCaseColor();
+		this.interSwing.gi.resetChoseCase();
+		this.interSwing.gi.resetParryCase();
+	}
+
+	// les procédure à faire après clique de souris sur carte
 	public void clicSourisCarte(int sourisX, int sourisY) {
 		InterfaceElementPosition iep = this.getCardByClick(sourisX, sourisY);
 		if(iep.getEle() == InterfaceElementType.CARTE && !this.interSwing.ci.zoomCarte.get(iep.getNombre()).isInvalid()) {
-			this.interSwing.ci.changeZoomTo(iep.getNombre(), LockedBoolean.LOCKEDTRUE);
+			if(iep.getNombre() < this.pg.getPlayerCourant().getCartes().size()) this.interSwing.ci.changeZoomTo(iep.getNombre(), LockedBoolean.LOCKEDTRUE);
 			
 			int dist = epg.getDistance();
 			ArrayList<Carte> cartes = this.epg.getCurrentPlayerCards();
 			for(int i=0; i<cartes.size(); i++) {
-				if(i != iep.getNombre()) {
-					if(dist != this.epg.getSelectedCard().getValue())
-						this.interSwing.ci.changeZoomTo(i, LockedBoolean.INVALID);
-					else {
-						if(cartes.get(i).getValue() != cartes.get(iep.getNombre()).getValue())
+				Carte selected = this.epg.getSelectedCard();
+				if(selected != null) {
+					if(i != iep.getNombre()) {
+						if(dist != this.epg.getSelectedCard().getValue())
 							this.interSwing.ci.changeZoomTo(i, LockedBoolean.INVALID);
+						else {
+							if(cartes.get(i).getValue() != cartes.get(iep.getNombre()).getValue())
+								this.interSwing.ci.changeZoomTo(i, LockedBoolean.INVALID);
+						}
 					}
 				}
 			}
 			switch(this.pg.getWaitStatus()) {
 			case 1:
 				// Parry direct attack
-				this.interSwing.gi.setParryCase();
+				boolean valEQ = this.epg.getSelectedCard().getValue() == this.pg.getLastAttack().getAttValue().getValue();
+				boolean nbEQ = this.epg.getNBSelectedCard() == this.pg.getLastAttack().getAttnb();
+				if(nbEQ) this.interSwing.gi.setParryCase();
 				break;
 			case 2:
 				// Retreat only
@@ -159,15 +205,29 @@ public class ControlCenter implements Observateur{
 				break;
 			case 3:
 				// Move or direct attack
-				this.interSwing.gi.setMoveCaseColor();
+				if(this.epg.getNBSelectedCard() == 1) this.interSwing.gi.setMoveCaseColor();
+				else {
+					Carte selected = this.epg.getSelectedCard();
+					if(selected != null) this.interSwing.gi.setAttackCaseColor();
+				}
 				break;
 			case 4:
 				// Indirect attack only
-				this.interSwing.gi.setAttackCaseColor();
+				if(this.epg.getSelectedCard().getValue() == this.pg.getDistance()) this.interSwing.gi.setAttackCaseColor();
 				break;
 			case 5:
 				// Parry indirect attack or retreat
-				this.interSwing.gi.setPRCaseColor();
+				boolean nbEQ1 = this.epg.getNBSelectedCard() == 1;
+				valEQ = this.epg.getSelectedCard().getValue() == this.pg.getLastAttack().getAttValue().getValue();
+				nbEQ = this.epg.getNBSelectedCard() == this.pg.getLastAttack().getAttnb();
+				this.interSwing.gi.resetCaseColor();
+				this.interSwing.gi.resetChoseCase();
+				if(nbEQ1) {
+					if(valEQ && nbEQ) this.interSwing.gi.setPRCaseColor();
+					else this.interSwing.gi.setRetreatCaseColor();
+				}else if(valEQ && nbEQ) {
+					this.interSwing.gi.setParryCase();
+				}
 				break;
 			default:
 				System.err.println("Clic Carte Error Line 136");
@@ -177,19 +237,32 @@ public class ControlCenter implements Observateur{
 		this.interSwing.repaintCarte();
 	}
 	
+	// Reinitialiser le zoom
+	public void resetCartes() {
+		for(int i=0; i<interSwing.ci.zoomCarte.size(); i++) {
+			interSwing.ci.changeZoomTo(i, LockedBoolean.FALSE);
+		}
+	}
+
+	// les procédure après clique de souris droite sur la carte
 	public void clicSourisCarteDroite(int sourisX, int sourisY) {
 		InterfaceElementPosition iep = this.getCardByClick(sourisX, sourisY);
 		if(iep.getEle() == InterfaceElementType.CARTE) {
-			
 			for(int i=0; i<interSwing.ci.zoomCarte.size(); i++) {
 				if(i != iep.getNombre()) interSwing.ci.changeZoomTo(i, LockedBoolean.FALSE);
 				else this.interSwing.ci.changeZoomTo(iep.getNombre(), LockedBoolean.LOCKEDFALSE);
 			}
 			this.interSwing.gi.resetCaseColor();
+			this.interSwing.gi.resetChoseCase();
+		}else {
+			this.resetGrille();
+			this.resetCartes();
+			this.interSwing.repaintAll();
 		}
 		this.interSwing.repaintCarte();
 	}
 
+	// les procédures quand le souris est sur la carte ou sur background
 	public void deplaceSourisCarte(int sourisX, int sourisY) {
 		InterfaceElementPosition iep = this.getCardByClick(sourisX, sourisY);
 		
@@ -204,19 +277,264 @@ public class ControlCenter implements Observateur{
 		this.interSwing.repaintCarte();
 	} 
 	
+	// Clic sur bouton confirmer
 	public void confirmReceived() {
 		this.epg.confirmReceived();
+		this.interSwing.ci.initialiseZoom();
 		this.interSwing.gi.resetCaseColor();
 		this.interSwing.gi.resetChoseCase();
 		this.interSwing.gi.resetParryCase();
 	}
 	
+	// Clic sur bouton cancel
 	public void clicCancel() {
 		this.epg.cancelReceived();
+		this.interSwing.ci.initialiseZoom();
+		this.interSwing.gi.resetCaseColor();
+		this.interSwing.gi.resetChoseCase();
+		this.interSwing.gi.resetParryCase();
 	}
 
 	@Override
 	public void miseAJour() {
 		this.IAStep();
+	}
+
+	// Clic sur bouton annuler tour
+	public void annulerRound() {
+		if(this.epg.hist.listAction.size() == 0) {
+			System.out.println("There is no more round to recover.");
+		}else {
+			Action lastAction = this.epg.hist.removeLastAction();
+			String lastActions[] = lastAction.getActionString().split(",");
+			this.returnCardToPool(lastActions[3]);
+			this.resetAttack(lastActions[2]);
+			this.resetMove(lastActions[1]);
+			this.resetParry(lastActions[0]);
+			Attack attBL;
+			if(this.epg.hist.listAction.size() != 0) {
+				Action actBeforeLast = this.epg.hist.listAction.get(this.epg.hist.listAction.size() - 1);
+				String actionsBL[] = actBeforeLast.getActionString().split(",");
+				attBL = this.getAttackBeforeLast(actionsBL[2]);
+			}else attBL = new Attack(AttackType.NONE, null, 0);
+			this.epg.changetTour();
+			this.pg.setWaitStatus(0);
+			this.pg.initialiseSelected();
+			this.pg.setDirectionDeplace(0);
+			this.epg.currentAction.clear();
+			this.epg.roundStart(attBL);
+			this.interSwing.repaintAll();
+		}
+
+	}
+
+	// Prendre des carte de joueur et le remettre au pile
+	public void returnCardToPool(String s) {
+		if(s.substring(0, 2).equals("GE")) {
+			for(int i=s.length()-1; i>=2; i--) {
+				// Gernerate a new card
+				int val = Character.getNumericValue(s.charAt(i));
+				Carte c = Carte.generateCarteFromInt(val);
+				// Add the card to pool
+				this.pg.getReste().add(0, c);
+				// Remove player's card
+				this.pg.getEnemyCourant().getCartes().remove(this.pg.getEnemyCourant().getCartes().size() - 1);
+			}
+		}
+	}
+
+	// Annuler le dernier etape d'attaquer
+	public void resetAttack(String s) {
+		switch(s.substring(0, 2)) {
+		case "NA" :
+			break;
+		default :
+			int attVal = Character.getNumericValue(s.charAt(2));
+			int attNb = s.length() - 2;
+			this.poolToEnemyPlayerCard(attVal, attNb);
+		}
+	}
+
+	// Annuler le dernier mouvement
+	public void resetMove(String s) {
+		if(s.charAt(2) != '0') {
+			int moveVal;
+			switch(s.charAt(1)) {
+			case 'F':
+				// Undo the last move by the player
+				moveVal = Character.getNumericValue(s.charAt(2));
+				if(pg.getTourCourant() == 1) this.pg.getNoir().setPlace(this.pg.getNoir().getPlace() + moveVal);
+				else this.pg.getBlanc().setPlace(this.pg.getBlanc().getPlace() - moveVal);
+				this.poolToEnemyPlayerCard(moveVal, 1);
+				break;
+			case 'B':
+				// Undo the last move by the player
+				moveVal = Character.getNumericValue(s.charAt(2));
+				if(pg.getTourCourant() == 1) this.pg.getNoir().setPlace(this.pg.getNoir().getPlace() - moveVal);
+				else this.pg.getBlanc().setPlace(this.pg.getBlanc().getPlace() + moveVal);
+				this.poolToEnemyPlayerCard(moveVal, 1);
+			default:
+				// Shouldn't be executed
+				System.err.println("Error resetMove() in ControlCenter.java at Line 345");
+				break;
+			}
+		}
+	}
+
+	// Annuler le dernier action de parer
+	public void resetParry(String s) {
+		switch(s.charAt(0)) {
+		case 'P':
+		case 'R':
+			int parryVal = Character.getNumericValue(s.charAt(1));
+			int parryNb = s.length() - 1;
+			System.out.println("parryNb = " + parryNb);
+			this.poolToEnemyPlayerCard(parryVal, parryNb);
+			if(s.charAt(0) == 'R') {
+				if(pg.getTourCourant() == 1) this.pg.getNoir().setPlace(this.pg.getNoir().getPlace() - parryVal);
+				else this.pg.getBlanc().setPlace(this.pg.getBlanc().getPlace() + parryVal);
+			}
+			break;
+		default:
+			break;
+		}
+	}
+
+	// Prendre l'attaque avant precedent
+	public Attack getAttackBeforeLast(String s) {
+		switch(s.substring(0, 2)) {
+		case "NA":
+			// No attack
+			return new Attack(AttackType.NONE, null, 0);
+		default:
+			int attVal = Character.getNumericValue(s.charAt(2));
+			int attNb = s.length() - 2;
+			if(s.substring(0, 2).equals("DA")) {
+				return new Attack(AttackType.DIRECT, Carte.generateCarteFromInt(attVal), attNb);
+			}else {
+				return new Attack(AttackType.INDIRECT, Carte.generateCarteFromInt(attVal), attNb);
+			}
+		}
+	}
+
+	// Annuler une seul action
+	public void annulerAction() {
+		String actionString = this.epg.currentAction.getActionString();
+		String actions[] = actionString.split(",");
+		switch(actions.length) {
+		case 2:
+			if(actions[1].charAt(2) != '0') {
+				int moveVal;
+				switch(actions[1].charAt(1)) {
+				case 'F':
+					// Undo the last move by the player
+					moveVal = Character.getNumericValue(actions[1].charAt(2));
+					if(pg.getTourCourant() == 2) this.pg.getNoir().setPlace(this.pg.getNoir().getPlace() + moveVal);
+					else this.pg.getBlanc().setPlace(this.pg.getBlanc().getPlace() - moveVal);
+					this.poolToCurrentPlayerCard(moveVal, 1);
+					break;
+				case 'B':
+					// Undo the last move by the player
+					moveVal = Character.getNumericValue(actions[1].charAt(2));
+					if(pg.getTourCourant() == 2) this.pg.getNoir().setPlace(this.pg.getNoir().getPlace() - moveVal);
+					else this.pg.getBlanc().setPlace(this.pg.getBlanc().getPlace() + moveVal);
+					this.poolToCurrentPlayerCard(moveVal, 1);
+					break;
+				default:
+					// Shouldn't be executed
+					System.err.println("Error annulerAction() in ControlCenter.java at Line 417");
+					break;
+				}
+			}
+			this.epg.currentAction.deleteAction();
+			System.out.println(this.epg.currentAction.toString());
+			this.pg.setWaitStatus(3);
+			break;
+		case 1:
+			if(actions[0].equals("N0") || actions[0].equals("")) {
+				System.out.println("Reached round start.");
+			}
+			else if(actions[0].charAt(0) == 'P') {
+				int parryVal = Character.getNumericValue(actions[0].charAt(1));
+				int parryNB = actions[0].length() - 1;
+				this.poolToCurrentPlayerCard(parryVal, parryNB);
+				this.epg.currentAction.deleteAction();
+				this.epg.roundStart(this.pg.getLastAttack());
+			}
+			break;
+		case 0:
+			System.out.println("Reached round start.");
+			break;
+		default:
+			// Shouldn't be executed
+			System.err.println("Error annulerAction() in ControlCenter.java at Line 430");
+		}
+		this.interSwing.repaintAll();
+		this.pg.initialiseSelected();
+		this.interSwing.ci.initialiseZoom();
+	}
+
+	public void poolToCurrentPlayerCard(int val, int nb) {
+		for(int i=0; i<nb; i++) {
+			// Give the card back to player
+			Carte c = Carte.generateCarteFromInt(val);
+			this.pg.getPlayerCourant().getCartes().add(c);
+			// Remove the card from the pool of used cards
+			this.pg.getUsed().remove(this.pg.getUsed().size() - 1);
+		}
+	}
+
+	public void poolToEnemyPlayerCard(int val, int nb) {
+		for(int i=0; i<nb; i++) {
+			// Give the card back to player
+			Carte c = Carte.generateCarteFromInt(val);
+			this.pg.getEnemyCourant().getCartes().add(c);
+			// Remove the card from the pool of used cards
+			this.pg.getUsed().remove(this.pg.getUsed().size() - 1);
+		}
+	}
+
+	public void openSaveGameInterface() {
+		SaveInterface si = new SaveInterface(this);
+		si.run();
+	}
+
+	public void openLoadGameInterface() {
+		LoadInterface li = new LoadInterface(this);
+		li.run();
+	}
+
+	public void generateSaveGame(String text) {
+		String s = this.epg.generateSaveString();
+		boolean fileExist = false;
+
+	    try {
+	    	File f = new File("./res/savefile/" + text);
+	    	if (f.createNewFile()) {
+	    		System.out.println("File created: " + f.getName());
+	    	} else {
+	    		System.out.println("File already exists.");
+	    		fileExist = true;
+	    	}
+	    } catch (IOException e) {
+	    	System.out.println("An error occurred.");
+	    	e.printStackTrace();
+	    }
+
+	    if(!fileExist) {
+	    	try {
+				PrintWriter out = new PrintWriter("./res/savefile/" + text);
+				out.print(s);
+				out.close();
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
+	    }
+
+
+	}
+
+	public void loadGame(String string) {
+		System.out.println(string);
 	}
 }

@@ -1,5 +1,7 @@
 package vue;
 
+import javax.swing.SwingUtilities;
+
 import global.Configuration;
 import modele.ExecPlayground;
 import modele.Playground;
@@ -18,54 +20,34 @@ public class Starter {
 		
 		System.out.println(pg.toString());
 		*/
+		//InterfaceInitialise.start();
 		String iaActive = Configuration.instance().lis("IA");
-		Playground pg = new Playground();
+		Playground pg;
 		ExecPlayground epg;
 		switch (iaActive){
 			case "None" :
 				epg = new ExecPlayground(pg, 0);
-				
-				epg.shuffleReste();
-
-				InterfaceSwing.start(pg, epg);
-				
-				epg.restartNewRound();
 				break;
 			case "IAAleatoire" :
 				System.out.println("RandomIA activated !");
-				
+				pg = new Playground(1);
 				epg = new ExecPlayground(pg, 1);
-				
-				epg.shuffleReste();
-
-				InterfaceSwing.start(pg, epg);
-				
-				epg.restartNewRound();
 				break;
 			case "IAProba" :
 				System.out.println("ProbaIA activated !");
-
-				epg = new ExecPlayground(pg, 2);
-
-				epg.shuffleReste();
-
-				InterfaceSwing.start(pg, epg);
-
-				epg.restartNewRound();
+				pg = new Playground(1);
+				epg = new ExecPlayground(pg, 1);
 				break;
 			case "IAAleatoireVsIAProba" :
 				System.out.println("IAale Vs IAprob activated !");
-
-				epg = new ExecPlayground(pg, 3);
-
-				epg.shuffleReste();
-
-				InterfaceSwing.start(pg, epg);
-
-				epg.restartNewRound();
+				pg = new Playground(1);
+				epg = new ExecPlayground(pg, 1);
 				break;
 		}
-		
+
+		epg.shuffleReste();
+		InterfaceSwing.start(pg, epg);
+		epg.restartNewRound();
 		
 	}
 }

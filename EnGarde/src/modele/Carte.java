@@ -12,4 +12,21 @@ public enum Carte {
 	public int getValue() {
 		return this.type;
 	}
+	
+	public static Carte generateCarteFromInt(int i) {
+		switch(i) {
+		case 1 :
+			return Carte.UN;
+		case 2:
+			return Carte.DEUX;
+		case 3:
+			return Carte.TROIS;
+		case 4:
+			return Carte.QUATRE;
+		case 5:
+			return Carte.CINQ;
+		default:
+			return null;
+		}
+	}
 }

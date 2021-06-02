@@ -24,7 +24,6 @@ public class TitreInterface extends JComponent{
 		try {
 			imgTitle = ImageIO.read(new File("./EnGarde/res/images/title.png"));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		this.setPreferredSize(new Dimension(400, 200));

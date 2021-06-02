@@ -40,4 +40,8 @@ public class Attack {
 		return "Attack [at=" + at + ", attValue=" + attValue + ", attnb=" + attnb + "]";
 	}
 
+	public String generateAttackString() {
+		if(this.attValue == null) return this.at.getValue() + ",0," + this.attnb;
+		else return this.at.getValue() + "," + this.attValue.getValue() + "," + this.attnb;
+	}
 }
