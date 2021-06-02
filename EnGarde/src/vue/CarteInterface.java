@@ -6,7 +6,6 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -44,6 +43,7 @@ public class CarteInterface extends JComponent implements Observateur{
 		this.imgCarte = new BufferedImage[6];
 		this.grayscaledCarte = new BufferedImage[6];
 		
+		// on introduit 6 images de cartes dont 5 recto et 1 verso de carte
 		for(int i=0; i<6; i++) {
 			File imgFile = new File("./res/images/carte" + i + ".png");
 			try {
@@ -75,9 +75,11 @@ public class CarteInterface extends JComponent implements Observateur{
 	public void resetZoom() {
 		for(int i=0; i<this.zoomCarte.size(); i++) {
 			LockedBoolean status = this.zoomCarte.get(i);
+			// si c'est une case non bloqué et valide(soit FALSE et TRUE), on remet le case i de liste zoomCarte à False
 			if(!status.isLocked()) {
 				if(!status.isInvalid()) this.zoomCarte.set(i, LockedBoolean.FALSE);
 			}else {
+				// si c'est une case bloqué et contient False(soit LOCKEDFALSE et LOCKEDTRUE), on remet à False
 				if(!status.isTrue()) this.zoomCarte.set(i, LockedBoolean.FALSE);
 			}
 		}
@@ -86,12 +88,14 @@ public class CarteInterface extends JComponent implements Observateur{
 	
 	public ArrayList<Boolean> lockedBooleanListToBooleanList(){
 		ArrayList<Boolean> al = new ArrayList<Boolean>();
+		// il copie zoomCarte à al puis le renvoie 
 		for(int i=0; i<this.zoomCarte.size(); i++){
 			al.add(this.zoomCarte.get(i).isTrue());
 		}
 		return al;
 	}
 	
+	// générer des cartes à échelle grise
 	public void generateGrayscaledCards() {
 		for(int m=0; m<this.grayscaledCarte.length; m++) {
 			BufferedImage image = this.grayscaledCarte[m];
@@ -118,8 +122,6 @@ public class CarteInterface extends JComponent implements Observateur{
 		
 		int tour = pg.getTourCourant();
 		
-		String s = "";
-		
 		ArrayList<Carte> cartes;
 		if(tour == 1) cartes = pg.getBlancCartes();
 		else cartes = pg.getNoirCartes();
@@ -131,11 +133,16 @@ public class CarteInterface extends JComponent implements Observateur{
 		
 		// Paint player's 5 cards
 		for(int i=0; i<cartes.size(); i++) {
+			// Mettre les cartes impossible de choisir en INVALID si on est en etape 1 ou 4 (demande de parer un attaque)
 			if(pg.getWaitStatus() == 1) {
 				int attVal = this.pg.getLastAttack().getAttValue().getValue();
-				for(int m=0; m<5; m++) if(cartes.get(m).getValue() != attVal) this.changeZoomTo(m, LockedBoolean.INVALID);
+				for(int m=0; m<this.pg.getCurrentPlayerCards().size(); m++) if(cartes.get(m).getValue() != attVal) this.changeZoomTo(m, LockedBoolean.INVALID);
+			}
+			if(pg.getWaitStatus() == 4) {
+				for(int m=0; m<this.pg.getCurrentPlayerCards().size(); m++) if(cartes.get(m).getValue() != this.pg.getDistance()) this.changeZoomTo(m, LockedBoolean.INVALID);
 			}
 			int picSelected = cartes.get(i).getValue();
+			// on affiche les cartes sélectionnées 
 			if(zoomCarte.get(i).isTrue()) {
 				drawable.drawImage(	imgCarte[picSelected], 
 						carteXStart + (int)(10*this.proportionCarte) + (int)(100*this.proportionCarte*i) - (int)(40*(this.proportionZoomCarte-this.proportionCarte)), 
@@ -144,6 +151,7 @@ public class CarteInterface extends JComponent implements Observateur{
 						(int)(126*this.proportionZoomCarte), 
 						null);
 			}else if(!zoomCarte.get(i).isInvalid()){
+				// afficher les cartes avec couleurs
 				drawable.drawImage(	imgCarte[picSelected], 
 									carteXStart + (int)(10*this.proportionCarte) + (int)(100*this.proportionCarte*i), 
 									2 + (int)(63*(this.proportionZoomCarte-this.proportionCarte)), 
@@ -151,6 +159,7 @@ public class CarteInterface extends JComponent implements Observateur{
 									(int)(126*this.proportionCarte), 
 									null);
 			}else {
+				// afficher les cartes gris
 				drawable.drawImage(	this.grayscaledCarte[picSelected], 
 						carteXStart + (int)(10*this.proportionCarte) + (int)(100*this.proportionCarte*i), 
 						2 + (int)(63*(this.proportionZoomCarte-this.proportionCarte)), 
@@ -173,7 +182,6 @@ public class CarteInterface extends JComponent implements Observateur{
 		String nbReste = this.pg.getResteNb() + "";
 		int nbResteXStart = resteXStart + (int)(40*this.proportionCarte) - (int)(0.5*gra.getFontMetrics(f2).stringWidth(nbReste));
 		drawable.drawString(nbReste, nbResteXStart, (int)(120*this.proportionCarte));
-		//drawable.drawString(this.pg.getResteNb() + "", carteEndX, carteYStart + (int)(63*this.proportionCarte));
 	}
 	
 	@Override
@@ -184,18 +192,19 @@ public class CarteInterface extends JComponent implements Observateur{
 		int width = getSize().width;
 		int height = getSize().height;
 		
+		// initialiser la porportion à 1.1
 		this.proportionCarte = 1.1 * Math.min(width/800.0, height/200.0);
 		this.proportionZoomCarte = 1.25 * proportionCarte;
-		
-		//System.out.println(width + ", " + height + ", " + proportionCarte);
 		
 		this.cartePosition = this.getCartePosition();
 		this.tracerCarte(width, height);
 		this.tracerReste();
 	}
 	
+	// Retourne les positions de cartes et stocker dans cartePosition
 	public ArrayList<InterfaceElementPosition> getCartePosition() {
 		ArrayList<InterfaceElementPosition> res = new ArrayList<InterfaceElementPosition>();
+		// x1 y1 est le point de gauche en haute, x2 y2 est le point de droite en bas
 		for(int i=0; i<5; i++) {
 			InterfaceElementType iet = InterfaceElementType.CARTE;
 			int x1 = carteXStart + (int)(10*this.proportionCarte) + (int)(100*this.proportionCarte*i);

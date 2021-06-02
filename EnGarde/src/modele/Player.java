@@ -4,15 +4,17 @@ import java.util.ArrayList;
 
 public class Player {
 	public int place;
-	int startPoint;
+	int startPlace;
 	int point;
 	ArrayList<Carte> cartes;
+	public String name;
 	
-	public Player(int i) {
+	public Player(int i, String name) {
 		this.place = i;
-		this.startPoint = i;
+		this.startPlace = i;
 		this.point = 0;
 		this.cartes = new ArrayList<Carte>();
+		this.name = name;
 	}
 
 	public int getPlace() {
@@ -47,9 +49,29 @@ public class Player {
 		return this.point;
 	}
 	
-	public int getDistToStartPoint() {
-		if(this.place > this.startPoint) return this.place - this.startPoint;
-		else return this.startPoint - this.place;
+	public int getDistToStartPlace() {
+		if(this.place > this.startPlace) return this.place - this.startPlace;
+		else return this.startPlace - this.place;
+	}
+
+	public int getStartPlace() {
+		return startPlace;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setstartPlace(int startPlace) {
+		this.startPlace = startPlace;
+	}
+
+	public void setPoint(int point) {
+		this.point = point;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	@Override
@@ -57,5 +79,16 @@ public class Player {
 		return "place=" + place + ", cartes=" + cartes.toString();
 	}
 	
-	
+	public String generatePlayerString(String player) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(player + ":");
+		sb.append("name=" + this.getName() + ","); 
+		sb.append("place=" + this.getPlace() + ",");
+		sb.append("startPlace=" + this.getStartPlace() + ",");
+		sb.append("point=" + this.getPoint() + ",");
+		sb.append("cartes=");
+		for(int i=0; i<this.cartes.size(); i++) sb.append(this.cartes.get(i).getValue());
+		sb.append(";\n");
+		return sb.toString();
+	}
 }

@@ -1,14 +1,13 @@
 package modele;
 
 import java.util.ArrayList;
-import java.util.Collections;
-
 import patterns.Observable;
 
 public class Playground extends Observable{
     private Player blanc;
     private Player noir;
     
+    // deux pile de carte, soit pas encore utilisée soit déjà utilisée dans le jeu
     private ArrayList<Carte> reste;
     private ArrayList<Carte> used;
     
@@ -16,21 +15,25 @@ public class Playground extends Observable{
     
     private int tourCourant;
     
-    private int directionDeplace; // 1-Avance, 2-Retrait, 0-Valeur initialise
+    private int directionDeplace; // 1-Avance, 2-Retrait, 3-PlayerPosition(for parry use), 0-Valeur initialise
     
     private ArrayList<Boolean> selected;
     
     private int waitStatus;
     
-    /*	startType == 0 two human
- 	 	startType == 1 human play as white
- 		startType == 2 human play as black
- 	*/
-     private int startType;
+    private int roundCount;
     
-    public Playground() {
-    	this.blanc = new Player(0);
-    	this.noir = new Player(22);
+    /*	
+     * startType == 0 two human
+     * startType == 1 human play as white
+     * startType == 2 human play as black
+     */
+    
+    private int startType;
+    
+    public Playground(int startType) {
+    	this.blanc = new Player(0, "1P");
+    	this.noir = new Player(22, "2P");
     	
     	this.reste = new ArrayList<Carte>();
     	this.used = new ArrayList<Carte>();
@@ -40,7 +43,8 @@ public class Playground extends Observable{
     	
     	this.directionDeplace = 0;
     	this.waitStatus = 0;
-    	this.startType = 2;
+    	this.startType = startType;
+    	this.roundCount = 0;
     }
     
     // Getters et setters basiques
@@ -48,7 +52,6 @@ public class Playground extends Observable{
 		return directionDeplace;
 	}
 	public void setDirectionDeplace(int directionDeplace) {
-		System.out.println(directionDeplace);
 		this.directionDeplace = directionDeplace;
 	}
 	public Player getBlanc() {
@@ -120,6 +123,7 @@ public class Playground extends Observable{
     	return (this.blanc.getPlace() != i) && (this.noir.getPlace() != i);
     }
     
+    // retourne le joueur de tour courant soit blanc soit noir
     public Player getPlayerCourant() {
     	if(getTourCourant() == 1) return this.blanc;
     	else return this.noir;
@@ -189,4 +193,53 @@ public class Playground extends Observable{
     public int getStartType() {
 		return this.startType;
 	}
+
+	public int getRoundCount() {
+		return roundCount;
+	}
+
+	public void incrementRoundCount() {
+		this.roundCount = this.roundCount + 1;
+	}
+
+	public void setStartType(int startType) {
+		this.startType = startType;
+	}
+
+	public String generateSaveString() {
+		StringBuilder sb = new StringBuilder();
+		// Joueur Blanc
+		sb.append(this.blanc.generatePlayerString("Blanc"));
+		
+		// Joueur Noir
+		sb.append(this.noir.generatePlayerString("Noir"));
+		
+		// Pile Reste
+		sb.append("Reste:");
+		for(int i=0; i<this.reste.size(); i++) sb.append(this.reste.get(i).getValue());
+		sb.append(";\n");
+		
+		// Pile used
+		sb.append("Used:");
+		for(int i=0; i<this.used.size(); i++) sb.append(this.used.get(i).getValue());
+		sb.append(";\n");
+		
+		// Dernier Attaque
+		sb.append("LastAttack:" + this.lastAttack.generateAttackString() + ";\n");
+		
+		// Tour Courant
+		sb.append("Tour:" + this.tourCourant + ";");
+		
+		// Wait Status
+		sb.append("WaitStatus:" + this.waitStatus + ";");
+		
+		// Round nb
+		sb.append("RoundCount:" + this.roundCount + ";");
+		
+		// Start Type
+		sb.append("StartType:" + this.startType + ";\n");
+		
+		return sb.toString();
+	}
+    
 }

@@ -4,9 +4,9 @@ import java.awt.Point;
 
 public class InterfaceElementPosition {
 	private InterfaceElementType ele;
-	private Point p1;
-	private Point p2;
-	private int nombre;
+	private Point p1; // Upper left point of the element
+	private Point p2; // Bottom right point of the element
+	private int nombre; // The number of case / card
 	
 	public InterfaceElementPosition(InterfaceElementType ele, Point p1, Point p2, int nombre) {
 		this.ele = ele;
