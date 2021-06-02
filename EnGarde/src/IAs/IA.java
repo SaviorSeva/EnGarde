@@ -62,7 +62,7 @@ public abstract class IA {
                 if (iaCartes.get(i).getValue() <= pg.getDistance())
                     ceds.add(new CarteEtDirection(1, iaCartes.get(i), i));
             }
-            if (iaCartes.get(i).getValue() <= this.pg.getPlayerCourant().getDistToStartPoint())
+            if (iaCartes.get(i).getValue() <= this.pg.getPlayerCourant().getDistToStartPlace())
                 ceds.add(new CarteEtDirection(2, iaCartes.get(i), i));
         }
     }

@@ -53,15 +53,15 @@ public class InterfaceSwing implements Runnable{
 		this.cc.ajouteInterfaceUtilisateur(this);
 		this.chorno = new Timer(1000, new AdapteurTimerAttente(cc));
 		try {
-			this.pleinEcranImage = ImageIO.read(new File("./res/images/fullscreen.png"));
+			this.pleinEcranImage = ImageIO.read(new File("./EnGarde/res/images/fullscreen.png"));
 			this.pleinEcranImage = this.pleinEcranImage.getScaledInstance(50, 50, Image.SCALE_DEFAULT);
-			this.saveImage = ImageIO.read(new File("./res/images/save.png"));
+			this.saveImage = ImageIO.read(new File("./EnGarde/res/images/save.png"));
 			this.saveImage = this.saveImage.getScaledInstance(50, 50, Image.SCALE_DEFAULT);
-			this.loadImage = ImageIO.read(new File("./res/images/load.png"));
+			this.loadImage = ImageIO.read(new File("./EnGarde/res/images/load.png"));
 			this.loadImage = this.loadImage.getScaledInstance(50, 50, Image.SCALE_DEFAULT);
-			this.restartImage = ImageIO.read(new File("./res/images/restart.png"));
+			this.restartImage = ImageIO.read(new File("./EnGarde/res/images/restart.png"));
 			this.restartImage = this.restartImage.getScaledInstance(50, 50, Image.SCALE_DEFAULT);
-			this.helpImage = ImageIO.read(new File("./res/images/help.png"));
+			this.helpImage = ImageIO.read(new File("./EnGarde/res/images/help.png"));
 			this.helpImage = this.helpImage.getScaledInstance(50, 50, Image.SCALE_DEFAULT);
 
 		} catch (IOException e) {

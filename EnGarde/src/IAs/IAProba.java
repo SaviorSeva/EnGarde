@@ -213,7 +213,7 @@ public class IAProba extends IA{
         }
         else if(dis>10) {
             for (int j = 0; j < iaCartes.size(); j++){
-                if((pg.getEnemyCourant().getDistToStartPoint() - pg.getPlayerCourant().getDistToStartPoint())<=0) {
+                if((pg.getEnemyCourant().getDistToStartPlace() - pg.getPlayerCourant().getDistToStartPlace())<=0) {
                     if (min > iaCartes.get(j).getValue()) {
                         min = iaCartes.get(j).getValue();
                         dir = 1;
@@ -276,7 +276,7 @@ public class IAProba extends IA{
             case DIRECT:
                 choisirParryOrAttackCartes(etreAtt.getAttnb(), etreAtt.getAttValue().getValue());
                 System.out.println("AI Proba choose to parry direct attack of " + pg.getLastAttack().getAttValue().getValue() + "with " + etreAtt.getAttnb() + "cards");
-                jouerCarte(0, choisir);
+                jouerCarte(3, choisir);
                 iaCartes = pg.getCurrentPlayerCards();
                 break;
             case INDIRECT:
@@ -288,7 +288,7 @@ public class IAProba extends IA{
                     for (Boolean aBoolean : choisir) {
                         System.out.println("choisir : " + aBoolean);
                     }
-                    jouerCarte(0, choisir);
+                    jouerCarte(3, choisir);
                     iaCartes = pg.getCurrentPlayerCards();
                     //retreat
                 }else if(ceds.size()>0){

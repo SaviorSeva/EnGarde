@@ -509,7 +509,7 @@ public class ControlCenter implements Observateur{
 		boolean fileExist = false;
 
 	    try {
-	    	File f = new File("./res/savefile/" + text);
+	    	File f = new File("./EnGarde/res/savefile/" + text);
 	    	if (f.createNewFile()) {
 	    		System.out.println("File created: " + f.getName());
 	    	} else {
@@ -523,7 +523,7 @@ public class ControlCenter implements Observateur{
 
 	    if(!fileExist) {
 	    	try {
-				PrintWriter out = new PrintWriter("./res/savefile/" + text);
+				PrintWriter out = new PrintWriter("./EnGarde/res/savefile/" + text);
 				out.print(s);
 				out.close();
 			} catch (FileNotFoundException e) {
