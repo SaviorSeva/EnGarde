@@ -3,6 +3,7 @@ package vue;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Desktop;
 import java.awt.Font;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
@@ -214,6 +215,20 @@ public class InterfaceSwing implements Runnable{
 			public void actionPerformed(ActionEvent arg0) {
 				cc.restartButtonAction();
 				repaintAll();
+			}
+		});
+		this.help.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				try {
+					File pdfFile = new File("./res/engarde.pdf");
+					if(pdfFile.exists()) {
+						if(Desktop.isDesktopSupported()) {
+			                Desktop.getDesktop().open(pdfFile);
+			            }else System.err.println("Awt Desktop is not supported!");
+			        }
+				} catch (Exception ex) {
+					ex.printStackTrace();
+		        }
 			}
 		});
 		this.infoArea.setFont(new Font("TimesRoman", Font.PLAIN, 25));
