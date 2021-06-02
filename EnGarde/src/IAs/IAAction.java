@@ -13,7 +13,6 @@ public class IAAction  {
         move = m;
         attack = a;
         probaReussite = p;
-
     }
 
 }
