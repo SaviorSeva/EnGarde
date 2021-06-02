@@ -130,10 +130,11 @@ public class ControlCenter implements Observateur{
 	}
 	
 	// les procédures à faire après clique de souris sur les grilles
-	public void clicSourisGrille(int sourisX, int sourisY) {
+	public void tapezSourisGrille(int sourisX, int sourisY) {
 		InterfaceElementPosition iep = this.getCaseByClick(sourisX, sourisY);
 		if(this.epg.getSelectedCard() != null) {
 			if(iep.getEle() == InterfaceElementType.CASE && this.interSwing.gi.equalToHighlighted(iep.getNombre())) {
+				System.out.println("Exe");
 				if(epg.pg.getTourCourant() == 1) {
 					// si tour blanc, et si on clique sur droite de place, on avance
 					// sinon on retraite
@@ -151,12 +152,17 @@ public class ControlCenter implements Observateur{
 				}
 				this.interSwing.gi.setChoseCase(iep.getNombre());
 			}
-			this.interSwing.repaintGrille();
+		}else {
+			if(iep.getEle() == InterfaceElementType.CASE && this.interSwing.gi.equalStayCase(iep.getNombre())) {
+				epg.pg.setDirectionDeplace(3);
+				this.interSwing.gi.setChoseCase(iep.getNombre());
+			}
 		}
+		this.interSwing.repaintGrille();
 	}
 
 	// Deselectionner un grille
-	public void clicSourisGrilleDroite(int sourisX, int sourisY) {
+	public void tapezSourisGrilleDroite(int sourisX, int sourisY) {
 		InterfaceElementPosition iep = this.getCaseByClick(sourisX, sourisY);
 		if(iep.getEle() == InterfaceElementType.CASE) {
 			this.interSwing.gi.resetChoseCase();
@@ -215,7 +221,10 @@ public class ControlCenter implements Observateur{
 				break;
 			case 4:
 				// Indirect attack only
-				if(this.epg.getSelectedCard().getValue() == this.pg.getDistance()) this.interSwing.gi.setAttackCaseColor();
+				if(this.epg.getSelectedCard().getValue() == this.pg.getDistance()) {
+					this.interSwing.gi.resetStayCase();
+					this.interSwing.gi.setAttackCaseColor();
+				}
 				break;
 			case 5:
 				// Parry indirect attack or retreat
@@ -263,6 +272,7 @@ public class ControlCenter implements Observateur{
 			this.interSwing.repaintAll();
 		}
 		this.interSwing.repaintCarte();
+		if(this.pg.getWaitStatus() == 4) this.interSwing.gi.setStayCaseColor();
 	}
 
 	// les procédures quand le souris est sur la carte ou sur background
@@ -287,6 +297,8 @@ public class ControlCenter implements Observateur{
 		this.interSwing.gi.resetCaseColor();
 		this.interSwing.gi.resetChoseCase();
 		this.interSwing.gi.resetParryCase();
+		if(this.pg.getWaitStatus() == 4) this.interSwing.gi.setStayCaseColor();
+		this.interSwing.repaintAll();
 	}
 	
 	// Clic sur bouton cancel
@@ -582,15 +594,18 @@ public class ControlCenter implements Observateur{
 				case 5:
 				case 6:
 				case 7:
-				case 8:
 					/* 
 					 * 5 - Changer Tour Courant
 					 * 6 - Changer WaitStatus
 					 * 7 - Changer RoundCount
-					 * 8 - Changer StartType
 					 */
 					this.pg.setParamByString(i, playgroundStrings[i]);
 					break;
+				case 8:
+					// 8 - Changer StartType
+					this.pg.setParamByString(i, playgroundStrings[i]);
+					String params[] = playgroundStrings[i].split(":");
+					this.epg.humanPlayer = Integer.parseInt(params[1]);
 				case 9:
 					// Changer current action string
 					this.epg.setCurrentActionByString(playgroundStrings[9]);
@@ -618,5 +633,16 @@ public class ControlCenter implements Observateur{
 	@Override
 	public void changeText(String s) {
 		this.interSwing.infoArea.setText(s);
+	}
+	
+	public void restartButtonAction() {
+		this.pg.setRoundCount(0);
+		this.epg.restartNewRound();
+		this.pg.getBlanc().setPoint(0);
+		this.pg.getNoir().setPoint(0);
+	}
+	
+	public boolean hasCaseSelected() {
+		return this.interSwing.gi.choseCase != -1;
 	}
 }

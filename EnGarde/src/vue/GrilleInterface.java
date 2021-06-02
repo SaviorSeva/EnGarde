@@ -33,8 +33,9 @@ public class GrilleInterface extends JComponent implements Observateur{
 	public ArrayList<InterfaceElementPosition> grillePos;
 	
 	int predictMove1, predictMove2; // Les grilles de mouvement possible - afficher avec couleur vert
-	int parryCase; // Les grilles de mouvement possible - afficher avec couleur rose
-	int choseCase; // Les grilles de mouvement possible - afficher avec border jaune
+	int parryCase; // La grilles pour faire un action de parer - afficher avec couleur rose
+	int stayCase; // La grilles pour ne pas poser un attaque indirect - afficher avec couleur gris
+	public int choseCase; // Les grilles de mouvement possible - afficher avec border jaune
 	
 	public GrilleInterface(Playground pg) {
 		this.pg = pg;
@@ -44,13 +45,14 @@ public class GrilleInterface extends JComponent implements Observateur{
 		this.proportionCaseY = 1.0;
 		this.predictMove1 = -1;
 		this.predictMove2 = -1;
+		this.stayCase = -1;
 		this.parryCase = -1;
 		this.choseCase = -1;
 	}
 	
 	// Verifier si on peut selectionner un grille
 	public boolean equalToHighlighted(int caseNB) {
-		return this.predictMove1 == caseNB || this.predictMove2 == caseNB || this.parryCase == caseNB;
+		return this.predictMove1 == caseNB || this.predictMove2 == caseNB || this.parryCase == caseNB || this.stayCase == caseNB;
 	}
 	
 	public void tracerGrille() {
@@ -58,6 +60,9 @@ public class GrilleInterface extends JComponent implements Observateur{
 			
 			// If can parry, change the color to pink
 			if(i == parryCase) drawable.setColor(Color.PINK);
+			else if (i == stayCase) {
+				drawable.setColor(Color.GRAY);
+			}
 			else if(i == this.predictMove1) {
 				// If the case is moveable but there is an enemy, change the color to red to attack
 				if(this.pg.getEnemyCourant().getPlace() == i) drawable.setColor(Color.RED);
@@ -239,10 +244,24 @@ public class GrilleInterface extends JComponent implements Observateur{
 		this.repaint();
 	}
 	
+	// Remettre la valeur de stayCase
+	public void setStayCaseColor() {
+		this.stayCase = this.pg.getPlayerCourant().getPlace();
+		this.repaint();
+	}
+	
+	// Reinitialiser la valeur de stayCase
+	public void resetStayCase() {
+		this.stayCase = -1;
+		this.repaint();
+	}
+	
+	
 	// Reinitialise tous les valeur (sauf selectionne)
 	public void resetCaseColor() {
 		this.predictMove1 = -1; 
 		this.predictMove2 = -1;
+		this.stayCase = -1;
 		this.parryCase = -1;
 		this.repaint();
 	}
@@ -276,6 +295,11 @@ public class GrilleInterface extends JComponent implements Observateur{
 
 	@Override
 	public void changeText(String s) {
+		// Faire rien s'il recoit ce signal
+	}
+
+	public boolean equalStayCase(int nombre) {
+		return nombre == this.stayCase;
 	}
 
 	

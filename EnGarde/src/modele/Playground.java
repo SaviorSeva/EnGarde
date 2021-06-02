@@ -106,7 +106,11 @@ public class Playground extends Observable{
 		this.waitStatus = waitStatus;
 	}
     
-    public void initialiseSelected() {
+    public void setRoundCount(int roundCount) {
+		this.roundCount = roundCount;
+	}
+
+	public void initialiseSelected() {
 		this.selected.clear();
 		for(int i=0; i<5; i++) {
 			selected.add(false);

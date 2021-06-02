@@ -468,20 +468,27 @@ public class ExecPlayground extends Observable{
 				this.phaseDeplacer(c);
 			break;
 		case 4:
-			// Indirect Attack
-			Carte indirectCarte = this.getSelectedCard();
-			nbSelected = this.getNBSelectedCard();
-			// si la carte choisi égale à la distance entre deux joueurs,
-			// on joue avec cette carte et l'ajoute dans liste d'action enfin finaliser round courant
-			if(indirectCarte.getValue() == this.pg.getDistance()) {
-				this.jouerCarte();
-				this.currentAction.appendIndirectAttackAction(indirectCarte, nbSelected);
-				this.roundEnd(new Attack(AttackType.INDIRECT, indirectCarte, nbSelected));
-			}else {
-				// sinon afficher l'info "ne peut pas attaquer avec cette carte car distance différent de celle entre deux joueurs"
-				System.out.println("You cannot attack with the selection of (" +
-						indirectCarte.getValue() + ", " + nbSelected + 
-						") because the distance is " + this.pg.getDistance() + ".");
+			if(this.pg.getDirectionDeplace() == 3) {
+				// on annule d'attaquer avec carte admissible, donc rien à faire pour ennemis puis round courant termine
+				System.out.println("You've chose not to attack the enemy.");
+				this.currentAction.appendNoAttackAction();
+				this.roundEnd(new Attack(AttackType.NONE, null, 0));
+			}else if(this.pg.getDirectionDeplace() == 1) {
+				// Indirect Attack
+				Carte indirectCarte = this.getSelectedCard();
+				nbSelected = this.getNBSelectedCard();
+				// si la carte choisi égale à la distance entre deux joueurs,
+				// on joue avec cette carte et l'ajoute dans liste d'action enfin finaliser round courant
+				if(indirectCarte.getValue() == this.pg.getDistance()) {
+					this.jouerCarte();
+					this.currentAction.appendIndirectAttackAction(indirectCarte, nbSelected);
+					this.roundEnd(new Attack(AttackType.INDIRECT, indirectCarte, nbSelected));
+				}else {
+					// sinon afficher l'info "ne peut pas attaquer avec cette carte car distance différent de celle entre deux joueurs"
+					System.out.println("You cannot attack with the selection of (" +
+							indirectCarte.getValue() + ", " + nbSelected + 
+							") because the distance is " + this.pg.getDistance() + ".");
+				}
 			}
 			break;
 		case 5:
@@ -552,6 +559,7 @@ public class ExecPlayground extends Observable{
 			System.out.println("You've chose not to attack the enemy.");
 			this.currentAction.appendNoAttackAction();
 			this.roundEnd(new Attack(AttackType.NONE, null, 0));
+			
 			break;
 		case 5:
 			System.out.println("You have to parry the attack or retreat !");

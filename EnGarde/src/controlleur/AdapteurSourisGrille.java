@@ -17,9 +17,10 @@ public class AdapteurSourisGrille extends MouseAdapter {
 		int sourisX = e.getX();
 		int sourisY = e.getY();
 		if(SwingUtilities.isLeftMouseButton(e))
-			this.cc.clicSourisGrille(sourisX, sourisY);
+			if(this.cc.hasCaseSelected()) this.cc.confirmReceived();
+			else this.cc.tapezSourisGrille(sourisX, sourisY);
 		else if(SwingUtilities.isRightMouseButton(e)){
-			cc.clicSourisGrilleDroite(sourisX, sourisY);
+			cc.tapezSourisGrilleDroite(sourisX, sourisY);
 		}	
 	}
 }

@@ -210,7 +210,12 @@ public class InterfaceSwing implements Runnable{
 				cc.openLoadGameInterface();
 			}
 		});
-		
+		this.restart.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				cc.restartButtonAction();
+				repaintAll();
+			}
+		});
 		this.infoArea.setFont(new Font("TimesRoman", Font.PLAIN, 25));
 		
 		// Des listeners pour les interfaces
