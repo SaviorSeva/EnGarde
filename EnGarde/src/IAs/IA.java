@@ -58,20 +58,18 @@ public abstract class IA {
             if(pg.getCurrentPlayerCards().get(i).getValue() == valeur) n++;
         return n;
     }
-
     public void resetAllPossible(boolean needAvance){
-        if(ceds.size()>0) ceds = new ArrayList<>();
-        for(int i=1;i<6 && iaCartes.contains(Carte.generateCarteFromInt(i));i++) {
+        ceds.clear();
+        for(int i=0;i<iaCartes.size();i++) {
             if (needAvance){
-                if (iaCartes.get(i).getValue() <= pg.getDistance()){
+                if (iaCartes.get(i).getValue() <= pg.getDistance())
                     ceds.add(new CarteEtDirection(1, iaCartes.get(i), i));
-                }
             }
-            if (iaCartes.get(i).getValue() <= this.pg.getPlayerCourant().getDistToStartPlace()){
+            if (iaCartes.get(i).getValue() <= this.pg.getPlayerCourant().getDistToStartPlace())
                 ceds.add(new CarteEtDirection(2, iaCartes.get(i), i));
-            }
         }
     }
+
 
     public abstract boolean pickMove();
     

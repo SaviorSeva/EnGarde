@@ -28,7 +28,7 @@ public class Configuration{
     int branchPerdu;
 
 
-    public Configuration(Player p1, int owner){
+    public Configuration(Player p1, int owner, ArrayList<Carte> used){
         iaCartes = new ArrayList<>();
         reste = new ArrayList<>();
         for(int i=1; i<6; i++) {
@@ -42,6 +42,9 @@ public class Configuration{
         cartesMain = new ArrayList<>();
         for (Carte c: p1.getCartes()) {
             cartesMain.add(c);
+            reste.remove(c);
+        }
+        for (Carte c: used) {
             reste.remove(c);
         }
         tousFils = new ArrayList<>();
