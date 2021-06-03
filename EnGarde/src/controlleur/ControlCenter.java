@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import IAs.IA;
 import IAs.IAAleatoire;
 import IAs.IAProba;
+import animations.Animation;
+import animations.AnimationTriangle;
 import modele.Action;
 import modele.Attack;
 import modele.AttackType;
@@ -28,15 +30,16 @@ import vue.LoadInterface;
 import vue.SaveInterface;
 
 public class ControlCenter implements Observateur{
-	Playground pg;
+	public Playground pg;
 	public ExecPlayground epg;
-	InterfaceSwing interSwing;
+	public InterfaceSwing interSwing;
 	ArrayList<Point> elementPos;
 	IA ia;
 	IA iaAlea;
 	IA iaProba;
 	LoadInterface li;
 	SaveInterface si;
+	AnimationTriangle anims;
 	
 	public ControlCenter(ExecPlayground epg) {
 		this.epg = epg;
@@ -53,6 +56,7 @@ public class ControlCenter implements Observateur{
 			this.ia = new IAProba(this.epg, this.pg);
 			break;
 		}
+		this.anims = new AnimationTriangle(30, this);
 	}
 	
 	public void ajouteInterfaceUtilisateur(InterfaceSwing ifs) {
@@ -460,6 +464,8 @@ public class ControlCenter implements Observateur{
 					System.err.println("Error annulerAction() in ControlCenter.java at Line 417");
 					break;
 				}
+				this.interSwing.gi.resetCaseColor();
+				this.interSwing.gi.resetChoseCase();
 			}
 			this.epg.currentAction.deleteAction();
 			System.out.println(this.epg.currentAction.toString());
@@ -644,5 +650,10 @@ public class ControlCenter implements Observateur{
 	
 	public boolean hasCaseSelected() {
 		return this.interSwing.gi.choseCase != -1;
+	}
+
+	public void updateAnimations() {
+		this.anims.tictac();
+		// System.out.println("Updated");
 	}
 }

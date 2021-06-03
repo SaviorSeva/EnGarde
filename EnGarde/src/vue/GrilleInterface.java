@@ -19,6 +19,8 @@ import patterns.Observateur;
 public class GrilleInterface extends JComponent implements Observateur{
 	Graphics2D drawable;
 	Graphics gra;
+	int xpoints[];
+	int ypoints[];
 	
 	public Playground pg;
 	
@@ -48,6 +50,9 @@ public class GrilleInterface extends JComponent implements Observateur{
 		this.stayCase = -1;
 		this.parryCase = -1;
 		this.choseCase = -1;
+		this.xpoints = new int[3];
+		this.ypoints = new int[3];
+		this.initialiseIndicateurPosition(this.pg.getPlayerCourant().getPlace(), this.pg.getTourCourant());
 	}
 	
 	// Verifier si on peut selectionner un grille
@@ -116,15 +121,13 @@ public class GrilleInterface extends JComponent implements Observateur{
 		// Joueur Blanc
 		drawable.setColor(Color.WHITE);
 		drawable.fillOval(caseXStart+b*caseWidth, (int)(this.caseHeight - this.caseWidth)/2, caseWidth, caseWidth);
-		// tracer l'indicateur de joueur courant
-		if(this.pg.getTourCourant() == 1) tracerIndicateur(b, 1);
-			
+
+		
 		
 		// Joueur Noir
 		drawable.setColor(Color.BLACK);
 		drawable.fillOval(caseXStart+n*caseWidth, (int)(this.caseHeight - this.caseWidth)/2, caseWidth, caseWidth);
 		// tracer l'indicateur de joueur courant
-		if(this.pg.getTourCourant() == 2) tracerIndicateur(n, 2);
 	
 		// String Distance
 		int distYEnd = (int)(caseHeight * 1.15);
@@ -139,12 +142,10 @@ public class GrilleInterface extends JComponent implements Observateur{
 	
 	// tracer l'indicateur de joueur courant et le string (1P ou 2P) en haut
 	public void tracerIndicateur(int place, int tour) {
-		int xpoints[] = {(int)(caseXStart+(place+0.25)*caseWidth), (int)(caseXStart+(place+0.75)*caseWidth), (int)(caseXStart+(place+0.5)*caseWidth)};
-		int triangleStart = (this.caseHeight - this.caseWidth) / 4;
-		int triangleEnd =  7 * (this.caseHeight - this.caseWidth) / 16;
-	    int ypoints[] = {triangleStart, triangleStart, triangleEnd};
-	    int npoints = 3;
-	    drawable.fillPolygon(xpoints, ypoints, npoints);
+		if(tour == 1) drawable.setColor(Color.WHITE);
+		else drawable.setColor(Color.BLACK);
+		
+		drawable.fillPolygon(xpoints, ypoints, 3);
 	    
 	    Font font = new Font("TimesRoman", Font.BOLD + Font.ITALIC, (int)(25*this.proportionCaseY));
 	    FontMetrics metrics = gra.getFontMetrics(font);
@@ -277,12 +278,15 @@ public class GrilleInterface extends JComponent implements Observateur{
 		
 		this.caseHeight = (int)(200*this.proportionCaseY);
 		this.caseWidth = (int)(50*this.proportionCaseX);
-		
-		
+	
 		this.drawable = (Graphics2D) g;
 		this.gra = g;
 		this.tracerGrille();
 		this.tracerJoueur(this.pg.getBlancPos(), this.pg.getNoirPos());
+		
+		// tracer l'indicateur de joueur courant
+		if(this.pg.getTourCourant() == 1) tracerIndicateur(this.pg.getBlancPos(), 1);
+		else if(this.pg.getTourCourant() == 2) tracerIndicateur(this.pg.getNoirPos(), 2);
 		this.tracerScore();
 		
 		this.grillePos = this.getGrillesPositions();
@@ -300,6 +304,30 @@ public class GrilleInterface extends JComponent implements Observateur{
 
 	public boolean equalStayCase(int nombre) {
 		return nombre == this.stayCase;
+	}
+	
+	public void initialiseIndicateurPosition(int place, int player) {
+		this.updateIndicateurPosition(0, place, player);
+	}
+
+	public void updateIndicateurPosition(int progress, int place, int player) {
+		int relativePosition;
+		if(progress <= 50) relativePosition = (int)(0.005 * this.caseWidth * progress);
+		else relativePosition = (int)(0.5* this.caseWidth - 0.005 * this.caseWidth * progress);
+
+		this.xpoints[0] = (int)(caseXStart+(place+0.25)*caseWidth) + relativePosition;
+		this.xpoints[1] = (int)(caseXStart+(place+0.75)*caseWidth) - relativePosition;
+		this.xpoints[2] = (int)(caseXStart+(place+0.5)*caseWidth);
+		
+		System.out.println("XPoint12 : (" + this.xpoints[0] + ", " + this.xpoints[1] + ")");
+		
+		int triangleStart = (this.caseHeight - this.caseWidth) / 4;
+		int triangleEnd =  7 * (this.caseHeight - this.caseWidth) / 16;
+		this.ypoints[0] = triangleStart;
+		this.ypoints[1] = triangleStart;
+		this.ypoints[2] = triangleEnd;
+
+	    this.repaint();
 	}
 
 	

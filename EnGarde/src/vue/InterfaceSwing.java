@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Desktop;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
@@ -27,7 +28,7 @@ import javax.swing.Timer;
 
 import controlleur.AdapteurSourisCarte;
 import controlleur.AdapteurSourisGrille;
-import controlleur.AdapteurTimerAttente;
+import controlleur.AdapteurMainTimer;
 import controlleur.ControlCenter;
 import modele.ExecPlayground;
 import modele.InterfaceElementPosition;
@@ -53,7 +54,7 @@ public class InterfaceSwing implements Runnable{
 		this.ci = new CarteInterface(this.pg);
 		this.cc = new ControlCenter(epg);
 		this.cc.ajouteInterfaceUtilisateur(this);
-		this.chorno = new Timer(1000, new AdapteurTimerAttente(cc));
+		this.chorno = new Timer(16, new AdapteurMainTimer(cc));
 		try {
 			this.pleinEcranImage = ImageIO.read(new File("./res/images/fullscreen.png"));
 			this.pleinEcranImage = this.pleinEcranImage.getScaledInstance(50, 50, Image.SCALE_DEFAULT);
@@ -258,7 +259,9 @@ public class InterfaceSwing implements Runnable{
 		frame.setSize(1200, 800);
 		frame.setVisible(true);
 		
-		// this.chorno.start();
+		frame.setMinimumSize(new Dimension(400, 400));
+		
+		this.chorno.start();
 	}
 	
 	public void toggleFullscreen() {

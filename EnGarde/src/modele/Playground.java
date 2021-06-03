@@ -272,9 +272,11 @@ public class Playground extends Observable{
 				break;
 			case 4:
 				ArrayList<Carte> cartes = new ArrayList<Carte>();
-				for(int l=0; l<valeur[1].length(); l++) {
-					cartes.add(Carte.generateCarteFromInt(valeur[1].charAt(l) - '0'));
-				}
+				if(valeur.length != 1) {
+					for(int l=0; l<valeur[1].length(); l++) {
+						cartes.add(Carte.generateCarteFromInt(valeur[1].charAt(l) - '0'));
+					}
+				}			
 				p.setCartes(cartes);
 				break;
 			default:
