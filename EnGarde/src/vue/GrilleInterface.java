@@ -319,7 +319,7 @@ public class GrilleInterface extends JComponent implements Observateur{
 		this.xpoints[1] = (int)(caseXStart+(place+0.75)*caseWidth) - relativePosition;
 		this.xpoints[2] = (int)(caseXStart+(place+0.5)*caseWidth);
 		
-		System.out.println("XPoint12 : (" + this.xpoints[0] + ", " + this.xpoints[1] + ")");
+		// System.out.println("XPoint12 : (" + this.xpoints[0] + ", " + this.xpoints[1] + ")");
 		
 		int triangleStart = (this.caseHeight - this.caseWidth) / 4;
 		int triangleEnd =  7 * (this.caseHeight - this.caseWidth) / 16;

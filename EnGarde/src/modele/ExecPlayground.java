@@ -93,6 +93,9 @@ public class ExecPlayground extends Observable{
     	if(this.pg.getRoundCount() % 2 == 1) this.pg.setTourCourant(1);
     	else this.pg.setTourCourant(2);
     	
+    	this.currentAction = new Action();
+    	this.hist = new Historique();
+    	
     	this.roundStart(new Attack(AttackType.NONE, null, 0));
     }
 	
