@@ -13,8 +13,7 @@ public class IAMinmax extends IA{
         super(epg, pg);
         this.proba = new double[5][6];
         iaAction = new ArrayList<>();
-        Configuration config = new Configuration(pg.getPlayerCourant(), pg.getTourCourant());
-        allPossible(config);
+
     }
 
     public void iaCanAttack(Configuration config){
@@ -59,19 +58,20 @@ public class IAMinmax extends IA{
         }
     }
 
-    public void allPossible(Configuration config){
-        Attack lastAttack = config.action.attack;
+    public Configuration allPossible(Configuration config){
         iaCartes = new ArrayList<>();
-        if(config.typeGagne!=2) return;
+        System.out.println("Entre : ");
+        if(config.typeGagne!=2) return config;
         for (Carte c:config.reste) {
             iaCartes.add(c);
         }
-        if(lastAttack==null){
+        if(config.action.attack==null){
             iaCanAttack(config);
             for (IAAction act: iaAction) {
-                allPossible(new Configuration(null, new IAAction(act.move, act.attack,0), config));
+                return allPossible(new Configuration(null, new IAAction(act.move, act.attack,0), config));
             }
         }else{
+            Attack lastAttack = config.action.attack;
             //parry
             if(nbCarteI(lastAttack.getAttValue().getValue())>=lastAttack.getAttnb()){
                 for (int i = 0; i < lastAttack.getAttnb(); i++) {
@@ -79,7 +79,7 @@ public class IAMinmax extends IA{
                 }
                 iaCanAttack(config);
                 for (IAAction act: iaAction) {
-                    allPossible(new Configuration(lastAttack, new IAAction(act.move, act.attack,0), config));
+                   return allPossible(new Configuration(lastAttack, new IAAction(act.move, act.attack,0), config));
                 }
             }
             //No parry
@@ -87,13 +87,14 @@ public class IAMinmax extends IA{
                 //如果能撤,把所有撤的情况列出来
                 for (int i = 1; i < 6; i++) {
                     if(config.disToDebut()>i && nbCarteI(i)>0){
-                        allPossible(new Configuration(null, new IAAction(new CarteEtDirection(2, Carte.generateCarteFromInt(i), -1), null, 0), config));
+                        return allPossible(new Configuration(null, new IAAction(new CarteEtDirection(2, Carte.generateCarteFromInt(i), -1), null, 0), config));
                     }
                 }
             }
             //如果不能撤，new config 输的
-            allPossible(new Configuration(config.tourCourrant, config));
+            return allPossible(new Configuration(config.tourCourrant, config, lastAttack));
         }
+        return null;
     }
 
 
@@ -110,7 +111,8 @@ public class IAMinmax extends IA{
 
     @Override
     public void iaStep() {
-
+        Configuration config = new Configuration(pg.getPlayerCourant(), pg.getTourCourant());
+        System.out.println(allPossible(config).tousFils.size());
     }
 
 }

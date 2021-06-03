@@ -43,6 +43,12 @@ public class Starter {
 				epg = new ExecPlayground(pg, 3);
 
 				break;
+			case "IAMinMax" :
+				System.out.println("IAArbre activated !");
+				pg = new Playground(2);
+				epg = new ExecPlayground(pg, 4);
+
+				break;
 			default :
 				pg = new Playground(0);
 				epg = new ExecPlayground(pg, 0);

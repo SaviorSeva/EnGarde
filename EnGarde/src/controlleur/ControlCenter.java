@@ -9,6 +9,7 @@ import java.util.ArrayList;
 
 import IAs.IA;
 import IAs.IAAleatoire;
+import IAs.IAMinmax;
 import IAs.IAProba;
 import modele.Action;
 import modele.Attack;
@@ -48,6 +49,9 @@ public class ControlCenter implements Observateur{
 		case 2:
 			this.ia = new IAProba(this.epg, this.pg);
 			break;
+		case 4:
+			this.ia = new IAMinmax(this.epg, this.pg);
+			break;
 		}
 	}
 	
@@ -70,6 +74,9 @@ public class ControlCenter implements Observateur{
 			case 3:
 				this.iaAlea = new IAAleatoire(this.epg, this.pg);
 				this.iaProba = new IAProba(this.epg, this.pg);
+				break;
+			case 4:
+				this.ia = new IAMinmax(this.epg, this.pg);
 				break;
 		}
 		if(this.epg.getIAType()==3) {

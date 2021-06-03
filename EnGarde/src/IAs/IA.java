@@ -27,6 +27,10 @@ public abstract class IA {
         for (int i = 0; i < 5; i++) choisir.add(false);
     }
 
+    public IA(){
+
+    }
+
     public void resetChoisir(){
         for (int i = 0; i < pg.getCurrentPlayerCards().size(); i++) {
             choisir.set(i, false);
