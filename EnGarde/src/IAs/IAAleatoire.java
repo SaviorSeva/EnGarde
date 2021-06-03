@@ -10,7 +10,6 @@ public class IAAleatoire extends IA{
 
 
     int direction;
-
     private boolean parry;
 
     public IAAleatoire(ExecPlayground epg, Playground pg) {
@@ -19,6 +18,7 @@ public class IAAleatoire extends IA{
         ceds = new ArrayList<>();
         direction = 0;
         parry = false;
+        ceds = new ArrayList<>();
     }
 
     public boolean iaCanAttack(){

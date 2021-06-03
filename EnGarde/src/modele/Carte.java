@@ -1,7 +1,7 @@
 package modele;
 
 public enum Carte {
-	UN(1), DEUX(2), TROIS(3), QUATRE(4), CINQ(5);
+	ZERO(0), UN(1), DEUX(2), TROIS(3), QUATRE(4), CINQ(5);
 	
 	private int type;
 	
@@ -15,6 +15,8 @@ public enum Carte {
 	
 	public static Carte generateCarteFromInt(int i) {
 		switch(i) {
+			case 0:
+				return Carte.ZERO;
 		case 1 :
 			return Carte.UN;
 		case 2:

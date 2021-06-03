@@ -14,7 +14,7 @@ public class CarteEtDirection {
 
     public CarteEtDirection(){
         this.direction = 0;
-        this.c = null;
+        this.c = Carte.generateCarteFromInt(0);
         this.index = 0;
     }
 

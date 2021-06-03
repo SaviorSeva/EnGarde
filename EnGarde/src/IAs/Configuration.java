@@ -9,10 +9,11 @@ import java.util.ArrayList;
 
 import static IAs.IAProba.factorial;
 
-public class Configuration extends IAProba{
+public class Configuration{
     ArrayList<Carte> carteJouer;
     ArrayList<Carte> cartesMain;
-    ArrayList<Carte> reste;
+    ArrayList<Carte> reste;//adverse
+    ArrayList<Carte> iaCartes;//ia
     ArrayList<Configuration> tousFils;
     int tourCourrant;
     int owner;
@@ -26,50 +27,9 @@ public class Configuration extends IAProba{
     int branchGagne;
     int branchPerdu;
 
-    public double calculProba(int i, int k, int n, int N) {
-        int K = inconnu[i];
-        if(K==0){
-            if (k ==0)return 1;
-            else return 0;
-        }
-        long a = (factorial(K) / (factorial(k) * factorial(K - k)));
-        long b = (factorial(N - K) / (factorial(n - k) * factorial((N - K) - (n - k))));
-        long c = (factorial(N) / (factorial(n) * factorial(N - n)));
-
-        return (double) (a * b) / c;
-    }
-
-    public void setCarteInconnu(){
-        for (int i = 0; i < carteJouer.size(); i++) {
-            int k = pg.getUsed().get(i).getValue();
-            inconnu[k-1]--;
-        }
-        for (int i = 0; i < cartesMain.size(); i++) {
-            int k = pg.getCurrentPlayerCards().get(i).getValue();
-            inconnu[k-1]--;
-        }
-    }
-
-
-    public void setTableauProba() {
-        int n = 5;
-        int N = reste.size();
-        /* i = 0 means carte 1, i = 4 means carte 5 */
-
-        for (int i = 0; i < 5; i++)
-            for (int k = 0; k < 6; k++) {
-                proba[i][k] = calculProba(i, k, n, N);
-            }
-        for (int i = 0; i <5 ; i++) {
-            double cumule = 0;
-            for (int j = 5; j > 0; j--) {
-                cumule += proba[i][j];
-                proba[i][j] = cumule;
-            }
-        }
-    }
 
     public Configuration(Player p1, int owner){
+        iaCartes = new ArrayList<>();
         reste = new ArrayList<>();
         for(int i=1; i<6; i++) {
             reste.add(Carte.UN);
@@ -78,6 +38,7 @@ public class Configuration extends IAProba{
             reste.add(Carte.QUATRE);
             reste.add(Carte.CINQ);
         }
+        iaCartes = reste;
         cartesMain = new ArrayList<>();
         for (Carte c: p1.getCartes()) {
             cartesMain.add(c);
@@ -97,16 +58,26 @@ public class Configuration extends IAProba{
     public Configuration(Attack p, IAAction a, Configuration pere){
         int n = 0;
         this.pere = pere;
+        owner = pere.owner;
         tourCourrant = pere.tourCourrant%2+1;
         parry = p;
         action = a;
         reste = new ArrayList<>();
+        iaCartes = new ArrayList<>();
         tousFils = new ArrayList<>();
         pere.tousFils.add(this);
         carteJouer =new ArrayList<>();
+        cartesMain = new ArrayList<>();
+        cartesMain = pere.cartesMain;
+        positionBlanc = pere.positionBlanc;
+        positionNoir = pere.positionNoir;
         typeGagne = 2;
         //Deepcopy
-        for (Carte carte:pere.reste) { reste.add(carte);}
+        for (Carte carte:pere.cartesMain) { iaCartes.add(carte);}
+        for (Carte carte:pere.reste) {
+            reste.add(carte);
+            iaCartes.add(carte);
+        }
         //Parry phase
         if(p!=null){
             for (int i = 0; i < reste.size() && n<=parry.getAttnb(); i++) {
@@ -125,12 +96,18 @@ public class Configuration extends IAProba{
         }
         //Verifier la carte a la main d'abord
         for (Carte c:carteJouer) {
+            //System.out.println(cartesMain.size());
             if(cartesMain!=null && cartesMain.contains(c)){
+//                System.out.println("Carte M  : " + c);
+//                System.out.println("remove M : " + cartesMain.remove(c));
                 cartesMain.remove(c);
             }else{
+//                System.out.println("Carte  : " + c);
+//                System.out.println("remove : " + reste.remove(c));
                 reste.remove(c);
             }
         }
+        //System.out.println(" :"+ reste.size());
 
         if(tourCourrant==1 && action.move.getDirection()==1){
             positionBlanc += action.move.getC().getValue();
@@ -144,6 +121,7 @@ public class Configuration extends IAProba{
 
     }
     public Configuration(int gagne, Configuration pere, Attack attack){
+        owner = pere.owner;
         if(gagne == owner) {
             typeGagne = 1;
             gagnerProba = 1;
@@ -162,13 +140,14 @@ public class Configuration extends IAProba{
     }
 
     public int disToDebut(){
-        if(tourCourrant==1) return positionBlanc;
+        if(tourCourrant==owner && owner==2) return positionBlanc;
         else return 22-positionNoir;
     }
 
     public void incrementGagne(){
         this.branchGagne++;
     }
+
 
     
 }
