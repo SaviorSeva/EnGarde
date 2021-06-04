@@ -1,5 +1,6 @@
 package IAs;
 
+import controlleur.ControlCenter;
 import modele.Carte;
 import modele.CarteEtDirection;
 import modele.ExecPlayground;
@@ -15,9 +16,11 @@ public abstract class IA {
     ArrayList<Boolean> choisir;
     ArrayList<CarteEtDirection> ceds;
     int direction;
-    public IA(ExecPlayground epg, Playground pg){
+    ControlCenter c;
+    public IA(ExecPlayground epg, Playground pg, ControlCenter cc){
         this.epg = epg;
         this.pg = pg;
+        this.c = cc;
         direction = 0;
         ceds = new ArrayList<>();
         iaPlayer = epg.humanPlayer%2+1;
@@ -25,6 +28,10 @@ public abstract class IA {
         else if (iaPlayer == 2) iaCartes = pg.getNoirCartes();
         choisir = new ArrayList<>();
         for (int i = 0; i < 5; i++) choisir.add(false);
+    }
+
+    public IA(){
+
     }
 
     public void resetChoisir(){
@@ -44,8 +51,17 @@ public abstract class IA {
     public void jouerCarte(int direction, ArrayList<Boolean> choisir){
         pg.setDirectionDeplace(direction);
         pg.setSelected(choisir);
-        epg.confirmReceived();
-        resetChoisir();
+        int choseCase;
+        if((this.pg.getTourCourant() == 1 && this.pg.getDirectionDeplace() == 1) || (this.pg.getTourCourant() == 2 && this.pg.getDirectionDeplace() == 2)) {
+            choseCase = this.pg.getPlayerCourant().getPlace() + this.epg.getSelectedCard().getValue();
+        }else if((this.pg.getTourCourant() == 2 && this.pg.getDirectionDeplace() == 1) || (this.pg.getTourCourant() == 2 && this.pg.getDirectionDeplace() == 1)){
+            choseCase = this.pg.getPlayerCourant().getPlace() - this.epg.getSelectedCard().getValue();
+        }else choseCase = this.pg.getPlayerCourant().getPlace();
+        c.tapezSourisGrille(choseCase);
+
+        System.out.println("Etat : " + this.pg.getWaitStatus());
+        c.confirmReceived();
+        //resetChoisir();
     }
 
     public int nbCarteI(int valeur){
@@ -54,7 +70,6 @@ public abstract class IA {
             if(pg.getCurrentPlayerCards().get(i).getValue() == valeur) n++;
         return n;
     }
-
     public void resetAllPossible(boolean needAvance){
         ceds.clear();
         for(int i=0;i<iaCartes.size();i++) {
@@ -66,6 +81,7 @@ public abstract class IA {
                 ceds.add(new CarteEtDirection(2, iaCartes.get(i), i));
         }
     }
+
 
     public abstract boolean pickMove();
     

@@ -1,5 +1,6 @@
 package IAs;
 
+import controlleur.ControlCenter;
 import modele.*;
 
 import java.util.ArrayList;
@@ -10,15 +11,15 @@ public class IAAleatoire extends IA{
 
 
     int direction;
-
     private boolean parry;
 
-    public IAAleatoire(ExecPlayground epg, Playground pg) {
-        super(epg, pg);
+    public IAAleatoire(ExecPlayground epg, Playground pg, ControlCenter cc) {
+        super(epg, pg, cc);
         random = new Random();
         ceds = new ArrayList<>();
         direction = 0;
         parry = false;
+        ceds = new ArrayList<>();
     }
 
     public boolean iaCanAttack(){

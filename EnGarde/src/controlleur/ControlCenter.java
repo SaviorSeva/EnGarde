@@ -11,6 +11,7 @@ import java.util.ArrayList;
 
 import IAs.IA;
 import IAs.IAAleatoire;
+import IAs.IAMinmax;
 import IAs.IAProba;
 import animations.Animation;
 import animations.AnimationJoueur;
@@ -46,17 +47,20 @@ public class ControlCenter implements Observateur{
 		this.epg = epg;
 		this.pg = this.epg.getPg();
 		this.epg.ajouteObservateur(this);
-		switch(this.epg.getIAType()) {
-		case 0:
-			this.ia = null;
-			break;
-		case 1:
-			this.ia = new IAAleatoire(this.epg, this.pg);
-			break;
-		case 2:
-			this.ia = new IAProba(this.epg, this.pg);
-			break;
-		}
+//		switch(this.epg.getIAType()) {
+//		case 0:
+//			this.ia = null;
+//			break;
+//		case 1:
+//			this.ia = new IAAleatoire(this.epg, this.pg);
+//			break;
+//		case 2:
+//			this.ia = new IAProba(this.epg, this.pg);
+//			break;
+//		case 4:
+//			this.ia = new IAMinmax(this.epg, this.pg);
+//			break;
+//		}
 		this.anims = new ArrayList<Animation>();
 		this.anims.add(new AnimationTriangle(30, this));
 	}
@@ -72,14 +76,17 @@ public class ControlCenter implements Observateur{
 				this.ia = null;
 				break;
 			case 1:
-				this.ia = new IAAleatoire(this.epg, this.pg);
+				this.ia = new IAAleatoire(this.epg, this.pg, this);
 				break;
 			case 2:
-				this.ia = new IAProba(this.epg, this.pg);
+				this.ia = new IAProba(this.epg, this.pg, this);
 				break;
 			case 3:
-				this.iaAlea = new IAAleatoire(this.epg, this.pg);
-				this.iaProba = new IAProba(this.epg, this.pg);
+				this.iaAlea = new IAAleatoire(this.epg, this.pg, this);
+				this.iaProba = new IAProba(this.epg, this.pg, this);
+				break;
+			case 4:
+				this.ia = new IAMinmax(this.epg, this.pg, this);
 				break;
 		}
 		if(this.epg.getIAType()==3) {
@@ -163,6 +170,33 @@ public class ControlCenter implements Observateur{
 				epg.pg.setDirectionDeplace(3);
 				this.interSwing.gi.setChoseCase(iep.getNombre());
 			}
+		}
+		this.interSwing.repaintGrille();
+	}
+	public void tapezSourisGrille(int nombre) {
+		if(this.epg.getSelectedCard() != null) {
+			if(nombre == this.pg.getPlayerCourant().getPlace()) {
+				System.out.println("Exe");
+				if(epg.pg.getTourCourant() == 1) {
+					// si tour blanc, et si on clique sur droite de place, on avance
+					// sinon on retraite
+					int place = epg.pg.getBlancPos();
+					if(nombre > place) epg.pg.setDirectionDeplace(1);
+					else if(nombre < place) epg.pg.setDirectionDeplace(2);
+					else epg.pg.setDirectionDeplace(3);
+				}else {
+					// si tour noir, et si on clique sur droite de place, on retraite
+					// sinon on avance
+					int place = epg.pg.getNoirPos();
+					if(nombre > place) epg.pg.setDirectionDeplace(2);
+					else if(nombre < place) epg.pg.setDirectionDeplace(1);
+					else epg.pg.setDirectionDeplace(3);
+				}
+				this.interSwing.gi.setChoseCase(nombre);
+			}
+		}else {
+			epg.pg.setDirectionDeplace(3);
+			this.interSwing.gi.setChoseCase(nombre);
 		}
 		this.interSwing.repaintGrille();
 	}

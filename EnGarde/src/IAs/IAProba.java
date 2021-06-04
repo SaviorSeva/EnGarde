@@ -1,6 +1,7 @@
 package IAs;
 
 
+import controlleur.ControlCenter;
 import modele.*;
 
 import java.util.*;
@@ -23,8 +24,21 @@ public class IAProba extends IA{
     final int dynamique = 8;
     private boolean isRetreat;
 
-    public IAProba(ExecPlayground epg, Playground pg) {
-        super(epg, pg);
+    public IAProba() {
+        random = new Random();
+        isRetreat = false;
+        inconnu = new int[5];
+        iaAction = new PriorityQueue<>(new IAActionComparator());
+        for (int i = 0; i <5 ; i++) {
+            inconnu[i] = 5;
+        }
+        nbInconnu = 0;
+        proba = new double[5][6];
+        seuilIntension = 0.5; /* 攻击阈值 */
+
+    }
+    public IAProba(ExecPlayground epg, Playground pg, ControlCenter cc) {
+        super(epg, pg, cc);
         random = new Random();
         isRetreat = false;
         inconnu = new int[5];
@@ -57,7 +71,7 @@ public class IAProba extends IA{
         return this.nbInconnu;
     }
 
-    public long factorial(long number) {
+    public static long factorial(long number) {
         if (number <= 1)
             return 1;
         else
@@ -195,7 +209,8 @@ public class IAProba extends IA{
         choisir.set(move.getIndex(), true);
         jouerCarte(move.getDirection(),choisir);
         if (epg.cartesContains(epg.getDistance())){
-            epg.cancelReceived();
+            resetChoisir();
+            jouerCarte(3, choisir);
         }
         return false;
         //选概率最高的打，如果概率都不高return false, 在iastep里执行movement + cancel
