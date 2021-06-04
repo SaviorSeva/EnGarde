@@ -18,6 +18,11 @@ public class AnimationTriangle extends Animation {
 		}
 		miseAJour();
 	}
+	
+	@Override
+	public boolean estTerminee() {
+		return true;
+	}
 
 	@Override
 	public void miseAJour() {

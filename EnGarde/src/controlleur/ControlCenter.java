@@ -13,6 +13,7 @@ import IAs.IA;
 import IAs.IAAleatoire;
 import IAs.IAProba;
 import animations.Animation;
+import animations.AnimationJoueur;
 import animations.AnimationTriangle;
 import modele.Action;
 import modele.Attack;
@@ -39,7 +40,7 @@ public class ControlCenter implements Observateur{
 	IA iaProba;
 	LoadInterface li;
 	SaveInterface si;
-	AnimationTriangle anims;
+	ArrayList<Animation> anims;
 	
 	public ControlCenter(ExecPlayground epg) {
 		this.epg = epg;
@@ -56,7 +57,8 @@ public class ControlCenter implements Observateur{
 			this.ia = new IAProba(this.epg, this.pg);
 			break;
 		}
-		this.anims = new AnimationTriangle(30, this);
+		this.anims = new ArrayList<Animation>();
+		this.anims.add(new AnimationTriangle(30, this));
 	}
 	
 	public void ajouteInterfaceUtilisateur(InterfaceSwing ifs) {
@@ -225,7 +227,7 @@ public class ControlCenter implements Observateur{
 				break;
 			case 4:
 				// Indirect attack only
-				if(this.epg.getSelectedCard().getValue() == this.pg.getDistance()) {
+				if(this.epg.getSelectedCard() != null && this.epg.getSelectedCard().getValue() == this.pg.getDistance()) {
 					this.interSwing.gi.resetStayCase();
 					this.interSwing.gi.setAttackCaseColor();
 				}
@@ -296,12 +298,42 @@ public class ControlCenter implements Observateur{
 	
 	// Clic sur bouton confirmer
 	public void confirmReceived() {
-		this.epg.confirmReceived();
+		switch (this.pg.getWaitStatus()){
+		case 2:
+			// Retreat
+			addAnimationJoueur();
+			break;
+		case 3:
+			if(this.epg.getSelectedCard().getValue() != this.pg.getDistance() || this.pg.getDirectionDeplace() != 1) {
+				// Movement
+				addAnimationJoueur();
+			}
+			break;
+		case 5:
+			// Retreat
+			if(this.interSwing.gi.choseCase != this.pg.getPlayerCourant().getPlace())
+				addAnimationJoueur();
+			break;
+		}
+		if(this.interSwing.gi.isInAnimation() == false) afterAnimation();
+	}
+	
+	public void addAnimationJoueur() {
+		int startPos = this.pg.getPlayerCourant().getPlace();
+		int endPos = this.interSwing.gi.choseCase;
+		AnimationJoueur aj = new AnimationJoueur(startPos, endPos, this);
+		this.anims.add(aj);
+		this.interSwing.gi.setInAnimation(true);
+	}
+	
+	public void afterAnimation() {
+		boolean executed = this.epg.confirmReceived();
+		
 		this.interSwing.ci.initialiseZoom();
 		this.interSwing.gi.resetCaseColor();
 		this.interSwing.gi.resetChoseCase();
 		this.interSwing.gi.resetParryCase();
-		if(this.pg.getWaitStatus() == 4) this.interSwing.gi.setStayCaseColor();
+		if(this.pg.getWaitStatus() == 4)this.interSwing.gi.setStayCaseColor();
 		this.interSwing.repaintAll();
 	}
 	
@@ -653,7 +685,22 @@ public class ControlCenter implements Observateur{
 	}
 
 	public void updateAnimations() {
-		this.anims.tictac();
-		// System.out.println("Updated");
+		for(int i=0; i<this.anims.size(); i++) {
+			Animation a = this.anims.get(i);
+			if(!a.estTerminee() || (a instanceof AnimationTriangle)) a.tictac();
+			else {
+				this.anims.remove(a);
+				this.interSwing.gi.setInAnimation(false);
+				i--;
+				this.afterAnimation();
+			}
+		}
+	}
+	
+	public boolean allAnimationTermined() {
+		for(Animation a : this.anims) {
+			if(!a.estTerminee()) return false;
+		}
+		return true;
 	}
 }

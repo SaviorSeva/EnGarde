@@ -409,7 +409,7 @@ public class ExecPlayground extends Observable{
 		this.roundStart(att);
 	}
 	
-	public void confirmReceived() {
+	public boolean confirmReceived() {
 		Carte c;
 		int nbSelected;
 		switch(this.pg.getWaitStatus()) {
@@ -418,11 +418,15 @@ public class ExecPlayground extends Observable{
 			nbSelected = this.getNBSelectedCard();
 			// si la valeur de carte de dernier attaque égale à carte choisi, et le nombre de cartes choisi égale à cel de dernier attaque
 			// on peut jouer avec cette carte
-			if(c == null) System.out.println("You must pick a card to parry !");
+			if(c == null) {
+				System.out.println("You must pick a card to parry !");
+				return false;
+			}
 			else if(c.getValue() == this.pg.getLastAttack().getAttValue().getValue() && nbSelected == this.pg.getLastAttack().getAttnb()) {
 				this.jouerCarte();
 				this.currentAction.appendParryAction(c, nbSelected);
 				enterE3();
+				return true;
 			}else {
 				//sinon on ne peut pas défendre avec cette carte choisi
 				System.out.println(	"You cannot parry the direct attack of (" +
@@ -431,51 +435,67 @@ public class ExecPlayground extends Observable{
 									this.pg.getLastAttack().getAttnb() + 
 									") with the selection of (" +
 									c.getValue() + ", " + nbSelected + ").");
+				return false;
 			}
-			break;
 		case 2:
 			c = this.getSelectedCard();
 			// si on ne peut pas retraiter avec cette carte, on affiche des infos pour rechoisir
-			if(this.pg.getPlayerCourant().getDistToStartPlace() < c.getValue()) System.out.println("You cannot retreat due to the size of the playground (case 2).");
+			if(this.pg.getPlayerCourant().getDistToStartPlace() < c.getValue()) {
+				System.out.println("You cannot retreat due to the size of the playground (case 2).");
+				return false;
+			}
 			// sinon on peut jouer avec action retraiter
 			else{
 				this.jouerCarte();
 				this.currentAction.appendRetreatAction(c);
 				this.retreat(c.getValue());
 				this.roundEnd(new Attack(AttackType.NONE, null, 0));
+				return true;
 			}
-			break;
 		case 3:
-			// 1. si on n'a pas d'action, rien à faire
+			// 1. si on n'a pas d'attaque à parer , on concatener le string d'action
 			if(this.currentAction.getActionString().equals("")) this.currentAction.appendNoParryAction();
 			c = this.getSelectedCard();
 
 			// 2. si on n'a pas encore choisi la carte, afficher l'info
-			if(c == null) System.out.println("You must pick a card!");
+			if(c == null) {
+				System.out.println("You must pick a card!");
+				return false;
+			}
 
 			// 3. si on a bien choisi la carte, on vérifie
-			else if(c.getValue() > this.pg.getDistance() && this.pg.getDirectionDeplace() == 1)
+			else if(c.getValue() > this.pg.getDistance() && this.pg.getDirectionDeplace() == 1) {
 				// 3.1 si la valeur de carte est supérieur à distance entre joueurs et avec la direction "avancer"
 				// afficher l'info de ne pas dépasser
 				System.out.println("You cannot surpass the other player");
-
+				return false;
+			}
 			else if(this.pg.getDirectionDeplace() == 2) {
 				// 3.2 si la direction de movement est "retrait"
-				// si la distance depuis point départ est inférieur à la valeur de carte, on ne peut pas retraiter puis afficher l'info
-				if(this.pg.getPlayerCourant().getDistToStartPlace() < c.getValue()) System.out.println("You cannot retreat due to the size of the playground (case 3).");
+				
+				if(this.pg.getPlayerCourant().getDistToStartPlace() < c.getValue()) {
+					// si la distance depuis point départ est inférieur à la valeur de carte, on ne peut pas retraiter puis afficher l'info
+					System.out.println("You cannot retreat due to the size of the playground (case 3).");
+					return false;
+				}
 				// sinon on peut déplacer avec cette carte
-				else this.phaseDeplacer(c);
-			}else 
+				else {
+					this.phaseDeplacer(c);
+					return true;
+				}
+			}else {
 				// 3.3 on peut soit retraiter soit avancer avec carte inférieur à
 				// la distance depuis point départ ou la distance entre deux joueurs
 				this.phaseDeplacer(c);
-			break;
+				return true;
+			}
 		case 4:
 			if(this.pg.getDirectionDeplace() == 3) {
 				// on annule d'attaquer avec carte admissible, donc rien à faire pour ennemis puis round courant termine
 				System.out.println("You've chose not to attack the enemy.");
 				this.currentAction.appendNoAttackAction();
 				this.roundEnd(new Attack(AttackType.NONE, null, 0));
+				return true;
 			}else if(this.pg.getDirectionDeplace() == 1) {
 				// Indirect Attack
 				Carte indirectCarte = this.getSelectedCard();
@@ -486,14 +506,16 @@ public class ExecPlayground extends Observable{
 					this.jouerCarte();
 					this.currentAction.appendIndirectAttackAction(indirectCarte, nbSelected);
 					this.roundEnd(new Attack(AttackType.INDIRECT, indirectCarte, nbSelected));
+					return true;
 				}else {
 					// sinon afficher l'info "ne peut pas attaquer avec cette carte car distance différent de celle entre deux joueurs"
 					System.out.println("You cannot attack with the selection of (" +
 							indirectCarte.getValue() + ", " + nbSelected + 
 							") because the distance is " + this.pg.getDistance() + ".");
-				}
+					return false;
+				} 
 			}
-			break;
+			return false;
 		case 5:
 			if(this.pg.getDirectionDeplace() == 3) {
 				// Parry indirect attack
@@ -505,6 +527,7 @@ public class ExecPlayground extends Observable{
 					this.jouerCarte();
 					this.currentAction.appendParryAction(c, nbSelected);
 					enterE3();
+					return true;
 				}else {
 					// si l'un des deux n'est pas satisfait, on affiche l'info de "ne peut pas défendre attaque indirect avec carte choisi"
 					System.out.println(	"You cannot parry the indirect attack of (" +
@@ -513,23 +536,30 @@ public class ExecPlayground extends Observable{
 										this.pg.getLastAttack().getAttnb() +
 										") with the selection of (" +
 										c.getValue() + ", " + nbSelected + ").");
+					return false;
 				}
 			}else if(this.pg.getDirectionDeplace() == 2){
 				// Retreat
 				c = this.getSelectedCard();
-				if(this.pg.getPlayerCourant().getDistToStartPlace() < c.getValue()) System.out.println("You cannot retreat due to the size of the playground.");
+				if(this.pg.getPlayerCourant().getDistToStartPlace() < c.getValue()) {
+					System.out.println("You cannot retreat due to the size of the playground.");
+					return true;
+				}
 				else {
 					this.jouerCarte();
 					this.currentAction.appendRetreatAction(c);
 		    		this.retreat(c.getValue());
 		    		this.roundEnd(new Attack(AttackType.NONE, null, 0));
+		    		return true;
 				}
-			}else System.out.println("You have to parry the attack or retreat !");
-			break;
+			}else {
+				System.out.println("You have to parry the attack or retreat !");
+				return false;
+			}
 		default:
 			// Should not be executed
 			System.err.println("Line 323 : confirmReceived() Error");
-			break;	
+			return false;	
 		}
 	}
 	

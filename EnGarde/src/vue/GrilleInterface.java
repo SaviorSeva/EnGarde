@@ -7,10 +7,13 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Shape;
+import java.awt.Stroke;
 import java.util.ArrayList;
 
 import javax.swing.JComponent;
 
+import modele.AttackType;
 import modele.InterfaceElementPosition;
 import modele.InterfaceElementType;
 import modele.Playground;
@@ -21,6 +24,8 @@ public class GrilleInterface extends JComponent implements Observateur{
 	Graphics gra;
 	int xpoints[];
 	int ypoints[];
+	boolean inJoueurAnimation;
+	int joueurAnimationPos;
 	
 	public Playground pg;
 	
@@ -52,12 +57,21 @@ public class GrilleInterface extends JComponent implements Observateur{
 		this.choseCase = -1;
 		this.xpoints = new int[3];
 		this.ypoints = new int[3];
+		this.inJoueurAnimation = false;
+		this.joueurAnimationPos = 0;
 		this.initialiseIndicateurPosition(this.pg.getPlayerCourant().getPlace(), this.pg.getTourCourant());
 	}
 	
 	// Verifier si on peut selectionner un grille
 	public boolean equalToHighlighted(int caseNB) {
 		return this.predictMove1 == caseNB || this.predictMove2 == caseNB || this.parryCase == caseNB || this.stayCase == caseNB;
+	}
+	
+	public boolean isInAnimation() {
+		return inJoueurAnimation;
+	}
+	public void setInAnimation(boolean inAnimation) {
+		this.inJoueurAnimation = inAnimation;
 	}
 	
 	public void tracerGrille() {
@@ -120,14 +134,19 @@ public class GrilleInterface extends JComponent implements Observateur{
 	public void tracerJoueur(int b, int n) {
 		// Joueur Blanc
 		drawable.setColor(Color.WHITE);
-		drawable.fillOval(caseXStart+b*caseWidth, (int)(this.caseHeight - this.caseWidth)/2, caseWidth, caseWidth);
+		if(this.pg.getTourCourant() == 2 || !this.inJoueurAnimation)
+			drawable.fillOval(caseXStart+b*caseWidth, (int)(this.caseHeight - this.caseWidth)/2, caseWidth, caseWidth);
+		else if(this.pg.getTourCourant() == 1 && this.inJoueurAnimation) {
+			drawable.fillOval(this.joueurAnimationPos, (int)(this.caseHeight - this.caseWidth)/2, caseWidth, caseWidth);
+		}
 
-		
-		
 		// Joueur Noir
 		drawable.setColor(Color.BLACK);
-		drawable.fillOval(caseXStart+n*caseWidth, (int)(this.caseHeight - this.caseWidth)/2, caseWidth, caseWidth);
-		// tracer l'indicateur de joueur courant
+		if(this.pg.getTourCourant() == 1 || !this.inJoueurAnimation)
+			drawable.fillOval(caseXStart+n*caseWidth, (int)(this.caseHeight - this.caseWidth)/2, caseWidth, caseWidth);
+		else if(this.pg.getTourCourant() == 2 && this.inJoueurAnimation) {
+			drawable.fillOval(this.joueurAnimationPos, (int)(this.caseHeight - this.caseWidth)/2, caseWidth, caseWidth);
+		}
 	
 		// String Distance
 		int distYEnd = (int)(caseHeight * 1.15);
@@ -289,6 +308,10 @@ public class GrilleInterface extends JComponent implements Observateur{
 		else if(this.pg.getTourCourant() == 2) tracerIndicateur(this.pg.getNoirPos(), 2);
 		this.tracerScore();
 		
+		if(	this.pg.getLastAttack().getAt() != AttackType.NONE && 
+			(this.pg.getWaitStatus() == 1 || this.pg.getWaitStatus() == 5 || this.pg.getWaitStatus() == 2)) 
+			tracerAttackFleche();
+		
 		this.grillePos = this.getGrillesPositions();
 	}
 	
@@ -329,6 +352,45 @@ public class GrilleInterface extends JComponent implements Observateur{
 
 	    this.repaint();
 	}
-
 	
+	public void tracerAttackFleche() {
+		drawable.setStroke(new BasicStroke(3));
+		drawable.setColor(Color.RED);
+		int x1, x2;
+		int y = this.caseHeight / 2;
+		x1 = caseXStart+(int)((this.pg.getBlancPos() + 0.5)*caseWidth);
+		x2 = caseXStart+(int)((this.pg.getNoirPos() + 0.5)*caseWidth);
+		if(this.pg.getTourCourant() == 1) {
+			int triPointsX[] = {x1-5, x1+(int)(0.25*caseWidth), x1+(int)(0.25*caseWidth)};
+			int triPointsY[] = {y, (int)(y-0.05*caseHeight), (int)(y+0.05*caseHeight)};
+			drawable.fillPolygon(triPointsX, triPointsY, 3);
+		}else {
+			int triPointsX[] = {x2+5, x2-(int)(0.25*caseWidth), x2-(int)(0.25*caseWidth)};
+			int triPointsY[] = {y, (int)(y-0.05*caseHeight), (int)(y+0.05*caseHeight)};
+			drawable.fillPolygon(triPointsX, triPointsY, 3);
+		}
+		drawable.drawLine(x1, y, x2, y);
+		
+		int lineMiddlePointX = (x1 + x2) / 2;
+		String cardValString = this.pg.getLastAttack().getAttValue().getValue() + "";
+		String cardNBString = this.pg.getLastAttack().getAttnb() + "";
+		
+		Font font = new Font("TimesRoman", Font.ITALIC, (int)(25*this.proportionCaseY));
+	    FontMetrics metrics = gra.getFontMetrics(font);
+	    int valStringPos = lineMiddlePointX - metrics.stringWidth(cardValString) / 2;
+	    drawable.drawString(cardValString, valStringPos, y - 10);
+	    
+	    int nbStringPos = lineMiddlePointX - metrics.stringWidth(cardNBString) / 2;
+	    drawable.drawString(cardNBString, nbStringPos, y + (int)(25*this.proportionCaseY));
+	    
+		drawable.setFont(font);
+		
+	}
+	
+	public void calculNewJoueurPos(int startCase, int targetCase, int progress) {
+		int startCasePos = caseXStart+startCase*caseWidth;
+		int	targetCasePos = caseXStart+targetCase*caseWidth;
+		this.joueurAnimationPos = (int)(startCasePos + (double)((targetCasePos - startCasePos) * progress) / 100.0);
+		this.repaint();
+	}
 }

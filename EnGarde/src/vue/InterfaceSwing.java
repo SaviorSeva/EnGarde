@@ -256,10 +256,10 @@ public class InterfaceSwing implements Runnable{
 		frame.add(boiteInfo, BorderLayout.SOUTH);
 		
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setSize(1200, 800);
+		frame.setSize(1440, 900);
 		frame.setVisible(true);
 		
-		frame.setMinimumSize(new Dimension(400, 400));
+		frame.setMinimumSize(new Dimension(800, 600));
 		
 		this.chorno.start();
 	}
