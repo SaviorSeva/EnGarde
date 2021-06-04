@@ -11,7 +11,6 @@ import java.util.ArrayList;
 
 import IAs.IA;
 import IAs.IAAleatoire;
-import IAs.IAMinmax;
 import IAs.IAProba;
 import animations.Animation;
 import animations.AnimationJoueur;
@@ -41,7 +40,8 @@ public class ControlCenter implements Observateur{
 	IA iaProba;
 	LoadInterface li;
 	SaveInterface si;
-	ArrayList<Animation> anims;
+	AnimationTriangle at;
+	ArrayList<AnimationJoueur> anims;
 	
 	public ControlCenter(ExecPlayground epg) {
 		this.epg = epg;
@@ -61,8 +61,8 @@ public class ControlCenter implements Observateur{
 //			this.ia = new IAMinmax(this.epg, this.pg);
 //			break;
 //		}
-		this.anims = new ArrayList<Animation>();
-		this.anims.add(new AnimationTriangle(30, this));
+		this.anims = new ArrayList<AnimationJoueur>();
+		this.at = new AnimationTriangle(30, this);
 	}
 	
 	public void ajouteInterfaceUtilisateur(InterfaceSwing ifs) {
@@ -84,9 +84,6 @@ public class ControlCenter implements Observateur{
 			case 3:
 				this.iaAlea = new IAAleatoire(this.epg, this.pg, this);
 				this.iaProba = new IAProba(this.epg, this.pg, this);
-				break;
-			case 4:
-				this.ia = new IAMinmax(this.epg, this.pg, this);
 				break;
 		}
 		if(this.epg.getIAType()==3) {
@@ -349,26 +346,30 @@ public class ControlCenter implements Observateur{
 				addAnimationJoueur();
 			break;
 		}
-		if(this.interSwing.gi.isInAnimation() == false) afterAnimation();
+		
+		this.epg.confirmReceived();
+		
+		if(!this.epg.isIaRound()) {
+			this.interSwing.ci.initialiseZoom();
+			this.interSwing.gi.resetCaseColor();
+			this.interSwing.gi.resetChoseCase();
+			this.interSwing.gi.resetParryCase();
+			if(this.pg.getWaitStatus() == 4)this.interSwing.gi.setStayCaseColor();
+			this.interSwing.repaintAll();
+		}
+		
 	}
 	
 	public void addAnimationJoueur() {
 		int startPos = this.pg.getPlayerCourant().getPlace();
 		int endPos = this.interSwing.gi.choseCase;
-		AnimationJoueur aj = new AnimationJoueur(startPos, endPos, this);
+		AnimationJoueur aj = new AnimationJoueur(this.pg.getTourCourant() ,startPos, endPos, this);
+		System.out.println("joueur = " + this.pg.getTourCourant() +", startPos = " + startPos + ", endPos = " + endPos);
 		this.anims.add(aj);
-		this.interSwing.gi.setInAnimation(true);
-	}
-	
-	public void afterAnimation() {
-		boolean executed = this.epg.confirmReceived();
-		
-		this.interSwing.ci.initialiseZoom();
-		this.interSwing.gi.resetCaseColor();
-		this.interSwing.gi.resetChoseCase();
-		this.interSwing.gi.resetParryCase();
-		if(this.pg.getWaitStatus() == 4)this.interSwing.gi.setStayCaseColor();
-		this.interSwing.repaintAll();
+		if(this.anims.size() == 1) {
+			if(this.pg.getTourCourant() == 1) this.interSwing.gi.setInBlancAnimation(true);
+			else this.interSwing.gi.setInNoirAnimation(true);
+		}
 	}
 	
 	// Clic sur bouton cancel
@@ -704,7 +705,8 @@ public class ControlCenter implements Observateur{
 
 	@Override
 	public void changeText(String s) {
-		this.interSwing.infoArea.setText(s);
+		//if(s != null) this.interSwing.infoArea.setText(s);
+		//this.interSwing.infoArea.setText("New Text");
 	}
 	
 	public void restartButtonAction() {
@@ -719,15 +721,26 @@ public class ControlCenter implements Observateur{
 	}
 
 	public void updateAnimations() {
-		for(int i=0; i<this.anims.size(); i++) {
-			Animation a = this.anims.get(i);
-			if(!a.estTerminee() || (a instanceof AnimationTriangle)) a.tictac();
-			else {
-				this.anims.remove(a);
-				this.interSwing.gi.setInAnimation(false);
-				i--;
-				this.afterAnimation();
+		this.at.tictac();
+		if(this.anims.size() != 0) {
+			if(this.anims.get(0).estTerminee()) {
+				AnimationJoueur aj = this.anims.remove(0);
+				if(aj.joueur == 1) {
+					this.interSwing.gi.setInBlancAnimation(false);
+					this.interSwing.gi.calculNewBlancPos(aj.getStartCase(), aj.getTargetCase(), 0);
+				}
+				else {
+					this.interSwing.gi.setInNoirAnimation(false);
+					this.interSwing.gi.noirAnimationPos = this.pg.getNoirPos();
+				}
+				
+				if(this.anims.size() != 0) {
+					if(this.anims.get(0).joueur == 1) this.interSwing.gi.setInBlancAnimation(true);
+					else this.interSwing.gi.setInNoirAnimation(true);
+					System.out.println(this.anims.get(0));
+				}
 			}
+			if(this.anims.size() != 0) this.anims.get(0).tictac();
 		}
 	}
 	

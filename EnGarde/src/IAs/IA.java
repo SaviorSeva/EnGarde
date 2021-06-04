@@ -51,14 +51,15 @@ public abstract class IA {
     public void jouerCarte(int direction, ArrayList<Boolean> choisir){
         pg.setDirectionDeplace(direction);
         pg.setSelected(choisir);
+        
         int choseCase;
         if((this.pg.getTourCourant() == 1 && this.pg.getDirectionDeplace() == 1) || (this.pg.getTourCourant() == 2 && this.pg.getDirectionDeplace() == 2)) {
             choseCase = this.pg.getPlayerCourant().getPlace() + this.epg.getSelectedCard().getValue();
         }else if((this.pg.getTourCourant() == 2 && this.pg.getDirectionDeplace() == 1) || (this.pg.getTourCourant() == 2 && this.pg.getDirectionDeplace() == 1)){
             choseCase = this.pg.getPlayerCourant().getPlace() - this.epg.getSelectedCard().getValue();
         }else choseCase = this.pg.getPlayerCourant().getPlace();
-        c.tapezSourisGrille(choseCase);
-
+        //c.tapezSourisGrille(choseCase);
+        c.interSwing.gi.setChoseCase(choseCase);
         System.out.println("Etat : " + this.pg.getWaitStatus());
         c.confirmReceived();
         //resetChoisir();

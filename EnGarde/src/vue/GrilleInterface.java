@@ -24,8 +24,16 @@ public class GrilleInterface extends JComponent implements Observateur{
 	Graphics gra;
 	int xpoints[];
 	int ypoints[];
-	boolean inJoueurAnimation;
-	int joueurAnimationPos;
+	boolean inBlancAnimation;
+	boolean inNoirAnimation;
+	public int blancAnimationPos;
+	public int noirAnimationPos;
+	
+	public int oldBlancPos;
+	public int oldNoirPos;
+	
+	int blancCurrentPos;
+	int noirCurrentPos;
 	
 	public Playground pg;
 	
@@ -57,8 +65,14 @@ public class GrilleInterface extends JComponent implements Observateur{
 		this.choseCase = -1;
 		this.xpoints = new int[3];
 		this.ypoints = new int[3];
-		this.inJoueurAnimation = false;
-		this.joueurAnimationPos = 0;
+		this.inBlancAnimation = false;
+		this.inNoirAnimation = false;
+		this.blancCurrentPos = this.pg.getBlancPos();
+		this.noirCurrentPos = this.pg.getNoirPos();
+		this.oldBlancPos = -1;
+		this.oldNoirPos = -1;
+		this.blancAnimationPos = 0;
+		this.noirAnimationPos = 0;
 		this.initialiseIndicateurPosition(this.pg.getPlayerCourant().getPlace(), this.pg.getTourCourant());
 	}
 	
@@ -67,13 +81,23 @@ public class GrilleInterface extends JComponent implements Observateur{
 		return this.predictMove1 == caseNB || this.predictMove2 == caseNB || this.parryCase == caseNB || this.stayCase == caseNB;
 	}
 	
-	public boolean isInAnimation() {
-		return inJoueurAnimation;
-	}
-	public void setInAnimation(boolean inAnimation) {
-		this.inJoueurAnimation = inAnimation;
-	}
 	
+	public boolean isInBlancAnimation() {
+		return inBlancAnimation;
+	}
+
+	public boolean isInNoirAnimation() {
+		return inNoirAnimation;
+	}
+
+	public void setInBlancAnimation(boolean inBlancAnimation) {
+		this.inBlancAnimation = inBlancAnimation;
+	}
+
+	public void setInNoirAnimation(boolean inNoirAnimation) {
+		this.inNoirAnimation = inNoirAnimation;
+	}
+
 	public void tracerGrille() {
 		for(int i=0; i<23; i++) {
 			
@@ -131,21 +155,30 @@ public class GrilleInterface extends JComponent implements Observateur{
 		return res;
 	}
 	
-	public void tracerJoueur(int b, int n) {
+	public void tracerJoueur() {
 		// Joueur Blanc
-		drawable.setColor(Color.WHITE);
-		if(this.pg.getTourCourant() == 2 || !this.inJoueurAnimation)
-			drawable.fillOval(caseXStart+b*caseWidth, (int)(this.caseHeight - this.caseWidth)/2, caseWidth, caseWidth);
-		else if(this.pg.getTourCourant() == 1 && this.inJoueurAnimation) {
-			drawable.fillOval(this.joueurAnimationPos, (int)(this.caseHeight - this.caseWidth)/2, caseWidth, caseWidth);
-		}
-
-		// Joueur Noir
-		drawable.setColor(Color.BLACK);
-		if(this.pg.getTourCourant() == 1 || !this.inJoueurAnimation)
-			drawable.fillOval(caseXStart+n*caseWidth, (int)(this.caseHeight - this.caseWidth)/2, caseWidth, caseWidth);
-		else if(this.pg.getTourCourant() == 2 && this.inJoueurAnimation) {
-			drawable.fillOval(this.joueurAnimationPos, (int)(this.caseHeight - this.caseWidth)/2, caseWidth, caseWidth);
+		
+		if(this.inBlancAnimation) {
+			drawable.setColor(Color.WHITE);
+			
+			drawable.fillOval(this.blancAnimationPos, (int)(this.caseHeight - this.caseWidth)/2, caseWidth, caseWidth);
+			
+			drawable.setColor(Color.BLACK);
+			drawable.fillOval(caseXStart+this.oldNoirPos*caseWidth, (int)(this.caseHeight - this.caseWidth)/2, caseWidth, caseWidth);
+		
+		}else if(this.inNoirAnimation){
+			drawable.setColor(Color.WHITE);
+			drawable.fillOval(caseXStart+this.oldBlancPos*caseWidth, (int)(this.caseHeight - this.caseWidth)/2, caseWidth, caseWidth);
+			
+			drawable.setColor(Color.BLACK);
+			drawable.fillOval(this.noirAnimationPos, (int)(this.caseHeight - this.caseWidth)/2, caseWidth, caseWidth);
+		
+		}else {
+			drawable.setColor(Color.WHITE);
+			drawable.fillOval(caseXStart+this.blancCurrentPos*caseWidth, (int)(this.caseHeight - this.caseWidth)/2, caseWidth, caseWidth);
+			
+			drawable.setColor(Color.BLACK);
+			drawable.fillOval(caseXStart+this.noirCurrentPos*caseWidth, (int)(this.caseHeight - this.caseWidth)/2, caseWidth, caseWidth);
 		}
 	
 		// String Distance
@@ -301,7 +334,16 @@ public class GrilleInterface extends JComponent implements Observateur{
 		this.drawable = (Graphics2D) g;
 		this.gra = g;
 		this.tracerGrille();
-		this.tracerJoueur(this.pg.getBlancPos(), this.pg.getNoirPos());
+		if(this.blancCurrentPos != this.pg.getBlancPos()) {
+			this.oldBlancPos = this.blancCurrentPos;
+			this.blancCurrentPos = this.pg.getBlancPos();
+		}
+		if(this.noirCurrentPos != this.pg.getNoirPos()) {
+			this.oldNoirPos = this.noirCurrentPos;
+			this.noirCurrentPos = this.pg.getNoirPos();
+		}
+		System.out.println(this.blancAnimationPos);
+		this.tracerJoueur();
 		
 		// tracer l'indicateur de joueur courant
 		if(this.pg.getTourCourant() == 1) tracerIndicateur(this.pg.getBlancPos(), 1);
@@ -387,10 +429,21 @@ public class GrilleInterface extends JComponent implements Observateur{
 		
 	}
 	
-	public void calculNewJoueurPos(int startCase, int targetCase, int progress) {
+	public void calculNewBlancPos(int startCase, int targetCase, int progress) {
 		int startCasePos = caseXStart+startCase*caseWidth;
 		int	targetCasePos = caseXStart+targetCase*caseWidth;
-		this.joueurAnimationPos = (int)(startCasePos + (double)((targetCasePos - startCasePos) * progress) / 100.0);
+		this.blancAnimationPos = (int)(startCasePos + (double)((targetCasePos - startCasePos) * progress) / 100.0);
+		
+		if(progress >= 100) this.oldBlancPos = this.blancCurrentPos;
+		this.repaint();
+	}
+	
+	public void calculNewNoirPos(int startCase, int targetCase, int progress) {
+		int startCasePos = caseXStart+startCase*caseWidth;
+		int	targetCasePos = caseXStart+targetCase*caseWidth;
+		this.noirAnimationPos = (int)(startCasePos + (double)((targetCasePos - startCasePos) * progress) / 100.0);
+		
+		if(progress >= 100) this.oldNoirPos = this.noirCurrentPos;
 		this.repaint();
 	}
 }
