@@ -1,9 +1,12 @@
 package vue;
 
+import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.util.ArrayList;
 
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -12,16 +15,29 @@ import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
 
+import controlleur.AdapteurStarter;
 import modele.ExecPlayground;
 import modele.Playground;
 
 public class InterfaceInitialise implements Runnable{
 	public TitreInterface ti;
 	public JFrame frame;
-	public JToggleButton startHuman, startAI;
+	public JButton startHuman, startAI;
+	public JTextField POneText;
+	public JTextField PTwoText;
+	public JTextField aiPText;
+	public JRadioButton[] aiPlayerSelections;
+	public ArrayList<JRadioButton> aiSelections;
+	public ButtonGroup aiDiffGroup;
 	
 	public InterfaceInitialise() {
 		this.ti = new TitreInterface();
+		POneText = new JTextField();
+        PTwoText = new JTextField();
+        aiPText = new JTextField();
+        aiPlayerSelections = new JRadioButton[2];
+        aiDiffGroup = new ButtonGroup();
+        this.aiSelections = new ArrayList<JRadioButton>();
 	}
 	
 	@Override
@@ -30,17 +46,27 @@ public class InterfaceInitialise implements Runnable{
 		JRadioButton aiOption1 = new JRadioButton("AI Random");
         JRadioButton aiOption2 = new JRadioButton("AI Probabilité");
         JRadioButton aiOption3 = new JRadioButton("AI Arbre MinMax");
+        JRadioButton aiOption6 = new JRadioButton("AI Random VS AI Proba");
+        aiSelections.add(aiOption1);
+        aiSelections.add(aiOption2);
+        aiSelections.add(aiOption3);
+        aiSelections.add(aiOption6);
         
         JRadioButton aiOption4 = new JRadioButton("Play as white");
         JRadioButton aiOption5 = new JRadioButton("Play as black");
-
-        this.startHuman = new JToggleButton("Start with human");
-        this.startAI = new JToggleButton("Start with an AI");
-		
-        ButtonGroup aiDiffGroup = new ButtonGroup();
+        
+        aiPlayerSelections[0] = aiOption4;
+        aiPlayerSelections[1] = aiOption5;
+ 
+        this.startHuman = new JButton("Start with human");
+        this.startHuman.addActionListener(new AdapteurStarter(false, this));
+        this.startAI = new JButton("Start with an AI");
+        this.startAI.addActionListener(new AdapteurStarter(true, this));
+        
         aiDiffGroup.add(aiOption1);
         aiDiffGroup.add(aiOption2);
         aiDiffGroup.add(aiOption3);
+        aiDiffGroup.add(aiOption6);
         aiOption1.setSelected(true);
         
         ButtonGroup aiPlayerGroup = new ButtonGroup();
@@ -66,10 +92,6 @@ public class InterfaceInitialise implements Runnable{
         JLabel PTwoL = new JLabel("2P Name : ");
         JLabel aiPL = new JLabel("Player Name : ");
         
-        JTextField POneText = new JTextField();
-        JTextField PTwoText = new JTextField();
-        JTextField aiPText = new JTextField();
-        
         POneBox.add(POneL);
         POneBox.add(POneText);
         
@@ -82,6 +104,7 @@ public class InterfaceInitialise implements Runnable{
         aiDiffBox.add(aiOption1);
         aiDiffBox.add(aiOption2);
         aiDiffBox.add(aiOption3);
+        aiDiffBox.add(aiOption6);
         
         aiPlayerBox.add(aiOption4);
         aiPlayerBox.add(aiOption5);
@@ -90,16 +113,20 @@ public class InterfaceInitialise implements Runnable{
         aiSettingBox.add(aiPlayerBox);
         
         aiBox.add(startAI);
+        aiBox.add(Box.createVerticalStrut(20));
         startAI.setAlignmentX(JComponent.CENTER_ALIGNMENT);
         aiBox.add(aiSettingBox);
         aiBox.add(aiPBox);
         
         humanBox.add(startHuman);
+        humanBox.add(Box.createVerticalStrut(20));
         startHuman.setAlignmentX(JComponent.CENTER_ALIGNMENT);
         humanBox.add(POneBox);
         humanBox.add(PTwoBox);
         
         settingBox.add(humanBox);
+        humanBox.setPreferredSize(new Dimension(200, 100));
+        settingBox.add(Box.createHorizontalStrut(100));
         settingBox.add(aiBox);
         
         frameBox.add(ti);

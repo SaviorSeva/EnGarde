@@ -9,21 +9,15 @@ public class AnimationJoueur extends Animation {
 	int targetCase;
 	
 	public AnimationJoueur(int joueur, int startCase, int targetCase, ControlCenter cc) {
-		super(60);
+		super(75);
 		this.joueur = joueur;
 		this.startCase = startCase;
 		this.targetCase = targetCase;
 		this.cc = cc;
 	}
-	
-	
-	
 	public int getStartCase() {
 		return startCase;
 	}
-
-
-
 	public int getTargetCase() {
 		return targetCase;
 	}
@@ -48,7 +42,7 @@ public class AnimationJoueur extends Animation {
 		if(super.compteur >= MAXCOMPTEUR) {
 			super.compteur = MAXCOMPTEUR;
 		}
-		System.out.println("Compteur = "+ super.compteur);
+		// System.out.println("Compteur = "+ super.compteur);
 		miseAJour();
 	}
 

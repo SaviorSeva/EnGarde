@@ -8,8 +8,6 @@ import java.util.Random;
 
 public class IAAleatoire extends IA{
     Random random;
-
-
     int direction;
     private boolean parry;
 

@@ -21,12 +21,14 @@ public class AdapteurSourisCarte extends MouseAdapter {
 	
 	@Override
 	public void mousePressed(MouseEvent e) {
-		int sourisX = e.getX();
-		int sourisY = e.getY();
-		if(SwingUtilities.isLeftMouseButton(e))
-			cc.clicSourisCarte(sourisX, sourisY);
-		else if(SwingUtilities.isRightMouseButton(e)){
-			cc.clicSourisCarteDroite(sourisX, sourisY);
+		if(cc.clicable) {
+			int sourisX = e.getX();
+			int sourisY = e.getY();
+			if(SwingUtilities.isLeftMouseButton(e))
+				cc.clicSourisCarte(sourisX, sourisY);
+			else if(SwingUtilities.isRightMouseButton(e)){
+				cc.clicSourisCarteDroite(sourisX, sourisY);
+			}
 		}
 	}
 

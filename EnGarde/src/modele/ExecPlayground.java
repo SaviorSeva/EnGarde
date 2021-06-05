@@ -13,12 +13,15 @@ public class ExecPlayground extends Observable{
 	public int IAType;
 	public int humanPlayer;
 	
+	public boolean gameStopped;
+	
 	public ExecPlayground(Playground pg, int IAType) {
 		this.pg = pg;
 		this.currentAction = new Action();
 		this.hist = new Historique();
 		this.IAType = IAType;
 		humanPlayer = pg.getStartType();
+		gameStopped = false;
 	}
 	
 	public int getIAType() {
@@ -79,7 +82,9 @@ public class ExecPlayground extends Observable{
 	
     // on remet le jeu comme le début
 	public void restartNewRound() {
-    	this.pg.getBlanc().setPlace(0);
+		this.gameStopped = false;
+		
+		this.pg.getBlanc().setPlace(0);
     	this.pg.getNoir().setPlace(22);
     	
     	this.initiliaseCarte();
@@ -280,7 +285,11 @@ public class ExecPlayground extends Observable{
 		if(unableToMove) {
 			System.out.println("You cannot move or attack, therefore" + pg.getTourCourant() + " lose !");
 			this.pg.getEnemyCourant().incrementPoint();
-			this.restartNewRound();
+			
+			if(this.IAType != 3) {
+				this.sendLoseSignal(pg.getTourCourant(), "he is unable to move or attack with his cards.");
+				
+			}else this.restartNewRound();
 		}else {
 			// si oui on rentre dans l'etat 3, c'est à dire on attend le joueur choisi un / des carte(s) puis confirmer
 			this.pg.setWaitStatus(3);
@@ -306,9 +315,26 @@ public class ExecPlayground extends Observable{
 			int distNoir = this.pg.getNoir().getDistToStartPlace();
 			// la joueur dont la distance entre joueur et départ est la plus grand obtient un point
 			// puis recommencer le prochain Round
-			if(distBlanc > distNoir) this.pg.getBlanc().incrementPoint();
-			else if(distNoir > distBlanc) this.pg.getNoir().incrementPoint();
-			this.restartNewRound();
+			int i=-1;
+			if(distBlanc > distNoir) {
+				this.pg.getBlanc().incrementPoint();
+				i=1;
+			}
+			else if(distNoir > distBlanc) {
+				this.pg.getNoir().incrementPoint();
+				i=2;
+			}
+			if(i!=-1) {
+				if(this.IAType != 3) {
+					this.sendLoseSignal(i, "the other player is further from his start place.");
+					this.gameStopped = true;
+				}
+				else this.restartNewRound();
+			}
+			else {
+				if(this.IAType != 3) this.sendLoseSignal(i, "both player travel the same distance.");
+				else this.restartNewRound();
+			}
 		}
 		// 2. si joueur courant n'a plus de carte
 		else if(this.getCurrentPlayerCards().size() == 0) {
@@ -316,7 +342,11 @@ public class ExecPlayground extends Observable{
 			if(pg.getLastAttack().getAt() != AttackType.NONE) {
 				if(this.pg.getTourCourant() == 1) this.pg.getNoir().incrementPoint();
 				else this.pg.getBlanc().incrementPoint();
-				this.restartNewRound();
+				
+				if(this.IAType != 3) {
+					this.sendLoseSignal(this.pg.getTourCourant(), "he has no card to parry an attack.");
+					
+				}else this.restartNewRound();
 			}else {
 				// Sinon il fait aucun action
 				this.currentAction.appendNoAction();
@@ -331,9 +361,14 @@ public class ExecPlayground extends Observable{
 	    	case 0:
 	    		// incrémenter points d'ennemis puis recommencer nouvel round
 	    		System.out.println("Case 0 lose, lose player: " + pg.getTourCourant());
+	    		
 				if(this.pg.getTourCourant() == 1) this.pg.getNoir().incrementPoint();
 				else this.pg.getBlanc().incrementPoint();
-				this.restartNewRound();
+				if(this.IAType != 3) {
+					this.sendLoseSignal(pg.getTourCourant(), "Unparryable direct attack.");
+					
+				}else this.restartNewRound();
+				
 				break;
 			case 1:
 				//1 - Pas d'attaque
@@ -359,8 +394,11 @@ public class ExecPlayground extends Observable{
 				// si on ne peut pas retraite, on perd directement
 				if(unableToRetreat) {
 					System.out.println("You cannnot retreat. You lose !");
+					
 					this.pg.getEnemyCourant().incrementPoint();
-					this.restartNewRound();
+					if(this.IAType != 3) {
+						this.sendLoseSignal(this.pg.getTourCourant(), "he is unable to retreat with his cards");
+					}else this.restartNewRound();
 				//sinon on rentre dans l'état 2: choisir la carte pour défendre
 				}else this.pg.setWaitStatus(2);
 				break;
@@ -376,11 +414,13 @@ public class ExecPlayground extends Observable{
 				break;
 	    	}
 		}
-
-		if(this.IAType==3) this.metAJour();
-		else if (this.IAType != 0 && this.isIaRound()) {
-			this.metAJour();
+		if(!this.gameStopped) {
+			if(this.IAType==3) this.metAJour();
+			else if (this.IAType != 0 && this.isIaRound()) {
+				this.metAJour();
+			}
 		}
+		
 	}
 	
 	public void roundEnd(Attack att) {
@@ -651,6 +691,12 @@ public class ExecPlayground extends Observable{
 		String params[] = string.split(":");
 		if(params.length == 1) this.currentAction.setActionString("");
 		else this.currentAction.setActionString((params[1]));
+	}
+	
+	@Override
+	public void sendLoseSignal(int i, String s) {
+		this.gameStopped = true;
+		super.sendLoseSignal(i, s);
 	}
 	
 	public void setHistoriqueByString(String string) {

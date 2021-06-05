@@ -65,4 +65,14 @@ public class Observable {
 			o.changeText(s);
 		}
 	}
+	
+	public void sendLoseSignal(int i, String s) {
+		Iterator<Observateur> it;
+	
+		it = observateurs.iterator();
+		while (it.hasNext()) {
+			Observateur o = it.next();
+			o.receiveLoseSignal(i, s);
+		}
+	}
 }

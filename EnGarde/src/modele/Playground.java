@@ -31,9 +31,9 @@ public class Playground extends Observable{
     
     private int startType;
     
-    public Playground(int startType) {
-    	this.blanc = new Player(0, "1P");
-    	this.noir = new Player(22, "2P");
+    public Playground(int startType, String name1P, String name2P) {
+    	this.blanc = new Player(0, name1P);
+    	this.noir = new Player(22, name2P);
     	
     	this.reste = new ArrayList<Carte>();
     	this.used = new ArrayList<Carte>();

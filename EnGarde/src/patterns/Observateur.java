@@ -34,4 +34,5 @@ package patterns;
 public interface Observateur {
 	void miseAJour();
 	void changeText(String s);
+	void receiveLoseSignal(int i, String s);
 }

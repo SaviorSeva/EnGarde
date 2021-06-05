@@ -227,4 +227,10 @@ public class CarteInterface extends JComponent implements Observateur{
 		// TODO Auto-generated method stub
 	}
 
+	@Override
+	public void receiveLoseSignal(int i, String s) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

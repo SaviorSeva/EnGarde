@@ -29,12 +29,16 @@ import vue.InterfaceInitialise;
 import vue.InterfaceSwing;
 import vue.LoadInterface;
 import vue.SaveInterface;
+import vue.WinInterface;
 
 public class ControlCenter implements Observateur{
 	public Playground pg;
 	public ExecPlayground epg;
 	public InterfaceSwing interSwing;
+	public InterfaceInitialise interIni;
+	public WinInterface wi;
 	ArrayList<Point> elementPos;
+	public boolean clicable;
 	IA ia;
 	IA iaAlea;
 	IA iaProba;
@@ -62,7 +66,9 @@ public class ControlCenter implements Observateur{
 //			break;
 //		}
 		this.anims = new ArrayList<AnimationJoueur>();
+		this.clicable = true;
 		this.at = new AnimationTriangle(30, this);
+		this.wi = new WinInterface(this);
 	}
 	
 	public void ajouteInterfaceUtilisateur(InterfaceSwing ifs) {
@@ -722,6 +728,7 @@ public class ControlCenter implements Observateur{
 
 	public void updateAnimations() {
 		this.at.tictac();
+		this.interSwing.gi.updateAnimationGrille();
 		if(this.anims.size() != 0) {
 			if(this.anims.get(0).estTerminee()) {
 				AnimationJoueur aj = this.anims.remove(0);
@@ -749,5 +756,14 @@ public class ControlCenter implements Observateur{
 			if(!a.estTerminee()) return false;
 		}
 		return true;
+	}
+
+	@Override
+	public void receiveLoseSignal(int i, String s) {
+		this.clicable = false;
+		this.wi.run();
+		if(i != -1) this.wi.changeText("Player " + i + " lose because " + s);
+		else this.wi.changeText("Game draw because " + s);
+		this.wi.setVisible(true);
 	}
 }
