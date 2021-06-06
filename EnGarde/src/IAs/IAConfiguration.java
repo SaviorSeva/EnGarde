@@ -1,5 +1,6 @@
 package IAs;
 
+import global.Configuration;
 import modele.*;
 
 import java.util.ArrayList;
@@ -18,12 +19,13 @@ public class IAConfiguration{
     int positionNoir;
     int positionBlanc;
     IAConfiguration pere;
+    IAConfiguration vraiFils;
     Attack parry;
     IAAction action;
     int typeGagne;
     double gagnerProba;
-    int branchGagne;
-    int branchPerdu;
+    double branchGagne;
+    double branchPerdu;
     int couche;
 
     public IAConfiguration(Playground pg){
@@ -63,7 +65,6 @@ public class IAConfiguration{
         this.pere = pere;
         owner = pere.owner;
         tourCourrant = pere.tourCourrant%2+1;
-        parry = p;
         action = new IAAction(a);
         reste = new ArrayList<>();
         carteCurrant = new ArrayList<>();
@@ -75,12 +76,13 @@ public class IAConfiguration{
         positionBlanc = pere.positionBlanc;
         positionNoir = pere.positionNoir;
         typeGagne = 2;
-        couche++;
+        couche = pere.couche++;
 
         //Deepcopy
         reste.addAll(pere.reste);
         //Parry phase
         if(p!=null){
+            parry = new Attack(p.getAt(),p.getAttValue(),p.getAttnb());
             for (int i = 0; i < reste.size() && n<=parry.getAttnb(); i++) {
                 carteJouer.add(parry.getAttValue());
             }
@@ -159,16 +161,43 @@ public class IAConfiguration{
     }
 
     public int disToDebut(){
-        if(tourCourrant==owner && owner==2) return positionBlanc;
+        if(tourCourrant==1) return positionBlanc;
         else return 22-positionNoir;
     }
 
     public void incrementGagne(){
-        this.branchGagne++;
+        if(this.pere!=null){
+            this.pere.branchGagne++;
+            this.pere.incrementGagne();
+        }
+    }
+
+    public void incrementPerdu(){
+        if(this.pere!=null){
+            this.pere.branchPerdu++;
+            this.pere.incrementPerdu();
+        }
     }
     public void setTourCourrant(){
         tourCourrant = tourCourrant%2+1;
     }
 
-    
+
+    public void setMinmax(IAConfiguration config) {
+        if(config.pere!=null){//max
+            if(config.tourCourrant==owner){
+                if(config.gagnerProba>config.pere.gagnerProba){
+                    pere.vraiFils = config;
+                    pere.gagnerProba = config.gagnerProba;
+                    setMinmax(config.pere);
+                }
+            }else{
+                if(config.gagnerProba<config.pere.gagnerProba){
+                    pere.vraiFils = config;
+                    pere.gagnerProba = config.gagnerProba;
+                    setMinmax(config.pere);
+                }
+            }
+        }
+    }
 }
