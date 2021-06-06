@@ -22,6 +22,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
@@ -42,10 +43,11 @@ public class InterfaceSwing implements Runnable{
 	public JFrame frame;
 	boolean maximized;
 	public ControlCenter cc;
-	public JButton confirmer, annulerRound, cancel, annulerAction, pleinEcran, save, load, restart, help;
+	public JButton annulerRound, annulerAction, pleinEcran, save, load, restart, help;
 	public Image pleinEcranImage, saveImage, loadImage, restartImage, helpImage;
-	public JTextField infoArea;
+	public JTextArea infoArea;
 	public Timer chorno;
+	public RegleInterface ri;
 	
 	public InterfaceSwing(Playground pg, ExecPlayground epg) {
 		this.pg = pg;
@@ -70,6 +72,8 @@ public class InterfaceSwing implements Runnable{
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		this.infoArea = new JTextArea("Some Text");
+		this.ri = new RegleInterface();
 	}
 	
 	public ArrayList<InterfaceElementPosition> getGrillePos() {
@@ -100,34 +104,24 @@ public class InterfaceSwing implements Runnable{
 		Box boiteInfo = Box.createHorizontalBox();
 		Box boiteContenu = Box.createVerticalBox();
 		
+		Box boiteAnnulers = Box.createVerticalBox();
+		
 		AdapteurSourisGrille asg = new AdapteurSourisGrille(this.cc);
 		AdapteurSourisCarte asc = new AdapteurSourisCarte(this.cc);
 		
-		// Info Label
-		
-		// Bouton confirmer
-		this.confirmer = new JButton("Confirmer");
-		confirmer.setAlignmentX(Component.LEFT_ALIGNMENT);
-		confirmer.setFocusable(false);
-		boiteInfo.add(confirmer);
-		
-		// Bouton cancel
-		this.cancel = new JButton("Cancel");
-		cancel.setAlignmentX(Component.LEFT_ALIGNMENT);
-		cancel.setFocusable(false);
-		boiteInfo.add(cancel);
-		
 		// Bouton annuler tour
 		this.annulerRound = new JButton("Annuler tour");
-		annulerRound.setAlignmentX(Component.LEFT_ALIGNMENT);
+		annulerRound.setAlignmentX(Component.CENTER_ALIGNMENT);
 		annulerRound.setFocusable(false);
-		boiteInfo.add(annulerRound);
+		boiteAnnulers.add(annulerRound);
 		
 		// Bouton annuler action
 		this.annulerAction = new JButton("Annuler action");
-		annulerAction.setAlignmentX(Component.LEFT_ALIGNMENT);
+		annulerAction.setAlignmentX(Component.CENTER_ALIGNMENT);
 		annulerAction.setFocusable(false);
-		boiteInfo.add(annulerAction);
+		boiteAnnulers.add(annulerAction);
+		
+		boiteInfo.add(boiteAnnulers);
 		
 		// Bouton pleinEcran
 		ImageIcon pleinEcranIcon = new ImageIcon(pleinEcranImage);
@@ -170,22 +164,12 @@ public class InterfaceSwing implements Runnable{
 		help.setContentAreaFilled(false);
 		
 		// Creer un boite de text pour afficher des infos utiles
-		this.infoArea = new JTextField("Some Text");
-		this.infoArea.setAlignmentX(Component.RIGHT_ALIGNMENT);
-		boiteInfo.add(infoArea);
 		
-		// Des actionlisteners pour les boutons
-		this.confirmer.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				cc.confirmReceived();
-				cc.initialiseZoom();
-			}
-		});
-		this.cancel.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				cc.clicCancel();
-			}
-		});
+		this.infoArea.setAlignmentX(Component.RIGHT_ALIGNMENT);
+		this.infoArea.setPreferredSize(new Dimension(600, 90));
+		this.infoArea.setEditable(false);
+		boiteInfo.add(infoArea);
+	
 		this.annulerRound.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				while(cc.epg.currentAction.getNBActionValide() != 0) cc.annulerAction();
@@ -220,19 +204,10 @@ public class InterfaceSwing implements Runnable{
 		});
 		this.help.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				try {
-					File pdfFile = new File("./res/engarde.pdf");
-					if(pdfFile.exists()) {
-						if(Desktop.isDesktopSupported()) {
-			                Desktop.getDesktop().open(pdfFile);
-			            }else System.err.println("Awt Desktop is not supported!");
-			        }
-				} catch (Exception ex) {
-					ex.printStackTrace();
-		        }
+				ri.frame.setVisible(true);
 			}
 		});
-		this.infoArea.setFont(new Font("TimesRoman", Font.PLAIN, 25));
+		this.infoArea.setFont(new Font("TimesRoman", Font.PLAIN, 20));
 		
 		// Des listeners pour les interfaces
 		gi.addMouseListener(asg);

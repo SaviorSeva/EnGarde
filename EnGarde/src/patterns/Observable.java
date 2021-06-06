@@ -75,4 +75,14 @@ public class Observable {
 			o.receiveLoseSignal(i, s);
 		}
 	}
+	
+	public void sendRestartSignal() {
+		Iterator<Observateur> it;
+	
+		it = observateurs.iterator();
+		while (it.hasNext()) {
+			Observateur o = it.next();
+			o.receiveRestartSignal();
+		}
+	}
 }

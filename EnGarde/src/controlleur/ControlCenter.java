@@ -711,7 +711,7 @@ public class ControlCenter implements Observateur{
 
 	@Override
 	public void changeText(String s) {
-		//if(s != null) this.interSwing.infoArea.setText(s);
+		if(s != null) this.interSwing.infoArea.setText(s);
 		//this.interSwing.infoArea.setText("New Text");
 	}
 	
@@ -765,5 +765,12 @@ public class ControlCenter implements Observateur{
 		if(i != -1) this.wi.changeText("Player " + i + " lose because " + s);
 		else this.wi.changeText("Game draw because " + s);
 		this.wi.setVisible(true);
+	}
+
+	@Override
+	public void receiveRestartSignal() {
+		this.interSwing.gi.resetChoseCase();
+		this.interSwing.gi.resetCaseColor();
+		this.interSwing.ci.initialiseZoom();
 	}
 }

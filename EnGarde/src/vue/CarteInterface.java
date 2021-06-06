@@ -127,7 +127,8 @@ public class CarteInterface extends JComponent implements Observateur{
 		else cartes = pg.getNoirCartes();
 		
 		// Paint card border
-		drawable.setColor(Color.GREEN);
+		if(this.pg.getTourCourant() == 1) drawable.setColor(Color.GREEN);
+		else drawable.setColor(Color.PINK);
 		drawable.setStroke(new BasicStroke(5));
 		drawable.drawRect(carteXStart, (int)(63*(this.proportionZoomCarte-this.proportionCarte)), (int)(500*this.proportionCarte), (int)(130*this.proportionCarte));
 		
@@ -229,6 +230,12 @@ public class CarteInterface extends JComponent implements Observateur{
 
 	@Override
 	public void receiveLoseSignal(int i, String s) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void receiveRestartSignal() {
 		// TODO Auto-generated method stub
 		
 	}

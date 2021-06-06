@@ -9,6 +9,8 @@ public class ExecPlayground extends Observable{
 	public Playground pg;
 	public Action currentAction;
 	public Historique hist;
+	boolean gameStart;
+	String infoString;
 	
 	public int IAType;
 	public int humanPlayer;
@@ -22,6 +24,8 @@ public class ExecPlayground extends Observable{
 		this.IAType = IAType;
 		humanPlayer = pg.getStartType();
 		gameStopped = false;
+		gameStart = true;
+		this.infoString = "";
 	}
 	
 	public int getIAType() {
@@ -100,6 +104,18 @@ public class ExecPlayground extends Observable{
     	
     	this.currentAction = new Action();
     	this.hist = new Historique();
+    	
+    	if(this.gameStart) {
+	    	if(this.pg.getStartType() == 0)
+	    		this.infoString = "Bienvenue au jeu En Garde, " + this.pg.getBlanc().getName()  + " et " + this.pg.getNoir().getName() + "!\n";
+	    	else if(this.pg.getStartType() == 1)
+	    		this.infoString = "Bienvenue au jeu En Garde, " + this.pg.getBlanc().getName()  + "!\n" ;
+	    	else if(this.pg.getStartType() == 2)
+	    		this.infoString = "Bienvenue au jeu En Garde, " + this.pg.getNoir().getName()  + "!\n" ;
+	    	
+    	}
+    	
+    	this.sendRestartSignal();
     	
     	this.roundStart(new Attack(AttackType.NONE, null, 0));
     }
@@ -232,7 +248,9 @@ public class ExecPlayground extends Observable{
 				this.jouerCarte();
 				// Get the possibility of an indirect attack
 				if(this.canAttack()) {
+					this.infoString = "Vous avez faire un mouvement, mais vous pouvez faire une attaque indirecte ou terminer votre tour.";
 					this.pg.setWaitStatus(4);
+					this.metAJour(infoString);
 				}else {
 					this.currentAction.appendNoAttackAction();
 					this.roundEnd(new Attack(AttackType.NONE, null, 0));
@@ -283,7 +301,7 @@ public class ExecPlayground extends Observable{
 		}
 		// si on ne peut pas déplacer ou attaquer, on perde le Round courant puis recommencer un nouvelle Round
 		if(unableToMove) {
-			System.out.println("You cannot move or attack, therefore" + pg.getTourCourant() + " lose !");
+			System.out.println("You cannot move or attack, therefore " + pg.getTourCourant() + " lose !");
 			this.pg.getEnemyCourant().incrementPoint();
 			
 			if(this.IAType != 3) {
@@ -293,6 +311,11 @@ public class ExecPlayground extends Observable{
 		}else {
 			// si oui on rentre dans l'etat 3, c'est à dire on attend le joueur choisi un / des carte(s) puis confirmer
 			this.pg.setWaitStatus(3);
+			if(this.gameStart)
+				this.infoString += "Vous pouvez choisir un carte pour faire un mouvement ou attaquer votre ennemi.";
+			else this.infoString = "Vous pouvez choisir un carte pour faire un mouvement ou attaquer votre ennemi.";
+			this.gameStart = false;
+			this.metAJour(infoString);
 		}
 	}
 	
@@ -308,7 +331,8 @@ public class ExecPlayground extends Observable{
 			}
 			System.exit(0);
 		}
-
+		
+		/*
 		// 1. si les deux joueurs n'ont plus de carte, passez au règlement
 		if(this.pg.getBlancCartes().size() == 0 && this.pg.getNoirCartes().size() == 0) {
 			int distBlanc = this.pg.getBlanc().getDistToStartPlace();
@@ -318,11 +342,11 @@ public class ExecPlayground extends Observable{
 			int i=-1;
 			if(distBlanc > distNoir) {
 				this.pg.getBlanc().incrementPoint();
-				i=1;
+				i=2;
 			}
 			else if(distNoir > distBlanc) {
 				this.pg.getNoir().incrementPoint();
-				i=2;
+				i=1;
 			}
 			if(i!=-1) {
 				if(this.IAType != 3) {
@@ -336,6 +360,8 @@ public class ExecPlayground extends Observable{
 				else this.restartNewRound();
 			}
 		}
+		
+		
 		// 2. si joueur courant n'a plus de carte
 		else if(this.getCurrentPlayerCards().size() == 0) {
 			// Verifier s'il y a un attaque, si oui, il perde
@@ -353,76 +379,105 @@ public class ExecPlayground extends Observable{
 				this.roundEnd(new Attack(AttackType.NONE, null, 0));
 			}
 		}
+		
+		*/
+		
 		//3. si joueur courant contient des cartes
-		else {
-			// on rentre dans différent état selon valeur retour par la fonction phaseParer
-			int pharerResultat = phaseParer(this.pg.getLastAttack());
-	    	switch(pharerResultat) {
-	    	case 0:
-	    		// incrémenter points d'ennemis puis recommencer nouvel round
-	    		System.out.println("Case 0 lose, lose player: " + pg.getTourCourant());
-	    		
-				if(this.pg.getTourCourant() == 1) this.pg.getNoir().incrementPoint();
-				else this.pg.getBlanc().incrementPoint();
-				if(this.IAType != 3) {
-					this.sendLoseSignal(pg.getTourCourant(), "Unparryable direct attack.");
-					
-				}else this.restartNewRound();
+		// on rentre dans différent état selon valeur retour par la fonction phaseParer
+		int pharerResultat = phaseParer(this.pg.getLastAttack());
+    	switch(pharerResultat) {
+    	case 0:
+    		// incrémenter points d'ennemis puis recommencer nouvel round
+    		System.out.println("Case 0 lose, lose player: " + pg.getTourCourant());
+    		
+			if(this.pg.getTourCourant() == 1) this.pg.getNoir().incrementPoint();
+			else this.pg.getBlanc().incrementPoint();
+			if(this.IAType != 3) {
+				this.sendLoseSignal(pg.getTourCourant(), "Unparryable direct attack.");
 				
-				break;
-			case 1:
-				//1 - Pas d'attaque
-				System.out.println("Case 1 noAttack");
-				// Rentre dans l'état 3: attendre le joueur choisit le carte puis confirmer
-				this.currentAction.appendNoParryAction();
-				enterE3();
-				break;
-			case 2:
-				// 2 - attaque direct et le joueur courant a des cartes pour défendre cette attaque
-				System.out.println("Case 2 canParry");
-				// on rentre dans l'état 1: choisir la carte pour défendre puis attendre le joueur clic confirmer
-				this.pg.setWaitStatus(1);
-				break;
-			case 3:
-				// 3 - attaque indirect et on ne peut que retraiter
-				System.out.println("Case 3 retreat");
-				ArrayList<Carte> cs = this.getCurrentPlayerCards();
-				boolean unableToRetreat = true;
-				for(int i=0; i<cs.size() && unableToRetreat; i++) {
-					if(this.pg.getPlayerCourant().getDistToStartPlace() >= cs.get(i).getValue()) unableToRetreat = false;
-				}
-				// si on ne peut pas retraite, on perd directement
-				if(unableToRetreat) {
-					System.out.println("You cannnot retreat. You lose !");
-					
-					this.pg.getEnemyCourant().incrementPoint();
-					if(this.IAType != 3) {
-						this.sendLoseSignal(this.pg.getTourCourant(), "he is unable to retreat with his cards");
-					}else this.restartNewRound();
-				//sinon on rentre dans l'état 2: choisir la carte pour défendre
-				}else this.pg.setWaitStatus(2);
-				break;
-			case 4:
-				// 4 - attaque indirect avec carte possible pour défendre ou juste retraite
-				System.out.println("Case 4 retreat or parry");
-				// on rentre dans l'état 5: on peut soit défendre soit retraite
-				this.pg.setWaitStatus(5);
-				break;
-			default:
-				// Should not be executed
-				System.err.println("roundStart() Error");
-				break;
-	    	}
-		}
+			}else this.restartNewRound();
+			
+			break;
+		case 1:
+			//1 - Pas d'attaque
+			System.out.println("Case 1 noAttack");
+			// Rentre dans l'état 3: attendre le joueur choisit le carte puis confirmer
+			this.currentAction.appendNoParryAction();
+			enterE3();
+			break;
+		case 2:
+			// 2 - attaque direct et le joueur courant a des cartes pour défendre cette attaque
+			System.out.println("Case 2 canParry");
+			// on rentre dans l'état 1: choisir la carte pour défendre puis attendre le joueur clic confirmer
+			this.pg.setWaitStatus(1);
+			if(this.pg.getLastAttack().getAttnb() == 1)
+				this.infoString = "Vous subissez un attaque direct de 1 carte avec un valeur de " + 
+									this.pg.getLastAttack().getAttValue().getValue() + " , \n";
+			else 
+				this.infoString = "Vous subissez un attaque direct de " + this.pg.getLastAttack().getAttnb() +
+									" cartes avec un valeur de " + 
+									this.pg.getLastAttack().getAttValue().getValue() + " , \n";
+			this.infoString += "Parer cette attaque avec la(les) catre(s) avec le même valeur et nombre.";
+			this.metAJour(this.infoString);
+			break;
+		case 3:
+			// 3 - attaque indirect et on ne peut que retraiter
+			System.out.println("Case 3 retreat");
+			ArrayList<Carte> cs = this.getCurrentPlayerCards();
+			boolean unableToRetreat = true;
+			for(int i=0; i<cs.size() && unableToRetreat; i++) {
+				if(this.pg.getPlayerCourant().getDistToStartPlace() >= cs.get(i).getValue()) unableToRetreat = false;
+			}
+			// si on ne peut pas retraite, on perd directement
+			if(unableToRetreat) {
+				System.out.println("You cannnot retreat. You lose !");
+				
+				this.pg.getEnemyCourant().incrementPoint();
+				if(this.IAType != 3) {
+					this.sendLoseSignal(this.pg.getTourCourant(), "he is unable to retreat with his cards");
+				}else this.restartNewRound();
+			//sinon on rentre dans l'état 2: choisir la carte pour défendre
+			}else this.pg.setWaitStatus(2);
+			
+			if(this.pg.getLastAttack().getAttnb() == 1)
+				this.infoString = "Vous subissez un attaque indirect de 1 carte avec un valeur de " + 
+									this.pg.getLastAttack().getAttValue().getValue() + " , \n";
+			else 
+				this.infoString = "Vous subissez un attaque indirect de "+ this.pg.getLastAttack().getAttnb() + 
+									" cartes avec un valeur de " + 
+									this.pg.getLastAttack().getAttValue().getValue() + " , \n";
+			this.infoString += "Vous n'avez pas de carte pour le parer, mais vous pouvez retraiter avec un carte et terminer votre tour.";
+			this.metAJour(infoString);
+			break;
+		case 4:
+			// 4 - attaque indirect avec carte possible pour défendre ou juste retraite
+			System.out.println("Case 4 retreat or parry");
+			// on rentre dans l'état 5: on peut soit défendre soit retraite
+			this.pg.setWaitStatus(5);
+			if(this.pg.getLastAttack().getAttnb() == 1)
+				this.infoString = "Vous subissez un attaque indirect de 1 carte avec un valeur de " + 
+									this.pg.getLastAttack().getAttValue().getValue() + " , \n";
+			else 
+				this.infoString = "Vous subissez un attaque indirect de "+ this.pg.getLastAttack().getAttnb() + 
+									"cartes avec un valeur de " + 
+									this.pg.getLastAttack().getAttValue().getValue() + " , \n";
+			this.infoString += "Vous pouvez parer cette attaque avec les propres cartes et continuer votre tour, \n"
+								+ "ou retraiter avec un carte et terminer votre tour.";
+			this.metAJour(infoString);
+			break;
+		default:
+			// Should not be executed
+			System.err.println("roundStart() Error");
+			break;
+    	}
 		if(!this.gameStopped) {
 			if(this.IAType==3) this.metAJour();
 			else if (this.IAType != 0 && this.isIaRound()) {
 				this.metAJour();
 			}
 		}
-		
 	}
-	
+
 	public void roundEnd(Attack att) {
 		ArrayList<Carte> cartes = this.getCurrentPlayerCards();
 		// la pile de carte distribue les carte tant qu'elle soit vide
@@ -433,8 +488,10 @@ public class ExecPlayground extends Observable{
 				int val = this.distribuerCarte(pg.getTourCourant());
 				this.currentAction.appendGetCardAction(val);
 			}
+			
 		}
 		// reinitialiser l'état courant et les cartes sélectionnées enfin changer le tour
+		// TODO
 		this.pg.setWaitStatus(0);
 		this.pg.initialiseSelected();
 		this.pg.setDirectionDeplace(0);
@@ -499,7 +556,8 @@ public class ExecPlayground extends Observable{
 
 			// 2. si on n'a pas encore choisi la carte, afficher l'info
 			if(c == null) {
-				System.out.println("You must pick a card!");
+				this.infoString += ("\nYou must pick a card!");
+				this.metAJour(infoString);
 				return false;
 			}
 
@@ -507,7 +565,8 @@ public class ExecPlayground extends Observable{
 			else if(c.getValue() > this.pg.getDistance() && this.pg.getDirectionDeplace() == 1) {
 				// 3.1 si la valeur de carte est supérieur à distance entre joueurs et avec la direction "avancer"
 				// afficher l'info de ne pas dépasser
-				System.out.println("You cannot surpass the other player");
+				this.infoString += ("\nYou cannot surpass the other player");
+				this.metAJour(infoString);
 				return false;
 			}
 			else if(this.pg.getDirectionDeplace() == 2) {
@@ -515,7 +574,8 @@ public class ExecPlayground extends Observable{
 				
 				if(this.pg.getPlayerCourant().getDistToStartPlace() < c.getValue()) {
 					// si la distance depuis point départ est inférieur à la valeur de carte, on ne peut pas retraiter puis afficher l'info
-					System.out.println("You cannot retreat due to the size of the playground (case 3).");
+					this.infoString += ("\nYou cannot retreat due to the size of the playground (case 3).");
+					this.metAJour(infoString);
 					return false;
 				}
 				// sinon on peut déplacer avec cette carte
@@ -596,6 +656,7 @@ public class ExecPlayground extends Observable{
 				System.out.println("You have to parry the attack or retreat !");
 				return false;
 			}
+	
 		default:
 			// Should not be executed
 			System.err.println("Line 323 : confirmReceived() Error");

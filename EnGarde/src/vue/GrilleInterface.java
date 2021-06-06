@@ -555,4 +555,10 @@ public class GrilleInterface extends JComponent implements Observateur{
 		}
 		this.repaint();
 	}
+
+	@Override
+	public void receiveRestartSignal() {
+		// TODO Auto-generated method stub
+		
+	}
 }
