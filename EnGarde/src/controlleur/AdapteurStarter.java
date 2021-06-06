@@ -70,8 +70,7 @@ public class AdapteurStarter implements ActionListener{
 					fw.write("IA=IAProba\n");
 					break;
 				case 2:
-					// TODO Arbre minmax
-					// fw.write("IA=IAMinMax\n");
+					fw.write("IA=IAMinMax\n");
 					break;
 				case 3:
 					fw.write("IA=IAAleatoireVsIAProba\n");
@@ -125,6 +124,12 @@ public class AdapteurStarter implements ActionListener{
 					System.out.println("IAale Vs IAprob activated !");
 					pg = new Playground(jou, "IAAleatoire", "IAProbabilite");
 					epg = new ExecPlayground(pg, 3);
+
+					break;
+				case "IAMinMax" :
+					System.out.println("IAArbre activated !");
+					pg = new Playground(jou, playerName, "IAArbre");
+					epg = new ExecPlayground(pg, 4);
 
 					break;
 				default :

@@ -24,7 +24,7 @@ public class AnimationGrilleCouleur extends Animation {
 		if(this.compteur >= MAXCOMPTEUR) {
 			this.compteur = MAXCOMPTEUR;
 		}
-		System.out.println("Compteur = " + this.compteur);
+		//System.out.println("Compteur = " + this.compteur);
 		miseAJour();
 	}
 	
@@ -38,7 +38,7 @@ public class AnimationGrilleCouleur extends Animation {
 		int newR = (int)((double)(startColor.getRed() * (100-this.progress())) / 100.0 + endColor.getRed() * this.progress() / 100.0);
 		int newG = (int)((double)(startColor.getGreen() * (100-this.progress())) / 100.0 + endColor.getGreen() * this.progress() / 100.0);
 		int newB = (int)((double)(startColor.getBlue() * (100-this.progress())) / 100.0 + endColor.getBlue() * this.progress() / 100.0);
-		System.out.println("R=" + newR + " G=" + newG + " B=" + newB + " pos=" + this.caseNB);
+		//System.out.println("R=" + newR + " G=" + newG + " B=" + newB + " pos=" + this.caseNB);
 		this.currentColor = new Color(newR, newG, newB);
 	}
 }

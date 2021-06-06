@@ -11,6 +11,7 @@ import java.util.ArrayList;
 
 import IAs.IA;
 import IAs.IAAleatoire;
+import IAs.IAMinmax;
 import IAs.IAProba;
 import animations.Animation;
 import animations.AnimationJoueur;
@@ -90,6 +91,9 @@ public class ControlCenter implements Observateur{
 			case 3:
 				this.iaAlea = new IAAleatoire(this.epg, this.pg, this);
 				this.iaProba = new IAProba(this.epg, this.pg, this);
+				break;
+			case 4:
+				this.ia = new IAMinmax(this.epg, this.pg, this);
 				break;
 		}
 		if(this.epg.getIAType()==3) {
