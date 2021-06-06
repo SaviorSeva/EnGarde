@@ -12,6 +12,8 @@ public class ExecPlayground extends Observable{
 	boolean gameStart;
 	String infoString;
 	
+	int getLastCardPlayer;
+	
 	public int IAType;
 	public int humanPlayer;
 	
@@ -26,6 +28,7 @@ public class ExecPlayground extends Observable{
 		gameStopped = false;
 		gameStart = true;
 		this.infoString = "";
+		int getLastCardPlayer = 0;
 	}
 	
 	public int getIAType() {
@@ -384,8 +387,8 @@ public class ExecPlayground extends Observable{
 		
 		//3. si joueur courant contient des cartes
 		// on rentre dans différent état selon valeur retour par la fonction phaseParer
-		int pharerResultat = phaseParer(this.pg.getLastAttack());
-    	switch(pharerResultat) {
+		int parerResultat = phaseParer(this.pg.getLastAttack());
+    	switch(parerResultat) {
     	case 0:
     		// incrémenter points d'ennemis puis recommencer nouvel round
     		System.out.println("Case 0 lose, lose player: " + pg.getTourCourant());
@@ -399,11 +402,12 @@ public class ExecPlayground extends Observable{
 			
 			break;
 		case 1:
-			//1 - Pas d'attaque
+			// 1 - Pas d'attaque
 			System.out.println("Case 1 noAttack");
 			// Rentre dans l'état 3: attendre le joueur choisit le carte puis confirmer
 			this.currentAction.appendNoParryAction();
-			enterE3();
+			if(this.getLastCardPlayer != this.pg.getTourCourant()) enterE3();
+			else this.endProcedure();
 			break;
 		case 2:
 			// 2 - attaque direct et le joueur courant a des cartes pour défendre cette attaque
@@ -478,6 +482,54 @@ public class ExecPlayground extends Observable{
 		}
 	}
 
+	private void endProcedure() {
+		// if distance <= 5, comparer player's card of who has the most card of the distance
+		if(this.pg.getDistance() <= 5) {
+			int blancNb = 0, noirNb = 0;
+			for(Carte c : this.pg.getBlancCartes()) {
+				if(c.getValue() == this.pg.getDistance()) blancNb++;
+			}
+			for(Carte c : this.pg.getNoirCartes()) {
+				if(c.getValue() == this.pg.getDistance()) noirNb++;
+			}
+			if(blancNb < noirNb) {
+				this.pg.getNoir().incrementPoint();
+				this.sendLoseSignal(1, "he has less card of value " + this.pg.getDistance());
+			}
+			else if(blancNb > noirNb) {
+				this.pg.getBlanc().incrementPoint();
+				this.sendLoseSignal(2, "he has less card of value " + this.pg.getDistance());
+			}
+			else compareDistance();
+		}else compareDistance();
+
+		this.getLastCardPlayer = 0;
+	}
+
+	private void compareDistance() {
+		int distBlanc = this.pg.getBlanc().getDistToStartPlace();
+		int distNoir = this.pg.getNoir().getDistToStartPlace();
+		// la joueur dont la distance entre joueur et départ est la plus grand obtient un point
+		// puis recommencer le prochain Round
+		int i=-1;
+		if(distBlanc > distNoir) {
+			this.pg.getBlanc().incrementPoint();
+			i=2;
+		}
+		else if(distNoir > distBlanc) {
+			this.pg.getNoir().incrementPoint();
+			i=1;
+		}
+		if(i!=-1) {
+			if(this.IAType != 3) this.sendLoseSignal(i, "the other player travelled further from his start place.");
+			else this.restartNewRound();
+		}
+		else {
+			if(this.IAType != 3) this.sendLoseSignal(i, "both player travelled the same distance.");
+			else this.restartNewRound();
+		}
+	}
+
 	public void roundEnd(Attack att) {
 		ArrayList<Carte> cartes = this.getCurrentPlayerCards();
 		// la pile de carte distribue les carte tant qu'elle soit vide
@@ -488,10 +540,15 @@ public class ExecPlayground extends Observable{
 				int val = this.distribuerCarte(pg.getTourCourant());
 				this.currentAction.appendGetCardAction(val);
 			}
-			
+		}
+		
+		System.out.println("Reste = " + this.pg.getReste().size());
+		
+		if(this.pg.getReste().size() == 0 && this.getLastCardPlayer == 0) {
+			this.getLastCardPlayer = new Integer(this.pg.getTourCourant());
 		}
 		// reinitialiser l'état courant et les cartes sélectionnées enfin changer le tour
-		// TODO
+
 		this.pg.setWaitStatus(0);
 		this.pg.initialiseSelected();
 		this.pg.setDirectionDeplace(0);
@@ -522,7 +579,8 @@ public class ExecPlayground extends Observable{
 			else if(c.getValue() == this.pg.getLastAttack().getAttValue().getValue() && nbSelected == this.pg.getLastAttack().getAttnb()) {
 				this.jouerCarte();
 				this.currentAction.appendParryAction(c, nbSelected);
-				enterE3();
+				if(this.pg.getTourCourant() != this.getLastCardPlayer) enterE3();
+				else endProcedure();
 				return true;
 			}else {
 				//sinon on ne peut pas défendre avec cette carte choisi
@@ -546,7 +604,8 @@ public class ExecPlayground extends Observable{
 				this.jouerCarte();
 				this.currentAction.appendRetreatAction(c);
 				this.retreat(c.getValue());
-				this.roundEnd(new Attack(AttackType.NONE, null, 0));
+				if(this.pg.getTourCourant() != this.getLastCardPlayer) this.roundEnd(new Attack(AttackType.NONE, null, 0));
+				else endProcedure();
 				return true;
 			}
 		case 3:
@@ -626,7 +685,8 @@ public class ExecPlayground extends Observable{
 				if(c.getValue() == this.pg.getLastAttack().getAttValue().getValue() && nbSelected == this.pg.getLastAttack().getAttnb()) {
 					this.jouerCarte();
 					this.currentAction.appendParryAction(c, nbSelected);
-					enterE3();
+					if(this.pg.getTourCourant() != this.getLastCardPlayer) enterE3();
+					else endProcedure();
 					return true;
 				}else {
 					// si l'un des deux n'est pas satisfait, on affiche l'info de "ne peut pas défendre attaque indirect avec carte choisi"
@@ -649,7 +709,8 @@ public class ExecPlayground extends Observable{
 					this.jouerCarte();
 					this.currentAction.appendRetreatAction(c);
 		    		this.retreat(c.getValue());
-		    		this.roundEnd(new Attack(AttackType.NONE, null, 0));
+		    		if(this.pg.getTourCourant() != this.getLastCardPlayer) this.roundEnd(new Attack(AttackType.NONE, null, 0));
+		    		else endProcedure();
 		    		return true;
 				}
 			}else {
@@ -745,6 +806,7 @@ public class ExecPlayground extends Observable{
 		sb.append("CurrentAction:" + this.currentAction.actionString + ";\n");
 		sb.append("Historique:" + this.hist.generateHistString() + ";\n");
 		sb.append("IAType:" + this.IAType + ";\n");
+		sb.append("getLastCardPlayer:" + this.getLastCardPlayer + ";\n");
 		return sb.toString();
 	}
 
@@ -772,5 +834,10 @@ public class ExecPlayground extends Observable{
 	public void setAITypeByString(String string) {
 		String params[] = string.split(":");
 		this.IAType = Integer.parseInt(params[1]);
+	}
+
+	public void setgetLastCardPlayerByString(String string) {
+		String params[] = string.split(":");
+		this.getLastCardPlayer = Integer.parseInt(params[1]);
 	}
 }

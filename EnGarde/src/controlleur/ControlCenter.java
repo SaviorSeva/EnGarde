@@ -700,6 +700,9 @@ public class ControlCenter implements Observateur{
 				case 11:
 					this.epg.setAITypeByString(playgroundStrings[11]);
 					break;
+				case 12:
+					this.epg.setgetLastCardPlayerByString(playgroundStrings[12]);
+					break;
 				default :
 					// Shouldn't be executed
 					System.err.println(i + " : loadGame() Error in ContorlCenter.java");
@@ -710,7 +713,7 @@ public class ControlCenter implements Observateur{
 			this.interSwing.repaintAll();
 			this.li.frame.setVisible(false);
 		}
-		
+		this.epg.gameStopped = false;
 	}
 
 	@Override

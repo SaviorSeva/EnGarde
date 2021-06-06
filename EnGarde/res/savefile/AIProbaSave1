@@ -1,9 +1,0 @@
-Blanc:name=1P,place=10,startPlace=0,point=0,cartes=23133;
-Noir:name=2P,place=12,startPlace=22,point=0,cartes=13155;
-Reste:3414;
-Used:55514422242;
-LastAttack:1,2,1;
-Tour:1;WaitStatus:5;RoundCount:1;StartType:1;
-CurrentAction:;
-Historique:N0,MF5,NA0,GE5 N0,MF5,NA0,GE2 N0,MF5,NA0,GE1 N0,MB1,NA0,GE1 N0,MB4,NA0,GE2 N0,MF4,NA0,GE4 N0,MF2,NA0,GE3 N0,MB2,NA0,GE2 N0,MF2,NA0,GE3 N0,MF4,IA2,GE55 ;
-IAType:1;
