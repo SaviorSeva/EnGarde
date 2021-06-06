@@ -70,6 +70,7 @@ public class ControlCenter implements Observateur{
 		this.clicable = true;
 		this.at = new AnimationTriangle(30, this);
 		this.wi = new WinInterface(this);
+		this.wi.run();
 	}
 	
 	public void ajouteInterfaceUtilisateur(InterfaceSwing ifs) {
@@ -768,7 +769,6 @@ public class ControlCenter implements Observateur{
 	@Override
 	public void receiveLoseSignal(int i, String s) {
 		this.clicable = false;
-		this.wi.run();
 		if(i != -1) this.wi.changeText("Player " + i + " lose because " + s);
 		else this.wi.changeText("Game draw because " + s);
 		this.wi.setVisible(true);

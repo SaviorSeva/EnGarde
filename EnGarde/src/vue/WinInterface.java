@@ -23,6 +23,17 @@ public class WinInterface implements Runnable{
 		this.info.setFont(new Font("TimesRoman", Font.BOLD, 15));
 		this.button = new JButton("Got it, start new round");
 		this.cc = cc;
+		
+		this.button.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				
+				cc.clicable = true;
+				frame.setVisible(false);
+				cc.epg.restartNewRound();
+				cc.interSwing.repaintAll();
+				
+			}
+		});
 	}
 	
 	public void changeText(String s) {
@@ -36,24 +47,13 @@ public class WinInterface implements Runnable{
 	@Override
 	public void run() {
 		this.frame = new JFrame("Gagne !");
-		
-		this.button.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				
-				cc.clicable = true;
-				frame.setVisible(false);
-				cc.epg.restartNewRound();
-				cc.interSwing.repaintAll();
-				
-			}
-		});
-		
+
 		frame.setLayout(new BorderLayout(20, 20));
 		 
 		frame.add(info, BorderLayout.CENTER);
 		frame.add(button, BorderLayout.SOUTH);
 		
-		frame.setSize(500, 200);
-		frame.setVisible(true);
+		frame.setSize(550, 200);
+		frame.setVisible(false);
 	}
 }

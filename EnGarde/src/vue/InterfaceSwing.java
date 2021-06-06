@@ -172,13 +172,17 @@ public class InterfaceSwing implements Runnable{
 	
 		this.annulerRound.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				while(cc.epg.currentAction.getNBActionValide() != 0) cc.annulerAction();
-				cc.annulerRound();
+				if(!cc.epg.gameStopped) {
+					while(cc.epg.currentAction.getNBActionValide() != 0) cc.annulerAction();
+					cc.annulerRound();
+				}	
 			}
 		});
 		this.annulerAction.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				cc.annulerAction();
+				if(!cc.epg.gameStopped) {
+					cc.annulerAction();
+				}
 			}
 		});
 		this.pleinEcran.addActionListener(new ActionListener() {
@@ -188,18 +192,20 @@ public class InterfaceSwing implements Runnable{
 		});
 		this.save.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				cc.openSaveGameInterface();
+				if(!cc.epg.gameStopped) cc.openSaveGameInterface();
 			}
 		});
 		this.load.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				cc.openLoadGameInterface();
+				if(!cc.epg.gameStopped) cc.openLoadGameInterface();
 			}
 		});
 		this.restart.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				cc.restartButtonAction();
-				repaintAll();
+				if(!cc.epg.gameStopped) {
+					cc.restartButtonAction();
+					repaintAll();
+				}
 			}
 		});
 		this.help.addActionListener(new ActionListener() {

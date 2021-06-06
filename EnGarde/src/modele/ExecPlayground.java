@@ -28,7 +28,7 @@ public class ExecPlayground extends Observable{
 		gameStopped = false;
 		gameStart = true;
 		this.infoString = "";
-		int getLastCardPlayer = 0;
+		getLastCardPlayer = 0;
 	}
 	
 	public int getIAType() {
