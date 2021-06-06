@@ -23,4 +23,9 @@ public class IAAction  {
         this.type = type;
     }
 
+    public IAAction(IAAction iaAction){
+        move = iaAction.move;
+        attack = iaAction.attack;
+        probaReussite = iaAction.probaReussite;
+    }
 }

@@ -62,7 +62,7 @@ public abstract class IA {
         c.interSwing.gi.setChoseCase(choseCase);
         System.out.println("Etat : " + this.pg.getWaitStatus());
         c.confirmReceived();
-        //resetChoisir();
+        resetChoisir();
     }
 
     public int nbCarteI(int valeur){
