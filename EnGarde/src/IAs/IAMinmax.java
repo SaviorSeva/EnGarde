@@ -35,7 +35,7 @@ public class IAMinmax extends IA{
 
         ArrayList<IAAction> iaAction = new ArrayList<>();
         iaCartesMinmax = new ArrayList<>();
-        iaCartesMinmax.addAll(config.carteCurrant);
+        iaCartesMinmax.addAll(config.carteForNext);
         if(lastAttack!=null) for (int i = 0; i < lastAttack.getAttnb(); i++) iaCartesMinmax.remove(lastAttack.getAttValue());
         int dis = config.getDistance();
         //Direct attack possible
@@ -51,26 +51,24 @@ public class IAMinmax extends IA{
             }
             if(dis>i){
                 iaAction.add(new IAAction(new CarteEtDirection(1, Carte.generateCarteFromInt(i), -1), null, 0));
-                if(config.carteCurrant.contains(Carte.generateCarteFromInt(dis+i))){
+                if(config.carteForNext.contains(Carte.generateCarteFromInt(dis-i))){
                     int k = nbCarteI(dis-i, iaCartesMinmax);
-                    if(dis-i == dis){
+                    if(dis-i == i){
                         k--;
                     }
-                    for (int j = 0; j < k; j++) {
+                    for (int j = 1; j <= k; j++) {
                         iaAction.add(new IAAction(new CarteEtDirection(1, Carte.generateCarteFromInt(i), -1), new Attack(AttackType.INDIRECT,Carte.generateCarteFromInt(dis-i), j),0));
                     }
                 }
             }
-            if(config.disToDebut()>i){
-                //System.out.println("disToDebut : " + config.disToDebut());
+            if(config.disToDebut(config.tourNext())>i){
+                //System.out.println("disToDebut : " + config.disToDebut(config.tourNext()));
                 iaAction.add(new IAAction(new CarteEtDirection(2, Carte.generateCarteFromInt(i), -1), null, 0));
-                if(config.carteCurrant.contains(Carte.generateCarteFromInt(dis+i))){
-                    int k = nbCarteI(dis-i, iaCartesMinmax);
-                    if(dis+i != dis){
-                        k--;
-                    }
-                    for (int j = 0; j < k; j++) {
-                        iaAction.add(new IAAction(new CarteEtDirection(2, Carte.generateCarteFromInt(i), -1), new Attack(AttackType.INDIRECT,Carte.generateCarteFromInt(dis-i), j),0));
+                if(config.carteForNext.contains(Carte.generateCarteFromInt(dis+i))){
+                    int k = nbCarteI(dis+i, iaCartesMinmax);
+
+                    for (int j = 1; j <= k; j++) {
+                        iaAction.add(new IAAction(new CarteEtDirection(2, Carte.generateCarteFromInt(i), -1), new Attack(AttackType.INDIRECT,Carte.generateCarteFromInt(dis+i), j),0));
                     }
                 }
             }
@@ -110,8 +108,9 @@ public class IAMinmax extends IA{
             config.setMinmax(config);
             return ;
         }
+
         //System.out.println("Entre : " + config.reste.size() + " " + config.positionNoir + " " + config.positionBlanc);
-        iaCartesMinmax = config.carteCurrant;
+        iaCartesMinmax = config.carteForNext;
         if(config.action.attack==null){
             ArrayList<IAAction> iaAction = new ArrayList<>();
             iaAction.addAll(iaCanAttack(config, null));
@@ -122,26 +121,25 @@ public class IAMinmax extends IA{
                     allPossible(new IAConfiguration(null, new IAAction(iaAction.get(i).move, iaAction.get(i).attack,0), config));
                 }
             }else {
-                if (config.carteCurrant.size() != 0) {
+                if (config.carteForNext.size() != 0) {
                     System.out.println("Entre else2: ");
                     allPossible(new IAConfiguration(config.tourCourrant, config, null));
-                }else{
-                    if(config.disToDebut()>config.pere.disToDebut()) {
-                        System.out.println("Entre else***: " + config.disToDebut()+ "***"+config.pere.disToDebut());
+                }/*else{
+                    if(config.disToDebut(config.tourNext())>config.pere.disToDebut()) {
+                        System.out.println("Entre else***: " + config.disToDebut(config.tourNext())+ "***"+config.pere.disToDebut());
                         allPossible(new IAConfiguration(config.tourCourrant, config, null));
                     }else{
-                        System.out.println("Entre else###: "+ config.disToDebut()+ "###" + config.pere.disToDebut());
+                        System.out.println("Entre else###: "+ config.disToDebut(config.tourNext())+ "###" + config.pere.disToDebut());
                         allPossible(new IAConfiguration(config.tourCourrant%2+1, config, null));
                     }
-                }
+                }*/
             }
         }else{
             System.out.println("Entre else3: ");
             Attack lastAttack = config.action.attack;
             //parry
-            if(nbCarteI(lastAttack.getAttValue().getValue(), config.carteCurrant)>=lastAttack.getAttnb()){
-                ArrayList<IAAction> iaAction = new ArrayList<>();
-                iaAction.addAll(iaCanAttack(config, lastAttack));
+            if(nbCarteI(lastAttack.getAttValue().getValue(), config.carteForNext)>=lastAttack.getAttnb()){
+                ArrayList<IAAction> iaAction = new ArrayList<>(iaCanAttack(config, lastAttack));
                 if(iaAction.size()!=0) {
                     for (IAAction act : iaAction) {
                         fils++;
@@ -149,9 +147,9 @@ public class IAMinmax extends IA{
                         allPossible(new IAConfiguration(lastAttack, new IAAction(act.move, act.attack, 0), config));
                     }
                 }else{
-                    if(config.carteCurrant.size()==0){
-                        if(config.pere.carteCurrant.size()==0){
-                            if(config.disToDebut()>config.pere.disToDebut()){
+                    if(config.carteForNext.size()!=0){
+                        /*if(config.pere.carteForNext.size()==0){
+                            if(config.disToDebut(config.tourNext())>config.pere.disToDebut()){
                                 System.out.println("Entre else5: ");
                                 allPossible(new IAConfiguration(config.tourCourrant%2+1, config, lastAttack));
                             }else{
@@ -159,7 +157,7 @@ public class IAMinmax extends IA{
                                 allPossible(new IAConfiguration(config.tourCourrant, config, lastAttack));
                             }
                         }else {
-                            if(config.disToDebut()>11){
+                            if(config.disToDebut(config.tourNext())>11){
                                 System.out.println("Entre else7: " );
                                 allPossible(new IAConfiguration(config.tourCourrant, config, lastAttack));
                             }else{
@@ -167,8 +165,8 @@ public class IAMinmax extends IA{
                                 allPossible(new IAConfiguration(config.tourCourrant%2+1, config, lastAttack));
 
                             }
-                        }
-                    }else{
+                        }*/
+                    //}else{
                         allPossible(new IAConfiguration(config.tourCourrant, config, lastAttack));
                     }
                 }
@@ -177,16 +175,16 @@ public class IAMinmax extends IA{
             if(lastAttack.getAt()==AttackType.INDIRECT){
                 //如果能撤,把所有撤的情况列出来
                 for (int i = 1; i < 6; i++) {
-                    if(config.disToDebut()>i && nbCarteI(i, config.carteCurrant)>0){
+                    if(config.disToDebut(config.tourNext())>i && nbCarteI(i, config.carteForNext)>0){
                         fils++;
                         System.out.println("Entre else8: " );
                         allPossible(new IAConfiguration(null, new IAAction(new CarteEtDirection(2, Carte.generateCarteFromInt(i), -1), null, 0), config));
                     }
                 }
-                if(config.disToDebut()<5){
+                if(config.disToDebut(config.tourNext()) < 5){
                     int minNb = Math.min(5, iaCartesMinmax.size());
-                    for (int i = 0; i < config.carteCurrant.size(); i++) {
-                        if(config.disToDebut()< config.carteCurrant.get(i).getValue()){
+                    for (int i = 0; i < config.carteForNext.size(); i++) {
+                        if(config.disToDebut(config.tourNext())< config.carteForNext.get(i).getValue()){
                             minNb--;
                         }
                     }
@@ -198,13 +196,13 @@ public class IAMinmax extends IA{
             }
             //如果不能撤，new config 输的
             if(lastAttack.getAt()==AttackType.DIRECT){
-                if(Math.max(5, config.carteCurrant.size())>5){
-                    if(!(nbCarteI(lastAttack.getAttValue().getValue(), config.carteCurrant) - (config.carteCurrant.size()-5) >= lastAttack.getAttnb())){
+                if(Math.max(5, config.carteForNext.size())>5){
+                    if(!(nbCarteI(lastAttack.getAttValue().getValue(), config.carteForNext) - (config.carteForNext.size()-5) >= lastAttack.getAttnb())){
                         System.out.println("Entre else*: " );
                         allPossible(new IAConfiguration(config.tourCourrant, config, lastAttack));
                     }
                 }else{
-                    if(nbCarteI(lastAttack.getAttValue().getValue(), config.carteCurrant)< lastAttack.getAttnb()){
+                    if(nbCarteI(lastAttack.getAttValue().getValue(), config.carteForNext)< lastAttack.getAttnb()){
                         allPossible(new IAConfiguration(config.tourCourrant, config, lastAttack));
                     }
                 }
@@ -281,6 +279,7 @@ public class IAMinmax extends IA{
                 }catch (Exception e) {
                     System.out.println("Error");
                 }
+                configAct = conf;
                 if(max<conf.gagnerProba){
                     configAct = conf;
                     max = conf.gagnerProba;

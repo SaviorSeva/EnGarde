@@ -11,7 +11,7 @@ public class IAConfiguration{
     ArrayList<Carte> carteJouer;
     ArrayList<Carte> cartesMain;
     ArrayList<Carte> reste;//adverse
-    ArrayList<Carte> carteCurrant;//ia
+    ArrayList<Carte> carteForNext;//ia
     ArrayList<Carte> carteEnemyCurrant;//
     ArrayList<IAConfiguration> tousFils;
     int tourCourrant;
@@ -29,7 +29,7 @@ public class IAConfiguration{
     int couche;
 
     public IAConfiguration(Playground pg){
-        carteCurrant = new ArrayList<>();
+        carteForNext = new ArrayList<>();
         reste = new ArrayList<>();
         for(int i=1; i<6; i++) {
             reste.add(Carte.UN);
@@ -47,8 +47,8 @@ public class IAConfiguration{
         for (Carte c: pg.getUsed()) {
             reste.remove(c);
         }
-        carteCurrant.addAll(cartesMain);
-        if(carteCurrant.size()!=5 && reste.size()>5) carteCurrant.addAll(reste);
+        carteForNext.addAll(cartesMain);
+        if(carteForNext.size()!=5 && reste.size()>5) carteForNext.addAll(reste);
         tousFils = new ArrayList<>();
         positionBlanc = pg.getBlancPos();
         positionNoir = pg.getNoirPos();
@@ -67,7 +67,7 @@ public class IAConfiguration{
         tourCourrant = pere.tourCourrant%2+1;
         action = new IAAction(a);
         reste = new ArrayList<>();
-        carteCurrant = new ArrayList<>();
+       carteForNext = new ArrayList<>();
         tousFils = new ArrayList<>();
         pere.tousFils.add(this);
         carteJouer =new ArrayList<>();
@@ -125,17 +125,17 @@ public class IAConfiguration{
         }
         System.out.println("Couche : " + couche);
         if(this.tourCourrant== this.owner){
-            carteCurrant.addAll(pere.reste);
+            carteForNext.addAll(pere.reste);
         }
         else {
-            carteCurrant.addAll(pere.cartesMain);
+            carteForNext.addAll(pere.cartesMain);
             if(reste.size()>5 && cartesMain.size()<5){
-                carteCurrant.addAll(pere.reste);
+                carteForNext.addAll(pere.reste);
             }
         }
         if(p!=null){
             for (int i = 0; i < p.getAttnb(); i++) {
-                carteCurrant.remove(p.getAttValue());
+                carteForNext.remove(p.getAttValue());
             }
         }
     }
@@ -160,9 +160,21 @@ public class IAConfiguration{
         return this.positionNoir-this.positionBlanc;
     }
 
-    public int disToDebut(){
-        if(tourCourrant==1) return positionBlanc;
+    public int disToDebut(int t){
+        if(t == 1) return positionBlanc;
         else return 22-positionNoir;
+    }
+
+    public int tourNext() {
+        return tourCourrant % 2 + 1;
+    }
+
+    public int getDisToDebutBlanc() {
+        return positionBlanc;
+    }
+
+    public int getDisToDebutNoir() {
+        return positionNoir;
     }
 
     public void incrementGagne(){
