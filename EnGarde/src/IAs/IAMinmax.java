@@ -75,7 +75,6 @@ public class IAMinmax extends IA{
 
     public void allPossible(IAConfiguration config){
         int tourCourant = config.tourCourrant % 2 + 1;
-
         /** config.carteForNext sont les cartes pour ce noeud **/
         if(config.typeGagne!=2){
             //System.out.println("Config : " + config.typeGagne);
@@ -84,11 +83,11 @@ public class IAMinmax extends IA{
                 System.out.println(" tourGagne 1:" + config.pere.tourCourrant);}
             else if(config.typeGagne==0 && pg.getTourCourant()==2){
                 blancGagne++;
-                //config.incrementPerdu();
+                config.incrementPerdu();
                 System.out.println(" tourGagne 1:" + config.pere.tourCourrant);
             }else {
                 noirGagne++;
-                //config.incrementGagne();
+                config.incrementGagne();
                 System.out.println(" tourGagne 2:" + config.pere.tourCourrant);
             }
 
@@ -153,6 +152,7 @@ public class IAMinmax extends IA{
             if(iaAction.size()!=0) {
                 for (int i = 0; i < iaAction.size(); i++) {
                     System.out.println("Entre else 1: ");
+                    if(config.cut) return;
                     allPossible(new IAConfiguration(null, new IAAction(iaAction.get(i).move, iaAction.get(i).attack,0), config));
                 }
             }else {
@@ -174,6 +174,7 @@ public class IAMinmax extends IA{
                 if(iaAction.size()!=0) {
                     for (IAAction act : iaAction) {
                         System.out.println("Entre else 4: ");
+                        if(config.cut) return;
                         allPossible(new IAConfiguration(lastAttack, new IAAction(act.move, act.attack, 0), config));
                     }
                 }else{
@@ -188,6 +189,7 @@ public class IAMinmax extends IA{
                 //如果能撤,把所有撤的情况列出来
                 for (int i = 1; i < 6; i++) {
                     /** disToDebut dépend le tour **/
+                    if(config.cut) return;
                     if(config.disToDebut(tourCourant) >= i && nbCarteI(i, config.carteForNext) > 0){
                         canReatreat = true;
                         /** Retreat can use only 1 card, so don't care how many we have, have it or not **/
@@ -270,19 +272,16 @@ public class IAMinmax extends IA{
                         System.out.println("Action Att: " + conf.action.attack.getAt());
                         System.out.println("Action carte: " + conf.action.attack.getAttValue().getValue());
                     }
-                    System.out.println("Increment branche gagner : " + "Branch i: " + i++ + "  ng :" + conf.branchGagne);
-                    System.out.println("Increment branche gagner : " + "Branch i: " + i++ + "  np :" + conf.branchPerdu);
+                    System.out.println("Increment branche gagner : " + "Branch i: " + i + "  ng :" + conf.branchGagne);
+                    System.out.println("Increment branche gagner : " + "Branch i: " + i + "  np :" + conf.branchPerdu);
                     conf.gagnerProba = conf.branchGagne/(conf.branchGagne+conf.branchPerdu);
-                    System.out.println("Increment branche gagner : " + "Branch i: " + i++ + "  nb :" + conf.gagnerProba);
+                    System.out.println("Increment branche gagner : " + "Branch i: " + i + "  nb :" + conf.gagnerProba);
+                    i++;
                 }catch (Exception e) {
                     System.out.println("Error");
                 }
-                configAct = conf;
-                if(max<conf.gagnerProba){
-                    configAct = conf;
-                    max = conf.gagnerProba;
-                }
             }
+            configAct = config.vraiFils;
             this.iaParryPhase();
             this.pickMove();
 

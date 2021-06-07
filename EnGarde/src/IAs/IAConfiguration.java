@@ -30,6 +30,8 @@ public class IAConfiguration{
     ArrayList<Carte> cartesHuman;
     ArrayList<Carte> cartesReste;
     int playerPickLastCard;
+    //minmax:true => max
+    boolean minmax, cut;
 
     public IAConfiguration(Playground pg){
         cartesIA = new ArrayList<>(pg.getCurrentPlayerCards());
@@ -43,8 +45,8 @@ public class IAConfiguration{
         positionBlanc = pg.getBlancPos();
         positionNoir = pg.getNoirPos();
         pere = null;
-
-        tourCourrant = pg.getTourCourant()%2+1;
+        minmax = true;
+        tourCourrant = pg.getTourCourant();
         this.owner = pg.getTourCourant(); //owner = AI
         typeGagne = 2;
         action = new IAAction(null, null, 0);
@@ -52,6 +54,7 @@ public class IAConfiguration{
 
 
     public IAConfiguration(Attack p, IAAction a, IAConfiguration pere){
+        minmax = !pere.minmax;
         this.pere = pere;
         owner = pere.owner;
         tourCourrant = pere.tourCourrant%2+1;
@@ -139,6 +142,7 @@ public class IAConfiguration{
         this.pere = pere;
         owner = pere.owner;
         playerPickLastCard = 0;
+
         tourCourrant = pere.tourCourrant%2+1;
         if(gagne == owner) {
             typeGagne = 1;
@@ -146,7 +150,6 @@ public class IAConfiguration{
         else {
             typeGagne = 0;
         }
-        tousFils = new ArrayList<>();
         pere.tousFils.add(this);
     }
 
@@ -190,20 +193,52 @@ public class IAConfiguration{
 
 
     public void setMinmax(IAConfiguration config) {
+        int min = Integer.MAX_VALUE, max = Integer.MIN_VALUE;
+        IAConfiguration iaC = null;
         if(config.pere!=null){//max
-            if(config.tourCourrant==owner){
-                if(config.gagnerProba>config.pere.gagnerProba){
-                    pere.vraiFils = config;
-                    pere.gagnerProba = config.gagnerProba;
-                    setMinmax(config.pere);
+            System.out.println("################## ");
+            if(config.pere.minmax){
+                for (IAConfiguration c: config.pere.tousFils) {
+                    if(c.typeGagne == owner){
+                        config.pere.vraiFils = config;
+                        config.pere.typeGagne = c.typeGagne;
+                        setMinmax(config.pere);
+                        config.pere.branchGagne = config.branchGagne;
+                        config.pere.branchPerdu = config.branchPerdu;
+                        config.pere.gagnerProba = config.gagnerProba;
+                        break;
+                    }
+                    if(c.branchGagne>=max){
+                        max = (int) c.branchGagne;
+                        iaC = c;
+                    }
                 }
             }else{
-                if(config.gagnerProba<config.pere.gagnerProba){
-                    pere.vraiFils = config;
-                    pere.gagnerProba = config.gagnerProba;
-                    setMinmax(config.pere);
+                for (IAConfiguration c: config.pere.tousFils) {
+                    if(c.typeGagne != owner){
+                        config.pere.vraiFils = config;
+                        config.pere.typeGagne = c.typeGagne;
+                        setMinmax(config.pere);
+                        config.pere.branchGagne = config.branchGagne;
+                        config.pere.branchPerdu = config.branchPerdu;
+                        config.pere.gagnerProba = config.gagnerProba;
+                        break;
+                    }
+                    if(c.branchGagne<=min){
+                        min = (int) c.branchGagne;
+                        iaC = c;
+                    }
                 }
             }
+            if(config.pere.vraiFils==null) {
+                if(iaC==null) System.out.println("  ** ");
+                System.out.println("*********************** ");
+                config.pere.typeGagne = iaC.typeGagne;
+                config.pere.vraiFils = iaC;
+            }
+
+        }else{
+            ;
         }
     }
 }
