@@ -775,9 +775,32 @@ public class ControlCenter implements Observateur{
 	@Override
 	public void receiveLoseSignal(int i, String s) {
 		this.clicable = false;
-		if(i != -1) this.wi.changeText("Player " + i + " lose because " + s);
-		else this.wi.changeText("Game draw because " + s);
+		this.wi.button.setText("Got it, start new round");
+		String affiche = "";
+		if(i != -1) affiche = "Player " + i + " lose because " + s;
+		else affiche = "Game draw because " + s;
+		if(this.wonGame()) {
+			if(this.pg.getBlanc().getPoint() == 5) affiche += "\n" + this.pg.getBlanc().getName() + " (Joueur Blanc) a gagné le jeu !";
+			if(this.pg.getNoir().getPoint() == 5) affiche += "\n" + this.pg.getNoir().getName() + " (Joueur Noir) a gagné le jeu !";
+			affiche = convertToMultiline(affiche);
+			System.out.println(affiche);
+			this.wi.button.setText("Restart new game");
+		}
+		this.wi.changeText(affiche);
 		this.wi.setVisible(true);
+	}
+	
+	public String convertToMultiline(String orig){
+	    return "<html>" + orig.replaceAll("\n", "<br>");
+	}
+	
+	public boolean wonGame() {
+		return this.pg.getBlanc().getPoint() == 5 || this.pg.getNoir().getPoint() == 5;
+	}
+	
+	public void restartRoundOrGame() {
+		if(!wonGame()) this.epg.restartNewRound();
+		else this.restartButtonAction();
 	}
 
 	@Override

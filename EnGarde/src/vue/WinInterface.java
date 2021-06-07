@@ -14,7 +14,7 @@ import modele.ExecPlayground;
 
 public class WinInterface implements Runnable{
 	JLabel info;
-	JButton button;
+	public JButton button;
 	public JFrame frame;
 	ControlCenter cc;
 	
@@ -26,12 +26,10 @@ public class WinInterface implements Runnable{
 		
 		this.button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				
 				cc.clicable = true;
 				frame.setVisible(false);
-				cc.epg.restartNewRound();
+				cc.restartRoundOrGame();
 				cc.interSwing.repaintAll();
-				
 			}
 		});
 	}
