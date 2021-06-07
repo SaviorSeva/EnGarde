@@ -99,7 +99,7 @@ public class IAAleatoire extends IA{
                 System.out.println("IA alea Cartes : " + pg.getCurrentPlayerCards());
                 this.iaParryPhase();
             }
-            else this.pickMove();
+            else if (epg.getLastCardPlayer != (epg.humanPlayer % 2 + 1)) this.pickMove();
         }
     }
 }

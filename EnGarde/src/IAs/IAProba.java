@@ -123,7 +123,7 @@ public class IAProba extends IA{
             setTableauProba();
             System.out.println("IA Proba Cartes : " + pg.getCurrentPlayerCards());
             this.iaParryPhase();
-            if(!isRetreat) this.pickMove();
+            if(!isRetreat && (epg.getLastCardPlayer != (epg.humanPlayer % 2 + 1))) this.pickMove();
         }
 
         for (int i = 0; i < 5; i++) {

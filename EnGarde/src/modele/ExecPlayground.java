@@ -12,7 +12,7 @@ public class ExecPlayground extends Observable{
 	boolean gameStart;
 	String infoString;
 	
-	int getLastCardPlayer;
+	public int getLastCardPlayer;
 	
 	public int IAType;
 	public int humanPlayer;
