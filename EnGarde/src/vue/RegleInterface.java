@@ -47,7 +47,7 @@ public class RegleInterface implements Runnable{
 		JLabel picLabel = new JLabel(new ImageIcon(bi[0]));
 		picLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 		
-		this.label = new JLabel((int)(this.currentImageNB + 1) + " / 5");
+		this.label = new JLabel((int)(this.currentImageNB + 1) + " / " + bi.length);
 		label.setAlignmentX(Component.CENTER_ALIGNMENT);
 		
 		this.prev = new JButton("Précedent");
@@ -60,7 +60,7 @@ public class RegleInterface implements Runnable{
 				if(currentImageNB != 0) {
 					currentImageNB--;
 					picLabel.setIcon(new ImageIcon(bi[currentImageNB]));
-					label.setText((currentImageNB + 1) + " / 5");
+					label.setText((currentImageNB + 1) + " / " + bi.length);
 				}
 			}
 		});
@@ -73,10 +73,10 @@ public class RegleInterface implements Runnable{
 		next.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if(currentImageNB != 4) {
+				if(currentImageNB != 5) {
 					currentImageNB++;
 					picLabel.setIcon(new ImageIcon(bi[currentImageNB]));
-					label.setText((currentImageNB + 1) + " / 5");
+					label.setText((currentImageNB + 1) + " / " + bi.length);
 				}
 			}
 		});
@@ -115,7 +115,7 @@ public class RegleInterface implements Runnable{
 		this.frame.add(picLabel, BorderLayout.CENTER);
 		this.frame.add(boiteInfo, BorderLayout.SOUTH);
 		
-		frame.setSize(900, 900);
+		frame.setSize(950, 950);
 		frame.setBackground(Color.WHITE);
 		
 	}
