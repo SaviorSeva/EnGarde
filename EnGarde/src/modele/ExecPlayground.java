@@ -14,7 +14,7 @@ public class ExecPlayground extends Observable{
 	
 	public int getLastCardPlayer;
 	
-	public int IAType;
+	public int IAType; // 0-Sans IA, 1-IA Aleatoire, 2-IA Proba, 3-IA Minmax
 	public int humanPlayer;
 	
 	public boolean gameStopped;

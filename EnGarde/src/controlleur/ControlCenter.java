@@ -402,27 +402,33 @@ public class ControlCenter implements Observateur{
 		if(this.epg.hist.listAction.size() == 0) {
 			System.out.println("There is no more round to recover.");
 		}else {
-			Action lastAction = this.epg.hist.removeLastAction();
-			String lastActions[] = lastAction.getActionString().split(",");
-			this.returnCardToPool(lastActions[3]);
-			this.resetAttack(lastActions[2]);
-			this.resetMove(lastActions[1]);
-			this.resetParry(lastActions[0]);
-			Attack attBL;
-			if(this.epg.hist.listAction.size() != 0) {
-				Action actBeforeLast = this.epg.hist.listAction.get(this.epg.hist.listAction.size() - 1);
-				String actionsBL[] = actBeforeLast.getActionString().split(",");
-				attBL = this.getAttackBeforeLast(actionsBL[2]);
-			}else attBL = new Attack(AttackType.NONE, null, 0);
-			this.epg.changetTour();
-			this.pg.setWaitStatus(0);
-			this.pg.initialiseSelected();
-			this.pg.setDirectionDeplace(0);
-			this.epg.currentAction.clear();
+			if(this.epg.getIAType() != 0) annulerRoundProcedure();
+			Attack attBL = annulerRoundProcedure();
 			this.epg.roundStart(attBL);
 			this.interSwing.repaintAll();
 		}
 
+	}
+	
+	public Attack annulerRoundProcedure() {
+		Action lastAction = this.epg.hist.removeLastAction();
+		String lastActions[] = lastAction.getActionString().split(",");
+		this.returnCardToPool(lastActions[3]);
+		this.resetAttack(lastActions[2]);
+		this.resetMove(lastActions[1]);
+		this.resetParry(lastActions[0]);
+		Attack attBL;
+		if(this.epg.hist.listAction.size() != 0) {
+			Action actBeforeLast = this.epg.hist.listAction.get(this.epg.hist.listAction.size() - 1);
+			String actionsBL[] = actBeforeLast.getActionString().split(",");
+			attBL = this.getAttackBeforeLast(actionsBL[2]);
+		}else attBL = new Attack(AttackType.NONE, null, 0);
+		this.epg.changetTour();
+		this.pg.setWaitStatus(0);
+		this.pg.initialiseSelected();
+		this.pg.setDirectionDeplace(0);
+		this.epg.currentAction.clear();
+		return attBL;
 	}
 
 	// Prendre des carte de joueur et le remettre au pile
