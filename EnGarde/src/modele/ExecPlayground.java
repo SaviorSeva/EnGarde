@@ -483,6 +483,7 @@ public class ExecPlayground extends Observable{
 	}
 
 	private void endProcedure() {
+		this.getLastCardPlayer = 0;
 		// if distance <= 5, comparer player's card of who has the most card of the distance
 		if(this.pg.getDistance() <= 5) {
 			int blancNb = 0, noirNb = 0;
@@ -502,8 +503,6 @@ public class ExecPlayground extends Observable{
 			}
 			else compareDistance();
 		}else compareDistance();
-
-		this.getLastCardPlayer = 0;
 	}
 
 	private void compareDistance() {
