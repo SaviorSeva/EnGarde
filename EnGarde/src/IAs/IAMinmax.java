@@ -14,11 +14,13 @@ public class IAMinmax extends IA{
     int fils;
     IAConfiguration config;
     IAConfiguration configAct;
-    ArrayList<Carte> iaCartesMinmax;
+    //ArrayList<Carte> iaCartesMinmax;
+    boolean minMaxActive;
+
     public IAMinmax(ExecPlayground epg, Playground pg, ControlCenter c) {
         super(epg, pg, c);
-
-        iaCartesMinmax = new ArrayList<>();
+        minMaxActive = false;
+        //iaCartesMinmax = new ArrayList<>();
         noirGagne = 0;
         blancGagne =0;
         fils = 0;
@@ -31,17 +33,13 @@ public class IAMinmax extends IA{
         return n;
     }
 
-    public ArrayList<IAAction> iaCanAttack(IAConfiguration config, Attack lastAttack){
+    public ArrayList<IAAction> iaAttackOrMove(IAConfiguration config, Attack lastAttack){
 
         ArrayList<IAAction> iaAction = new ArrayList<>();
-        iaCartesMinmax = new ArrayList<>();
-        iaCartesMinmax.addAll(config.carteForNext);
+        ArrayList<Carte> iaCartesMinmax = new ArrayList<>(config.carteForNext);
         if(lastAttack!=null) for (int i = 0; i < lastAttack.getAttnb(); i++) iaCartesMinmax.remove(lastAttack.getAttValue());
         int dis = config.getDistance();
-        //Direct attack possible
-//        for (Carte c: iaCartesMinmax) {
-//            System.out.println("000" + c);
-//        }
+
         for (int i = 1; i < 6; i++) {
             if(!iaCartesMinmax.contains(Carte.generateCarteFromInt(i))) continue;
             if (dis == i) {
@@ -62,7 +60,6 @@ public class IAMinmax extends IA{
                 }
             }
             if(config.disToDebut(config.tourNext())>i){
-                //System.out.println("disToDebut : " + config.disToDebut(config.tourNext()));
                 iaAction.add(new IAAction(new CarteEtDirection(2, Carte.generateCarteFromInt(i), -1), null, 0));
                 if(config.carteForNext.contains(Carte.generateCarteFromInt(dis+i))){
                     int k = nbCarteI(dis+i, iaCartesMinmax);
@@ -73,17 +70,13 @@ public class IAMinmax extends IA{
                 }
             }
         }
-//        for (IAAction iaaction : iaAction) {
-//            System.out.println("IAACTIO        N : " + iaaction.move.getC().getValue());
-//            System.out.println("IAACTION       D : " + iaaction.move.getDirection());
-//        }
-        //Indirect attack et move possible
         return iaAction;
-        }
+    }
 
     public void allPossible(IAConfiguration config){
-        iaCartesMinmax = new ArrayList<>();
+        int tourCourant = config.tourCourrant % 2 + 1;
 
+        /** config.carteForNext sont les cartes pour ce noeud **/
         if(config.typeGagne!=2){
             //System.out.println("Config : " + config.typeGagne);
             if(config.typeGagne==1 && pg.getTourCourant()==1){
@@ -98,118 +91,124 @@ public class IAMinmax extends IA{
                 //config.incrementGagne();
                 System.out.println(" tourGagne 2:" + config.pere.tourCourrant);
             }
-            //if(config.pere.reste.size()>3){
-                System.out.println("Entre : " + config.pere.reste.size() + " ");
 
-                //System.out.println("Entre : " + config.pere.pere.tousFils.size() + " ");
-                System.out.println("NoirGagne : " + noirGagne);
-                System.out.println("BlancGagne : " + blancGagne);
-            //}
+            System.out.println("NoirGagne : " + noirGagne);
+            System.out.println("BlancGagne : " + blancGagne);
+
             config.setMinmax(config);
             return ;
         }
 
-        //System.out.println("Entre : " + config.reste.size() + " " + config.positionNoir + " " + config.positionBlanc);
-        iaCartesMinmax = config.carteForNext;
-        if(config.action.attack==null){
-            ArrayList<IAAction> iaAction = new ArrayList<>();
-            iaAction.addAll(iaCanAttack(config, null));
+        /** Phase finale **/
+        if (config.pere != null && config.pere.playerPickLastCard != 0) {
+            if (config.action.attack == null) {
+                if (config.disToDebut(tourCourant) < config.disToDebut(config.tourCourrant) ) {
+                    allPossible(new IAConfiguration(config.tourCourrant, config));
+                }else {
+                    /** Draw include **/
+                    allPossible(new IAConfiguration(tourCourant, config));
+                }
+            }else if (config.action.attack.getAt() == AttackType.DIRECT || config.action.attack.getAt() == AttackType.INDIRECT) {
+                int attValue = config.action.attack.getAttValue().getValue();
+                int attNb = config.action.attack.getAttnb();
+                int resultat = nbCarteI(attValue, config.carteForNext) - attNb - nbCarteI(attValue, config.carteEnemyNext);
+                if (resultat > 0) {
+                    allPossible(new IAConfiguration(tourCourant, config));
+                }else if (resultat == 0) {
+                    if (config.disToDebut(tourCourant) < config.disToDebut(config.tourCourrant) ) {
+                        allPossible(new IAConfiguration(config.tourCourrant, config));
+                    }else {
+                        /** Draw include **/
+                        allPossible(new IAConfiguration(tourCourant, config));
+                    }
+                }else {
+                    if (config.action.attack.getAt() == AttackType.DIRECT) {
+                        allPossible(new IAConfiguration(config.tourCourrant, config));
+                    }else if (config.action.attack.getAt() == AttackType.INDIRECT){
+                        boolean vue = false;
+                        for (int i = 1; i < 6; i++) {
+                            /** disToDebut dépend le tour **/
+                            if(config.disToDebut(tourCourant) >= i && nbCarteI(i, config.carteForNext) > 0){
+                                vue = true;
+                                if ((config.disToDebut(tourCourant) - i) < config.disToDebut(config.tourCourrant) ) {
+                                    allPossible(new IAConfiguration(config.tourCourrant, config));
+                                }else {
+                                    /** Draw include **/
+                                    allPossible(new IAConfiguration(tourCourant, config));
+                                }
+                                break;
+                            }
+                        }
+                        if (!vue) allPossible(new IAConfiguration(config.tourCourrant, config));
+                    }
+                    else System.out.println("Error! 147");
+                }
+            }
+            return;
+        }
+
+        /** AllPossible judge que ce tour(noeud) est perdu ou pas, donc config.tourCourant est gagné **/
+        if(config.action.attack == null){
+            ArrayList<IAAction> iaAction = new ArrayList<>(iaAttackOrMove(config, null));
             if(iaAction.size()!=0) {
                 for (int i = 0; i < iaAction.size(); i++) {
-                    fils++;
-                    //System.out.println("Entre else1: ");
+                    System.out.println("Entre else 1: ");
                     allPossible(new IAConfiguration(null, new IAAction(iaAction.get(i).move, iaAction.get(i).attack,0), config));
                 }
             }else {
-                if (config.carteForNext.size() != 0) {
-                    System.out.println("Entre else2: ");
-                    allPossible(new IAConfiguration(config.tourCourrant, config, null));
-                }/*else{
-                    if(config.disToDebut(config.tourNext())>config.pere.disToDebut()) {
-                        System.out.println("Entre else***: " + config.disToDebut(config.tourNext())+ "***"+config.pere.disToDebut());
-                        allPossible(new IAConfiguration(config.tourCourrant, config, null));
-                    }else{
-                        System.out.println("Entre else###: "+ config.disToDebut(config.tourNext())+ "###" + config.pere.disToDebut());
-                        allPossible(new IAConfiguration(config.tourCourrant%2+1, config, null));
-                    }
-                }*/
+                System.out.println("Entre else 2: ");
+                allPossible(new IAConfiguration(config.tourCourrant, config));
             }
         }else{
-            System.out.println("Entre else3: ");
+            boolean parry = false;
+            boolean canReatreat = false;
+            boolean cantReatreat = false;
+            System.out.println("Entre else 3: ");
             Attack lastAttack = config.action.attack;
-            //parry
-            if(nbCarteI(lastAttack.getAttValue().getValue(), config.carteForNext)>=lastAttack.getAttnb()){
-                ArrayList<IAAction> iaAction = new ArrayList<>(iaCanAttack(config, lastAttack));
+
+            /** parry **/
+            if(nbCarteI(lastAttack.getAttValue().getValue(), config.carteForNext) >= lastAttack.getAttnb()){
+                parry = true;
+
+                ArrayList<IAAction> iaAction = new ArrayList<>(iaAttackOrMove(config, lastAttack));
                 if(iaAction.size()!=0) {
                     for (IAAction act : iaAction) {
-                        fils++;
-                        System.out.println("Entre else4: ");
+                        System.out.println("Entre else 4: ");
                         allPossible(new IAConfiguration(lastAttack, new IAAction(act.move, act.attack, 0), config));
                     }
                 }else{
-                    if(config.carteForNext.size()!=0){
-                        /*if(config.pere.carteForNext.size()==0){
-                            if(config.disToDebut(config.tourNext())>config.pere.disToDebut()){
-                                System.out.println("Entre else5: ");
-                                allPossible(new IAConfiguration(config.tourCourrant%2+1, config, lastAttack));
-                            }else{
-                                System.out.println("Entre else6: " );
-                                allPossible(new IAConfiguration(config.tourCourrant, config, lastAttack));
-                            }
-                        }else {
-                            if(config.disToDebut(config.tourNext())>11){
-                                System.out.println("Entre else7: " );
-                                allPossible(new IAConfiguration(config.tourCourrant, config, lastAttack));
-                            }else{
-                                System.out.println("Entre else7///: " );
-                                allPossible(new IAConfiguration(config.tourCourrant%2+1, config, lastAttack));
-
-                            }
-                        }*/
-                    //}else{
-                        allPossible(new IAConfiguration(config.tourCourrant, config, lastAttack));
-                    }
+                    /** Après parry (iaAttackOrMove a déjà judgé) mais ne peut pas faire une action **/
+                    allPossible(new IAConfiguration(config.tourCourrant, config));
                 }
             }
-            //No parry
-            if(lastAttack.getAt()==AttackType.INDIRECT){
+
+            /** No parry **/
+            if(lastAttack.getAt()==AttackType.INDIRECT && !parry){
+                int n = 0;
                 //如果能撤,把所有撤的情况列出来
                 for (int i = 1; i < 6; i++) {
-                    if(config.disToDebut(config.tourNext())>i && nbCarteI(i, config.carteForNext)>0){
-                        fils++;
-                        System.out.println("Entre else8: " );
+                    /** disToDebut dépend le tour **/
+                    if(config.disToDebut(tourCourant) >= i && nbCarteI(i, config.carteForNext) > 0){
+                        canReatreat = true;
+                        /** Retreat can use only 1 card, so don't care how many we have, have it or not **/
+                        System.out.println("Entre else 5: " );
                         allPossible(new IAConfiguration(null, new IAAction(new CarteEtDirection(2, Carte.generateCarteFromInt(i), -1), null, 0), config));
+                        n++;
                     }
                 }
-                if(config.disToDebut(config.tourNext()) < 5){
-                    int minNb = Math.min(5, iaCartesMinmax.size());
-                    for (int i = 0; i < config.carteForNext.size(); i++) {
-                        if(config.disToDebut(config.tourNext())< config.carteForNext.get(i).getValue()){
-                            minNb--;
-                        }
-                    }
-                    if(minNb<=0){
-                        System.out.println("Entre else9: " );
-                        allPossible(new IAConfiguration(config.tourCourrant, config, lastAttack));
-                    }
-                }
-            }
-            //如果不能撤，new config 输的
-            if(lastAttack.getAt()==AttackType.DIRECT){
-                if(Math.max(5, config.carteForNext.size())>5){
-                    if(!(nbCarteI(lastAttack.getAttValue().getValue(), config.carteForNext) - (config.carteForNext.size()-5) >= lastAttack.getAttnb())){
-                        System.out.println("Entre else*: " );
-                        allPossible(new IAConfiguration(config.tourCourrant, config, lastAttack));
-                    }
-                }else{
-                    if(nbCarteI(lastAttack.getAttValue().getValue(), config.carteForNext)< lastAttack.getAttnb()){
-                        allPossible(new IAConfiguration(config.tourCourrant, config, lastAttack));
-                    }
+                if (n == 0 && !canReatreat) {
+                    cantReatreat = true;
+                    System.out.println("Entre else 6: " );
+                    allPossible(new IAConfiguration(config.tourCourrant, config));
                 }
             }
 
+            /** Si suffit un attaquet directe et ne "parry" pas, c'est perdu **/
+            if(lastAttack.getAt()==AttackType.DIRECT && !parry && !cantReatreat){
+                System.out.println("Entre else 7: " );
+                allPossible(new IAConfiguration(config.tourCourrant, config));
+            }
         }
-        return;
     }
 
 
@@ -225,8 +224,6 @@ public class IAMinmax extends IA{
                         jouerCarte(configAct.action.move.getDirection(),choisir);
                     }
                 }
-//                choisir.set(config.action.move.getIndex(), true);
-//                jouerCarte(config.action.move.getDirection(),choisir);
             }
             if(configAct.action.attack!=null && configAct.action.attack.getAttnb()!=0){
                 choisirParryOrAttackCartes(configAct.action.attack.getAttnb(), configAct.action.attack.getAttValue().getValue());
@@ -247,10 +244,11 @@ public class IAMinmax extends IA{
 
     @Override
     public void iaStep() {
-        if(pg.getUsed().size()<15) {
+        if((pg.getDistance()>10) && (!minMaxActive)) {
             IA ia = new IAAleatoire(epg, pg, c);
             ia.iaStep();
         }else{
+            minMaxActive = true;
             config = new IAConfiguration(pg);
             allPossible(config);
             System.out.println("NoirGagne ******: " + noirGagne);
