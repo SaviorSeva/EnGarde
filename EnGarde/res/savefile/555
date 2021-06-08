@@ -1,0 +1,10 @@
+Blanc:name=Player,place=3,startPlace=0,point=0,cartes=53435;
+Noir:name=IAArbre,place=18,startPlace=22,point=0,cartes=25221;
+Reste:43133;
+Used:4514522411;
+LastAttack:0,0,0;
+Tour:1;WaitStatus:3;RoundCount:1;StartType:1;
+CurrentAction:N0,;
+Historique:N0,MF4,NA0,GE1 N0,MF5,NA0,GE4 N0,MF1,NA0,GE2 N0,MF4,NA0,GE1 N0,MB5,NA0,GE1 N0,MB2,NA0,GE1 N0,MF2,NA0,GE3 N0,MB4,NA0,GE2 N0,MF1,NA0,GE5 N0,MF1,NA0,GE2 ;
+IAType:4;
+getLastCardPlayer:0;

@@ -16,14 +16,16 @@ public class IAMinmax extends IA{
     IAConfiguration configAct;
     //ArrayList<Carte> iaCartesMinmax;
     boolean minMaxActive;
+    int depth, alpha;
 
     public IAMinmax(ExecPlayground epg, Playground pg, ControlCenter c) {
         super(epg, pg, c);
         minMaxActive = false;
         //iaCartesMinmax = new ArrayList<>();
         noirGagne = 0;
-        blancGagne =0;
+        blancGagne = 0;
         fils = 0;
+        depth = 0;
     }
 
     public int nbCarteI(int valeur, ArrayList<Carte> reste){
@@ -78,6 +80,7 @@ public class IAMinmax extends IA{
         /** config.carteForNext sont les cartes pour ce noeud **/
         if(config.typeGagne!=2){
             //System.out.println("Config : " + config.typeGagne);
+            if(config.couche>depth) depth++;
             if(config.typeGagne==1 && pg.getTourCourant()==1){
                 blancGagne++;
                 System.out.println(" tourGagne 1:" + config.pere.tourCourrant);}
@@ -93,8 +96,6 @@ public class IAMinmax extends IA{
 
             System.out.println("NoirGagne : " + noirGagne);
             System.out.println("BlancGagne : " + blancGagne);
-
-            config.setMinmax(config);
             return ;
         }
 
@@ -281,13 +282,37 @@ public class IAMinmax extends IA{
                     System.out.println("Error");
                 }
             }
-            configAct = config.vraiFils;
-            this.iaParryPhase();
-            this.pickMove();
+            System.out.println("Depth : " + depth);
+            System.out.println("Alpha : " + setMinmax(config, depth));
+//            this.iaParryPhase();
+//            this.pickMove();
 
         }
 
         //System.out.println(allPossible(config).tousFils.size());
     }
 
+    public int setMinmax(IAConfiguration cg, int d) {
+        IAConfiguration iaC = null;
+        System.out.println("print typeGagne set: " + d);
+        if (cg.tousFils.size()==0 || d == 0){
+            System.out.println("print typeGagne : " + cg.typeGagne);
+            return cg.typeGagne;
+        }
+        if(cg.minmax){
+            alpha= Integer.MIN_VALUE;
+            for (IAConfiguration c: cg.tousFils) {
+                int dp = d-1;
+                System.out.println("print dp : " + cg.typeGagne);
+                alpha = Math.max(alpha, setMinmax(c, dp));
+            }
+        }else{
+            alpha= Integer.MAX_VALUE;
+            for (IAConfiguration c: cg.pere.tousFils) {
+                int dp = d-1;
+                alpha = Math.min(alpha, setMinmax(c, dp));
+            }
+        }
+        return alpha;
+    }
 }

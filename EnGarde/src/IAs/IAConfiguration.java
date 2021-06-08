@@ -140,9 +140,10 @@ public class IAConfiguration{
 
     public IAConfiguration(int gagne, IAConfiguration pere){
         this.pere = pere;
+        couche = pere.couche + 1;
         owner = pere.owner;
         playerPickLastCard = 0;
-
+        System.out.println("Couche : " + couche);
         tourCourrant = pere.tourCourrant%2+1;
         if(gagne == owner) {
             typeGagne = 1;
@@ -192,53 +193,5 @@ public class IAConfiguration{
     }
 
 
-    public void setMinmax(IAConfiguration config) {
-        int min = Integer.MAX_VALUE, max = Integer.MIN_VALUE;
-        IAConfiguration iaC = null;
-        if(config.pere!=null){//max
-            System.out.println("################## ");
-            if(config.pere.minmax){
-                for (IAConfiguration c: config.pere.tousFils) {
-                    if(c.typeGagne == owner){
-                        config.pere.vraiFils = config;
-                        config.pere.typeGagne = c.typeGagne;
-                        setMinmax(config.pere);
-                        config.pere.branchGagne = config.branchGagne;
-                        config.pere.branchPerdu = config.branchPerdu;
-                        config.pere.gagnerProba = config.gagnerProba;
-                        break;
-                    }
-                    if(c.branchGagne>=max){
-                        max = (int) c.branchGagne;
-                        iaC = c;
-                    }
-                }
-            }else{
-                for (IAConfiguration c: config.pere.tousFils) {
-                    if(c.typeGagne != owner){
-                        config.pere.vraiFils = config;
-                        config.pere.typeGagne = c.typeGagne;
-                        setMinmax(config.pere);
-                        config.pere.branchGagne = config.branchGagne;
-                        config.pere.branchPerdu = config.branchPerdu;
-                        config.pere.gagnerProba = config.gagnerProba;
-                        break;
-                    }
-                    if(c.branchGagne<=min){
-                        min = (int) c.branchGagne;
-                        iaC = c;
-                    }
-                }
-            }
-            if(config.pere.vraiFils==null) {
-                if(iaC==null) System.out.println("  ** ");
-                System.out.println("*********************** ");
-                config.pere.typeGagne = iaC.typeGagne;
-                config.pere.vraiFils = iaC;
-            }
 
-        }else{
-            ;
-        }
-    }
 }
