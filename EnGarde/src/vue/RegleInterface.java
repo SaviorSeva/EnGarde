@@ -73,7 +73,7 @@ public class RegleInterface implements Runnable{
 		next.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if(currentImageNB != 5) {
+				if(currentImageNB != 4) {
 					currentImageNB++;
 					picLabel.setIcon(new ImageIcon(bi[currentImageNB]));
 					label.setText((currentImageNB + 1) + " / " + bi.length);
