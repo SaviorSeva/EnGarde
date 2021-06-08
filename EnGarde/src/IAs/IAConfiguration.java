@@ -34,6 +34,7 @@ public class IAConfiguration{
     boolean minmax, cut;
 
     public IAConfiguration(Playground pg){
+        parry = pg.getLastAttack();
         cartesIA = new ArrayList<>(pg.getCurrentPlayerCards());
         cartesHuman = new ArrayList<>(pg.getCurrentEnemyPlayerCards());
         cartesReste = new ArrayList<>(pg.getReste());
@@ -46,22 +47,24 @@ public class IAConfiguration{
         positionNoir = pg.getNoirPos();
         pere = null;
         minmax = true;
-        tourCourrant = pg.getTourCourant();
+        tourCourrant = pg.getTourCourant() % 2 + 1; /** Pour mettre le premier "AllPossible" est le tour de IA **/
         this.owner = pg.getTourCourant(); //owner = AI
         typeGagne = 2;
-        action = new IAAction(null, null, 0);
+        action = new IAAction(null, pg.getLastAttack(), 0);
     }
-    public IAConfiguration(){
-
-    }
-
 
     public IAConfiguration(Attack p, IAAction a, IAConfiguration pere){
+//        if (pere.pere == null) minmax = pere.minmax;
+//        else
         minmax = !pere.minmax;
+
         this.pere = pere;
         owner = pere.owner;
-        if(pere.pere==null) tourCourrant = pere.tourCourrant;
-        else tourCourrant = pere.tourCourrant%2+1;
+
+//        if(pere.pere==null) tourCourrant = pere.tourCourrant;
+//        else
+        tourCourrant = pere.tourCourrant % 2 + 1;
+
         action = new IAAction(a);
         playerPickLastCard = 0;
 
@@ -117,10 +120,13 @@ public class IAConfiguration{
         }
 
         //System.out.println("Cartes reste arpès jouer :"+ cartesCourant.size());
-
-        for (int i = 0; i < carteJouer.size(); i++) {
+        if (cartesReste.size() == 0) playerPickLastCard = tourCourrant % 2 + 1;
+        else {
+            for (int i = 0; i < carteJouer.size(); i++) {
+                if (cartesReste.size() == 0) playerPickLastCard = tourCourrant;
+                else cartesCourant.add(cartesReste.remove(0));
+            }
             if (cartesReste.size() == 0) playerPickLastCard = tourCourrant;
-            else cartesCourant.add(cartesReste.remove(0));
         }
 
 //        System.out.println("Cartes reste :"+ cartesReste.size());

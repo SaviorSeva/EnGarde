@@ -89,6 +89,7 @@ public class ExecPlayground extends Observable{
 	
     // on remet le jeu comme le début
 	public void restartNewRound() {
+		this.getLastCardPlayer = 0;
 		this.gameStopped = false;
 		
 		this.pg.getBlanc().setPlace(0);
@@ -392,7 +393,7 @@ public class ExecPlayground extends Observable{
     	case 0:
     		// incrémenter points d'ennemis puis recommencer nouvel round
     		System.out.println("Case 0 lose, lose player: " + pg.getTourCourant());
-    		
+    		this.getLastCardPlayer = 0;
 			if(this.pg.getTourCourant() == 1) this.pg.getNoir().incrementPoint();
 			else this.pg.getBlanc().incrementPoint();
 			if(this.IAType != 3) {
@@ -406,6 +407,7 @@ public class ExecPlayground extends Observable{
 			System.out.println("Case 1 noAttack");
 			// Rentre dans l'état 3: attendre le joueur choisit le carte puis confirmer
 			this.currentAction.appendNoParryAction();
+			System.out.println("?Lfjizhfia: " + this.getLastCardPlayer);
 			if(this.getLastCardPlayer != this.pg.getTourCourant()) enterE3();
 			else this.endProcedure();
 			break;
@@ -474,6 +476,7 @@ public class ExecPlayground extends Observable{
 			System.err.println("roundStart() Error");
 			break;
     	}
+
 		if(!this.gameStopped) {
 			if(this.IAType==3) this.metAJour();
 			else if (this.IAType != 0 && this.isIaRound()) {
@@ -483,6 +486,7 @@ public class ExecPlayground extends Observable{
 	}
 
 	private void endProcedure() {
+		System.out.println("aagagaggishgoqgqgjikgdishig");
 		this.getLastCardPlayer = 0;
 		// if distance <= 5, comparer player's card of who has the most card of the distance
 		if(this.pg.getDistance() <= 5) {
@@ -501,8 +505,12 @@ public class ExecPlayground extends Observable{
 				this.pg.getBlanc().incrementPoint();
 				this.sendLoseSignal(2, "he has less card of value " + this.pg.getDistance());
 			}
-			else compareDistance();
-		}else compareDistance();
+			else {
+				compareDistance();
+			}
+		}else {
+			compareDistance();
+		}
 	}
 
 	private void compareDistance() {
@@ -544,7 +552,9 @@ public class ExecPlayground extends Observable{
 		System.out.println("Reste = " + this.pg.getReste().size());
 		
 		if(this.pg.getReste().size() == 0 && this.getLastCardPlayer == 0) {
+			System.out.println("agioaghohgoahoga");
 			this.getLastCardPlayer = new Integer(this.pg.getTourCourant());
+			//this.getLastCardPlayer = this.pg.getTourCourant();
 		}
 		// reinitialiser l'état courant et les cartes sélectionnées enfin changer le tour
 
