@@ -43,6 +43,7 @@ public class ControlCenter implements Observateur{
 	IA ia;
 	IA iaAlea;
 	IA iaProba;
+	IAMinmax iaMinmax;
 	LoadInterface li;
 	SaveInterface si;
 	AnimationTriangle at;
@@ -52,25 +53,30 @@ public class ControlCenter implements Observateur{
 		this.epg = epg;
 		this.pg = this.epg.getPg();
 		this.epg.ajouteObservateur(this);
-//		switch(this.epg.getIAType()) {
-//		case 0:
-//			this.ia = null;
-//			break;
-//		case 1:
-//			this.ia = new IAAleatoire(this.epg, this.pg);
-//			break;
-//		case 2:
-//			this.ia = new IAProba(this.epg, this.pg);
-//			break;
-//		case 4:
-//			this.ia = new IAMinmax(this.epg, this.pg);
-//			break;
-//		}
+
 		this.anims = new ArrayList<AnimationJoueur>();
 		this.clicable = true;
 		this.at = new AnimationTriangle(30, this);
 		this.wi = new WinInterface(this);
 		this.wi.run();
+		switch(this.epg.getIAType()) {
+			case 0:
+				this.ia = null;
+				break;
+			case 1:
+				this.ia = new IAAleatoire(this.epg, this.pg, this);
+				break;
+			case 2:
+				this.ia = new IAProba(this.epg, this.pg, this);
+				break;
+			case 3:
+				this.iaAlea = new IAAleatoire(this.epg, this.pg, this);
+				this.iaProba = new IAProba(this.epg, this.pg, this);
+				break;
+			case 4:
+				this.iaMinmax = new IAMinmax(this.epg, this.pg, this);
+				break;
+		}
 	}
 	
 	public void ajouteInterfaceUtilisateur(InterfaceSwing ifs) {
@@ -94,7 +100,7 @@ public class ControlCenter implements Observateur{
 				this.iaProba = new IAProba(this.epg, this.pg, this);
 				break;
 			case 4:
-				this.ia = new IAMinmax(this.epg, this.pg, this);
+				if(epg.hist.size()==0) this.iaMinmax = new IAMinmax(this.epg, this.pg, this);
 				break;
 		}
 		if(this.epg.getIAType()==3) {
@@ -109,7 +115,8 @@ public class ControlCenter implements Observateur{
 				iaProba.iaStep();
 				System.out.println("iaProba fin");
 			}
-		}else ia.iaStep();
+		}else if(this.epg.getIAType()==4) this.iaMinmax.iaStep();
+		else ia.iaStep();
 
 	}
 	

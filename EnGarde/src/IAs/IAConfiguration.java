@@ -51,13 +51,17 @@ public class IAConfiguration{
         typeGagne = 2;
         action = new IAAction(null, null, 0);
     }
+    public IAConfiguration(){
+
+    }
 
 
     public IAConfiguration(Attack p, IAAction a, IAConfiguration pere){
         minmax = !pere.minmax;
         this.pere = pere;
         owner = pere.owner;
-        tourCourrant = pere.tourCourrant%2+1;
+        if(pere.pere==null) tourCourrant = pere.tourCourrant;
+        else tourCourrant = pere.tourCourrant%2+1;
         action = new IAAction(a);
         playerPickLastCard = 0;
 
@@ -75,10 +79,6 @@ public class IAConfiguration{
 
         typeGagne = 2;
         couche = pere.couche + 1;
-        if (couche > 30) {
-            System.out.println("Couche non-normal");
-        }
-
         ArrayList<Carte> cartesCourant;
         if (tourCourrant == owner) {
             cartesCourant = cartesIA;
@@ -109,20 +109,22 @@ public class IAConfiguration{
                 carteJouer.add(action.attack.getAttValue());
             }
         }
+
         //Verifier la carte a la main d'abord
-        for (Carte c : carteJouer) {
-            System.out.println("remove sucess: " + cartesCourant.remove(c));
+        for (int i = 0; i < carteJouer.size(); i++) {
+            System.out.println("remove sucess: " + cartesCourant.remove(carteJouer.get(i)));
+            System.out.println("Cartes jouer :"+ carteJouer.get(i));
         }
 
-        System.out.println("Cartes reste arpès jouer :"+ cartesCourant.size());
+        //System.out.println("Cartes reste arpès jouer :"+ cartesCourant.size());
 
         for (int i = 0; i < carteJouer.size(); i++) {
             if (cartesReste.size() == 0) playerPickLastCard = tourCourrant;
             else cartesCourant.add(cartesReste.remove(0));
         }
 
-        System.out.println("Cartes reste :"+ cartesReste.size());
-        System.out.println("Cartes complété :"+ cartesCourant.size());
+//        System.out.println("Cartes reste :"+ cartesReste.size());
+//        System.out.println("Cartes complété :"+ cartesCourant.size());
 
         if (tourCourrant == 1 && action.move.getDirection() == 1) {
             positionBlanc += action.move.getC().getValue();
