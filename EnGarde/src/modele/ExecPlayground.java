@@ -300,7 +300,7 @@ public class ExecPlayground extends Observable{
 		// variable unableToMove renvoie False, sinon elle contient True
 		for(int i=0; i<cs.size() && unableToMove; i++) {
 			int val = cs.get(i).getValue();
-			if(this.pg.getDistance() >= val || this.pg.getPlayerCourant().getDistToStartPlace() > val) unableToMove = false;
+			if(this.pg.getDistance() >= val || this.pg.getPlayerCourant().getDistToStartPlace() >= val) unableToMove = false;
 		}
 		// si on ne peut pas déplacer ou attaquer, on perde le Round courant puis recommencer un nouvelle Round
 		if(unableToMove) {

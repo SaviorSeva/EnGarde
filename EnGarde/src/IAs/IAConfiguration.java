@@ -9,10 +9,9 @@ import static IAs.IAProba.factorial;
 
 public class IAConfiguration{
     ArrayList<Carte> carteJouer;
-    ArrayList<Carte> cartesMain;
     ArrayList<Carte> reste;//adverse
     ArrayList<Carte> carteForNext;//ia
-    ArrayList<Carte> carteEnemyCurrant;//
+    ArrayList<Carte> carteEnemyNext;//
     ArrayList<IAConfiguration> tousFils;
     int tourCourrant;
     int owner;
@@ -27,92 +26,105 @@ public class IAConfiguration{
     double branchGagne;
     double branchPerdu;
     int couche;
+    ArrayList<Carte> cartesIA;
+    ArrayList<Carte> cartesHuman;
+    ArrayList<Carte> cartesReste;
+    int playerPickLastCard;
+    //minmax:true => max
+    boolean minmax, cut;
 
     public IAConfiguration(Playground pg){
-        carteForNext = new ArrayList<>();
-        reste = new ArrayList<>();
-        for(int i=1; i<6; i++) {
-            reste.add(Carte.UN);
-            reste.add(Carte.DEUX);
-            reste.add(Carte.TROIS);
-            reste.add(Carte.QUATRE);
-            reste.add(Carte.CINQ);
-        }
+        cartesIA = new ArrayList<>(pg.getCurrentPlayerCards());
+        cartesHuman = new ArrayList<>(pg.getCurrentEnemyPlayerCards());
+        cartesReste = new ArrayList<>(pg.getReste());
 
-        cartesMain = new ArrayList<>();
-        for (Carte c: pg.getPlayerCourant().getCartes()) {
-            cartesMain.add(c);
-            reste.remove(c);
-        }
-        for (Carte c: pg.getUsed()) {
-            reste.remove(c);
-        }
-        carteForNext.addAll(cartesMain);
-        if(carteForNext.size()!=5 && reste.size()>5) carteForNext.addAll(reste);
+        carteForNext = cartesIA;
+        playerPickLastCard = 0;
+
         tousFils = new ArrayList<>();
         positionBlanc = pg.getBlancPos();
         positionNoir = pg.getNoirPos();
         pere = null;
-        tourCourrant = pg.getTourCourant()%2+1;
-        this.owner = pg.getTourCourant();
+        minmax = true;
+        tourCourrant = pg.getTourCourant();
+        this.owner = pg.getTourCourant(); //owner = AI
         typeGagne = 2;
         action = new IAAction(null, null, 0);
+    }
+    public IAConfiguration(){
+
     }
 
 
     public IAConfiguration(Attack p, IAAction a, IAConfiguration pere){
-        int n = 0;
+        minmax = !pere.minmax;
         this.pere = pere;
         owner = pere.owner;
-        tourCourrant = pere.tourCourrant%2+1;
+        if(pere.pere==null) tourCourrant = pere.tourCourrant;
+        else tourCourrant = pere.tourCourrant%2+1;
         action = new IAAction(a);
-        reste = new ArrayList<>();
-       carteForNext = new ArrayList<>();
+        playerPickLastCard = 0;
+
+        cartesIA = new ArrayList<>(pere.cartesIA);
+        cartesHuman = new ArrayList<>(pere.cartesHuman);
+        cartesReste = new ArrayList<>(pere.cartesReste);
+
+        carteForNext = new ArrayList<>();
+        carteJouer = new ArrayList<>();
         tousFils = new ArrayList<>();
         pere.tousFils.add(this);
-        carteJouer =new ArrayList<>();
-        cartesMain = new ArrayList<>();
-        cartesMain.addAll(pere.cartesMain);
+
         positionBlanc = pere.positionBlanc;
         positionNoir = pere.positionNoir;
-        typeGagne = 2;
-        couche = pere.couche++;
 
-        //Deepcopy
-        reste.addAll(pere.reste);
+        typeGagne = 2;
+        couche = pere.couche + 1;
+        ArrayList<Carte> cartesCourant;
+        if (tourCourrant == owner) {
+            cartesCourant = cartesIA;
+            carteForNext = cartesHuman;
+            carteEnemyNext = cartesIA;
+        }
+        else {
+            cartesCourant = cartesHuman;
+            carteForNext = cartesIA;
+            carteEnemyNext = cartesHuman;
+        }
+
         //Parry phase
         if(p!=null){
             parry = new Attack(p.getAt(),p.getAttValue(),p.getAttnb());
-            for (int i = 0; i < reste.size() && n<=parry.getAttnb(); i++) {
+            //Déjà sûr que le jouer a assez cartes pour "parry" cet attaque.
+            for (int i = 0; i < parry.getAttnb(); i++) {
                 carteJouer.add(parry.getAttValue());
             }
         }
         //Move phase
-        if (action.move.getC() != null) {
+        if (action.move.getC().getValue() != 0) {
             carteJouer.add(action.move.getC());
         }
         //Attack phase
-        if (action.attack != null && action.attack.getAttnb() > 0) {
+        if (action.attack != null) {
             for (int i = 0; i < action.attack.getAttnb(); i++) {
                 carteJouer.add(action.attack.getAttValue());
             }
         }
+
         //Verifier la carte a la main d'abord
-        for (Carte c : carteJouer) {
-            //System.out.println(cartesMain.size());
-            if (cartesMain != null && cartesMain.contains(c) && tourCourrant == owner) {
-//                System.out.println("Carte M  : " + c);
-//                System.out.println("remove M : " + cartesMain.remove(c));
-                cartesMain.remove(c);
-            } else {
-//                System.out.println("Carte  : " + c);
-//                System.out.println("remove : " + reste.remove(c));
-                reste.remove(c);
-            }
+        for (int i = 0; i < carteJouer.size(); i++) {
+            System.out.println("remove sucess: " + cartesCourant.remove(carteJouer.get(i)));
+            System.out.println("Cartes jouer :"+ carteJouer.get(i));
         }
 
-        System.out.println("PPPPPPPPPPPP :"+ (reste.size() + cartesMain.size()));
+        //System.out.println("Cartes reste arpès jouer :"+ cartesCourant.size());
 
+        for (int i = 0; i < carteJouer.size(); i++) {
+            if (cartesReste.size() == 0) playerPickLastCard = tourCourrant;
+            else cartesCourant.add(cartesReste.remove(0));
+        }
+
+//        System.out.println("Cartes reste :"+ cartesReste.size());
+//        System.out.println("Cartes complété :"+ cartesCourant.size());
 
         if (tourCourrant == 1 && action.move.getDirection() == 1) {
             positionBlanc += action.move.getC().getValue();
@@ -122,37 +134,25 @@ public class IAConfiguration{
             positionNoir -= action.move.getC().getValue();
         } else if (tourCourrant == 2 && action.move.getDirection() == 2) {
             positionNoir += action.move.getC().getValue();
-        }
+        } else System.out.println("No move this time ");
+
         System.out.println("Couche : " + couche);
-        if(this.tourCourrant== this.owner){
-            carteForNext.addAll(pere.reste);
-        }
-        else {
-            carteForNext.addAll(pere.cartesMain);
-            if(reste.size()>5 && cartesMain.size()<5){
-                carteForNext.addAll(pere.reste);
-            }
-        }
-        if(p!=null){
-            for (int i = 0; i < p.getAttnb(); i++) {
-                carteForNext.remove(p.getAttValue());
-            }
-        }
+
     }
 
-    public IAConfiguration(int gagne, IAConfiguration pere, Attack attack){
+    public IAConfiguration(int gagne, IAConfiguration pere){
+        this.pere = pere;
+        couche = pere.couche + 1;
         owner = pere.owner;
+        playerPickLastCard = 0;
+        System.out.println("Couche : " + couche);
         tourCourrant = pere.tourCourrant%2+1;
         if(gagne == owner) {
             typeGagne = 1;
-            gagnerProba = 1;
         }
         else {
             typeGagne = 0;
-            gagnerProba = 0;
         }
-        this.pere = pere;
-        tousFils = new ArrayList<>();
         pere.tousFils.add(this);
     }
 
@@ -160,8 +160,8 @@ public class IAConfiguration{
         return this.positionNoir-this.positionBlanc;
     }
 
-    public int disToDebut(int t){
-        if(t == 1) return positionBlanc;
+    public int disToDebut(int tour){
+        if(tour == 1) return positionBlanc;
         else return 22-positionNoir;
     }
 
@@ -195,21 +195,5 @@ public class IAConfiguration{
     }
 
 
-    public void setMinmax(IAConfiguration config) {
-        if(config.pere!=null){//max
-            if(config.tourCourrant==owner){
-                if(config.gagnerProba>config.pere.gagnerProba){
-                    pere.vraiFils = config;
-                    pere.gagnerProba = config.gagnerProba;
-                    setMinmax(config.pere);
-                }
-            }else{
-                if(config.gagnerProba<config.pere.gagnerProba){
-                    pere.vraiFils = config;
-                    pere.gagnerProba = config.gagnerProba;
-                    setMinmax(config.pere);
-                }
-            }
-        }
-    }
+
 }
