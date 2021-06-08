@@ -130,7 +130,7 @@ public class CarteInterface extends JComponent implements Observateur{
 		if(this.pg.getTourCourant() == 1) drawable.setColor(Color.GREEN);
 		else drawable.setColor(Color.PINK);
 		drawable.setStroke(new BasicStroke(5));
-		drawable.drawRect(carteXStart, (int)(63*(this.proportionZoomCarte-this.proportionCarte)), (int)(500*this.proportionCarte), (int)(130*this.proportionCarte));
+		drawable.drawRect(carteXStart, 2, (int)(500*this.proportionCarte), (int)(126*this.proportionZoomCarte));
 		
 		// Paint player's 5 cards
 		for(int i=0; i<cartes.size(); i++) {

@@ -414,7 +414,6 @@ public class ControlCenter implements Observateur{
 			this.epg.roundStart(attBL);
 			this.interSwing.repaintAll();
 		}
-
 	}
 	
 	public Attack annulerRoundProcedure() {
