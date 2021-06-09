@@ -407,7 +407,7 @@ public class ExecPlayground extends Observable{
 			System.out.println("Case 1 noAttack");
 			// Rentre dans l'état 3: attendre le joueur choisit le carte puis confirmer
 			this.currentAction.appendNoParryAction();
-			System.out.println("?Lfjizhfia: " + this.getLastCardPlayer);
+			System.out.println("Make sure the getLastCardPlayer have been reset: " + this.getLastCardPlayer);
 			if(this.getLastCardPlayer != this.pg.getTourCourant()) enterE3();
 			else this.endProcedure();
 			break;
@@ -486,7 +486,7 @@ public class ExecPlayground extends Observable{
 	}
 
 	private void endProcedure() {
-		System.out.println("aagagaggishgoqgqgjikgdishig");
+		System.out.println("Enter the endProcedure");
 		this.getLastCardPlayer = 0;
 		// if distance <= 5, comparer player's card of who has the most card of the distance
 		if(this.pg.getDistance() <= 5) {
@@ -552,7 +552,7 @@ public class ExecPlayground extends Observable{
 		System.out.println("Reste = " + this.pg.getReste().size());
 		
 		if(this.pg.getReste().size() == 0 && this.getLastCardPlayer == 0) {
-			System.out.println("agioaghohgoahoga");
+			System.out.println("Someone gets the last card.");
 			this.getLastCardPlayer = new Integer(this.pg.getTourCourant());
 			//this.getLastCardPlayer = this.pg.getTourCourant();
 		}
