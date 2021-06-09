@@ -256,8 +256,19 @@ public class IAMinmax extends IA{
             choisirParryOrAttackCartes(configAct.parry.getAttnb(), configAct.parry.getAttValue().getValue());
             jouerCarte(3, choisir);
         }else if(pg.getLastAttack().getAt()!=AttackType.NONE){
-            choisirParryOrAttackCartes(pg.getLastAttack().getAttnb(), pg.getLastAttack().getAttValue().getValue());
-            jouerCarte(3, choisir);
+            if(pg.getLastAttack().getAttnb() <= nbCarteI(pg.getLastAttack().getAttValue().getValue(), iaCartes)){
+                choisirParryOrAttackCartes(pg.getLastAttack().getAttnb(), pg.getLastAttack().getAttValue().getValue());
+                jouerCarte(3, choisir);
+            }else if(pg.getLastAttack().getAt()==AttackType.INDIRECT){
+                int k = 0;
+                for (int i = 0; i < iaCartes.size(); i++) {
+                    if(iaCartes.get(i).getValue()<5){
+                        k = i;
+                    }
+                }
+                choisir.set(k, true);
+                jouerCarte(2, choisir);
+            }
         }else if (configAct.action.attack == null && configAct.action.move.getDirection() == 2) { /** Retreat **/
             for (int i = 0; i < iaCartes.size(); i++) {
                 if (iaCartes.get(i).getValue() == configAct.action.move.getC().getValue()) {

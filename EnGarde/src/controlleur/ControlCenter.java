@@ -100,7 +100,10 @@ public class ControlCenter implements Observateur{
 				this.iaProba = new IAProba(this.epg, this.pg, this);
 				break;
 			case 4:
-				if(epg.hist.size()==0) this.iaMinmax = new IAMinmax(this.epg, this.pg, this);
+				if(epg.hist.size()<=1) {
+					System.out.println("agaghqooela4549");
+					this.iaMinmax = new IAMinmax(this.epg, this.pg, this);
+				}
 				break;
 		}
 		if(this.epg.getIAType()==3) {
