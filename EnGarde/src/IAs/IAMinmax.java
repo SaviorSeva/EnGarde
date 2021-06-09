@@ -226,6 +226,7 @@ public class IAMinmax extends IA{
 
     public boolean pickMove() {
         iaCartes = pg.getCurrentPlayerCards();
+        if(configAct == null) return true;
         if(configAct.action!=null){
             if(configAct.action.move.getC().getValue()!=0){
                 for (int i = 0; i < pg.getCurrentPlayerCards().size(); i++) {
@@ -255,7 +256,10 @@ public class IAMinmax extends IA{
         cantMoveAgain = false;
         iaCartes = pg.getCurrentPlayerCards();
         if (pg.getLastAttack().getAt() == AttackType.NONE) return;
-        if (configAct.parry!=null && ((nbCarteI(pg.getLastAttack().getAttValue().getValue(), iaCartes)) >= pg.getLastAttack().getAttnb())){
+        if(configAct == null){
+            choisir.set(0, true);
+            jouerCarte(2, choisir);
+        }else if (configAct.parry!=null && pg.getLastAttack().getAttValue()!= null &&((nbCarteI(pg.getLastAttack().getAttValue().getValue(), iaCartes)) >= pg.getLastAttack().getAttnb())){
             choisirParryOrAttackCartes(configAct.parry.getAttnb(), configAct.parry.getAttValue().getValue());
             jouerCarte(3, choisir);
         }else if (configAct.action != null && configAct.action.attack == null && configAct.action.move.getDirection() == 2) { /** if there is a Retreat calculed **/
@@ -283,6 +287,7 @@ public class IAMinmax extends IA{
                         index = i;
                     }
                 }
+                System.out.println("Retreat ////////////////////////////////////");
                 choisir.set(index, true);
                 jouerCarte(2, choisir);
                 cantMoveAgain = true;
@@ -304,8 +309,9 @@ public class IAMinmax extends IA{
     @Override
     public void iaStep() {//IAProba jouer au debut, et puis IAMinmax
         if(pg.getUsed().size() < 10 && (!minMaxActive)) {
-            IA ia = new IAProba(epg, pg, c);
+            IAProba ia = new IAProba(epg, pg, c);
             ia.iaStep();
+            ;
         }else{
             config = new IAConfiguration(pg);
             allPossible(config);
@@ -314,7 +320,7 @@ public class IAMinmax extends IA{
             System.out.println("Depth : " + depth);
             System.out.println("Alpha : " + setMinmax(config, depth));
             configAct = config.vraiFils;
-            if (epg.isIaRound()) {
+            if (epg.isIaRound()|| epg.isIaMinmax()) {
                 this.iaParryPhase();
                 if (!cantMoveAgain) this.pickMove();
             }

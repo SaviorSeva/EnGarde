@@ -118,7 +118,7 @@ public class IAProba extends IA{
 
     @Override
     public void iaStep() {
-        if(epg.isIaRound() || epg.isIaProbaRound()){
+        if(epg.isIaRound() || epg.isIaMinmax()){
             setCarteInconnu();
             setTableauProba();
             System.out.println("IA Proba Cartes : " + pg.getCurrentPlayerCards());
@@ -126,11 +126,11 @@ public class IAProba extends IA{
             if(!isRetreat && (epg.getLastCardPlayer != (epg.humanPlayer % 2 + 1))) this.pickMove();
         }
 
-        for (int i = 0; i < 5; i++) {
-            for (int j = 0; j < 6; j++) {
-                System.out.println("Proba de Inconnu " + (i+1) + " au moin avec " + j + " cartes : " + proba[i][j]);
-            }
-        }
+//        for (int i = 0; i < 5; i++) {
+//            for (int j = 0; j < 6; j++) {
+//                System.out.println("Proba de Inconnu " + (i+1) + " au moin avec " + j + " cartes : " + proba[i][j]);
+//            }
+//        }
     }
 
     public void iaCanAttack(){
@@ -258,7 +258,7 @@ public class IAProba extends IA{
                     /** Si IA n'a pas l'advantage de distance **/
                     //if(pg.getPlayerCourant().getDistToStartPlace()<pg.getEnemyCourant().getDistToStartPlace()){
                     int disApres = dis - ced.getC().getValue();
-                    if (disApres <= 5 && nbCarteI(disApres) + 1 <= 5) {
+                    if (disApres <= 5 && nbCarteI(disApres) + 1 <= 5 && disApres != 0) {
                         if (ced.getDirection() == 1 && proba[Math.min(disApres - 1, 4)][nbCarteI(disApres) + 1] <= 0){
                             in = ced.getIndex();
                             dir = ced.getDirection();
@@ -286,7 +286,6 @@ public class IAProba extends IA{
                 }
             }
         }
-
         move = new CarteEtDirection(dir, iaCartes.get(in), in);
         System.out.println("Movement direction: " + move.getDirection());
         System.out.println("Movement value: " + move.getC().getValue());
