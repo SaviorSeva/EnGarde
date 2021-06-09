@@ -7,8 +7,6 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Shape;
-import java.awt.Stroke;
 import java.util.ArrayList;
 
 import javax.swing.JComponent;
@@ -21,6 +19,10 @@ import modele.Playground;
 import patterns.Observateur;
 
 public class GrilleInterface extends JComponent implements Observateur{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4732153844639499081L;
 	Graphics2D drawable;
 	Graphics gra;
 	int xpoints[];

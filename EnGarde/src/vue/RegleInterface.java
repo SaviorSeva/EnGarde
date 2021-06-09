@@ -4,8 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Desktop;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
@@ -41,7 +39,6 @@ public class RegleInterface implements Runnable{
 	public void run() {
 		this.frame = new JFrame("Règles !");
 		
-		Box boiteFrame = Box.createVerticalBox();
 		Box boiteInfo = Box.createHorizontalBox();
 		
 		JLabel picLabel = new JLabel(new ImageIcon(bi[0]));

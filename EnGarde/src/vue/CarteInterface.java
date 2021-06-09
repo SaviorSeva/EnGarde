@@ -22,6 +22,10 @@ import modele.Playground;
 import patterns.Observateur;
 
 public class CarteInterface extends JComponent implements Observateur{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	Graphics2D drawable;
 	Graphics gra;
 	

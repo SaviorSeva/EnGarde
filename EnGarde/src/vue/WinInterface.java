@@ -10,7 +10,6 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 
 import controlleur.ControlCenter;
-import modele.ExecPlayground;
 
 public class WinInterface implements Runnable{
 	JLabel info;

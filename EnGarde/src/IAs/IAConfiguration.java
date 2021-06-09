@@ -1,11 +1,7 @@
 package IAs;
 
-import global.Configuration;
 import modele.*;
-
 import java.util.ArrayList;
-
-import static IAs.IAProba.factorial;
 
 public class IAConfiguration{
     ArrayList<Carte> carteJouer;

@@ -2,8 +2,6 @@ package animations;
 
 import java.awt.Color;
 
-import controlleur.ControlCenter;
-
 public class AnimationGrilleCouleur extends Animation {
 	public Color startColor;
 	public Color endColor;

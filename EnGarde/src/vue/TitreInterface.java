@@ -10,10 +10,12 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.JComponent;
 
-import modele.Playground;
-import patterns.Observateur;
-
 public class TitreInterface extends JComponent{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	Graphics2D drawable;
 	
 	public Image imgTitle;

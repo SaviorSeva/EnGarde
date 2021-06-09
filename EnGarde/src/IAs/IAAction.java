@@ -3,8 +3,6 @@ package IAs;
 import modele.Attack;
 import modele.CarteEtDirection;
 
-import java.util.ArrayList;
-
 public class IAAction  {
     public CarteEtDirection move;
     public Attack attack;

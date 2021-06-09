@@ -1,7 +1,6 @@
 package IAs;
 
 import controlleur.ControlCenter;
-import global.Configuration;
 import modele.*;
 
 import java.util.ArrayList;

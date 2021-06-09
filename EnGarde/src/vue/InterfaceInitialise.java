@@ -12,12 +12,9 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
-import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
 
 import controlleur.AdapteurStarter;
-import modele.ExecPlayground;
-import modele.Playground;
 
 public class InterfaceInitialise implements Runnable{
 	public TitreInterface ti;

@@ -1,11 +1,5 @@
 package vue;
 
-import javax.swing.SwingUtilities;
-
-import global.Configuration;
-import modele.ExecPlayground;
-import modele.Playground;
-
 public class Starter {
 	public static void main(String[] args) {
 		/*
