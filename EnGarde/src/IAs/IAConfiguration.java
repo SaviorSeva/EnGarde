@@ -201,6 +201,4 @@ public class IAConfiguration{
         tourCourrant = tourCourrant%2+1;
     }
 
-
-
 }

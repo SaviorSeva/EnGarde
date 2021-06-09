@@ -34,7 +34,7 @@ public class IAProba extends IA{
         }
         nbInconnu = 0;
         proba = new double[5][6];
-        seuilIntension = 0.5; /* 攻击阈值 */
+        seuilIntension = 0.4;
 
     }
     public IAProba(ExecPlayground epg, Playground pg, ControlCenter cc) {
@@ -48,7 +48,7 @@ public class IAProba extends IA{
         }
         nbInconnu = 0;
         proba = new double[5][6];
-        seuilIntension = 0.5; /* 攻击阈值 */
+        seuilIntension = 0.5;
     }
 
     public void setCarteInconnu(){
@@ -213,14 +213,12 @@ public class IAProba extends IA{
             jouerCarte(3, choisir);
         }
         return false;
-        //选概率最高的打，如果概率都不高return false, 在iastep里执行movement + cancel
     }
 
     public void movement(int dis, ArrayList<CarteEtDirection> ceds){
         int min = 10, in = 0, dir = 0, max = 0;
         if(pg.getEnemyCourant().getCartes().size()==0){
             for(CarteEtDirection ced : ceds){
-                //可改进，对面无法移动的情况，手牌可以任意组合
                 dir = ced.getDirection();
                 in = ced.getIndex();
                 if(ced.getDirection()==1) break;
@@ -245,21 +243,33 @@ public class IAProba extends IA{
         }else{
             int val = 0;
             for(CarteEtDirection ced : ceds){
-                 //5+Math.round(5*((23-pg.getPlayerCourant().getDistToStartPoint())/23));
-                //目前撤退到dis为8的附近，可改进，8 可动态，在确定对方手牌时可增加判断条件，或离出发点过近时
-                if(ced.getDirection()==1) val = Math.abs(dynamique - (dis - ced.getC().getValue()));
-                else if(ced.getDirection()==2) val = Math.abs(dynamique - (dis + ced.getC().getValue()));
-                if(min>val){
-                    min = val;
+                if(pg.getReste().size() > 3) {
+                     //5+Math.round(5*((23-pg.getPlayerCourant().getDistToStartPoint())/23));
+                    if(ced.getDirection()==1) val = Math.abs(dynamique - (dis - ced.getC().getValue()));
+                    else if(ced.getDirection()==2) val = Math.abs(dynamique - (dis + ced.getC().getValue()));
+                    if(min>val){
+                        min = val;
+                        in = ced.getIndex();
+                        dir = ced.getDirection();
+                    }
+                }else{
                     in = ced.getIndex();
                     dir = ced.getDirection();
+                    if(pg.getPlayerCourant().getDistToStartPlace()<pg.getEnemyCourant().getDistToStartPlace()){
+                        int disApres = dis - ced.getC().getValue();
+                        if(ced.getDirection()==1 && proba[disApres-1][nbCarteI(disApres)+1]<=0){
+                            in = ced.getIndex();
+                            dir = ced.getDirection();
+                            System.out.println("************************* ");
+                            break;
+                        }
+                    }
                 }
             }
             if(dir == 2 && dis + iaCartes.get(in).getValue() <=5){
                 double m = 1.0;
                 resetAllPossible(false);
                 for(CarteEtDirection ced : ceds){
-                    //如果不得不撤退到5以内的位置，选择一个对手直接攻击我成功率最低的位置
                     int disApres = dis + ced.getC().getValue();
                     dir = 2;
                     if(nbCarteI(disApres)>3){
