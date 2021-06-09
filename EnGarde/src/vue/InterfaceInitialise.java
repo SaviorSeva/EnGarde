@@ -74,7 +74,6 @@ public class InterfaceInitialise implements Runnable{
         frame.setLayout(new FlowLayout());
         
         Box frameBox = Box.createVerticalBox();
-        Box titleBox =  Box.createHorizontalBox(); 
         Box settingBox = Box.createHorizontalBox();
         Box humanBox = Box.createVerticalBox();
         Box aiBox = Box.createVerticalBox();
