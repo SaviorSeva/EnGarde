@@ -255,15 +255,18 @@ public class IAProba extends IA{
                 }else{
                     in = ced.getIndex();
                     dir = ced.getDirection();
-                    if(pg.getPlayerCourant().getDistToStartPlace()<pg.getEnemyCourant().getDistToStartPlace()){
-                        int disApres = dis - ced.getC().getValue();
-                        if(ced.getDirection()==1 && proba[disApres-1][nbCarteI(disApres)+1]<=0){
+                    /** Si IA n'a pas l'advantage de distance **/
+                    //if(pg.getPlayerCourant().getDistToStartPlace()<pg.getEnemyCourant().getDistToStartPlace()){
+                    int disApres = dis - ced.getC().getValue();
+                    if (disApres <= 5 && nbCarteI(disApres) + 1 <= 5) {
+                        if (ced.getDirection() == 1 && proba[Math.min(disApres - 1, 4)][nbCarteI(disApres) + 1] <= 0){
                             in = ced.getIndex();
                             dir = ced.getDirection();
                             System.out.println("************************* ");
                             break;
                         }
                     }
+                    //}
                 }
             }
             if(dir == 2 && dis + iaCartes.get(in).getValue() <=5){
