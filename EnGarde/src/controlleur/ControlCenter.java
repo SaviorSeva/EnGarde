@@ -448,6 +448,8 @@ public class ControlCenter implements Observateur{
 	public void returnCardToPool(String s) {
 		if(s.substring(0, 2).equals("GE")) {
 			for(int i=s.length()-1; i>=2; i--) {
+				// Change the value of getLastCardPlayer
+				if(this.pg.getReste().size() == 0) this.epg.getLastCardPlayer = 0;
 				// Gernerate a new card
 				int val = Character.getNumericValue(s.charAt(i));
 				Carte c = Carte.generateCarteFromInt(val);
