@@ -17,12 +17,15 @@ public class IAMinmax extends IA{
     int depth, alpha;
     int leger;
     boolean creeArbre;
+    boolean cantMoveAgain;
+
     public IAMinmax(ExecPlayground epg, Playground pg, ControlCenter c) {
         super(epg, pg, c);
         minMaxActive = false;
         noirGagne = 0;
         blancGagne = 0;
         depth = 0;
+        cantMoveAgain = false;
     }
 
     public int nbCarteI(int valeur, ArrayList<Carte> reste){
@@ -135,6 +138,7 @@ public class IAMinmax extends IA{
                         for (int i = 1; i < 6; i++) {
                             /** disToDebut dépend le tour **/
                             if(config.disToDebut(tourCourant) >= i && nbCarteI(i, config.carteForNext) > 0){
+                                /** can retreat **/
                                 vue = true;
                                 if ((config.disToDebut(tourCourant) - i) < config.disToDebut(config.tourCourrant) ) {
                                     allPossible(new IAConfiguration(config.tourCourrant, config));
@@ -248,28 +252,17 @@ public class IAMinmax extends IA{
 
     @Override
     public void iaParryPhase() {
+        System.out.println("MinMax Get parry");
+        cantMoveAgain = false;
         iaCartes = pg.getCurrentPlayerCards();
-        if(configAct.parry!=null){
+        if (pg.getLastAttack().getAt() == AttackType.NONE) return;
+        if (configAct.parry!=null){
             System.out.println("Parry 1: " + configAct.parry.getAt());
             System.out.println("Parry 2: " + configAct.parry.getAttValue().getValue());
             System.out.println("Parry 3: " + configAct.parry.getAttnb());
             choisirParryOrAttackCartes(configAct.parry.getAttnb(), configAct.parry.getAttValue().getValue());
             jouerCarte(3, choisir);
-        }else if(pg.getLastAttack().getAt()!=AttackType.NONE){
-            if(pg.getLastAttack().getAttnb() <= nbCarteI(pg.getLastAttack().getAttValue().getValue(), iaCartes)){
-                choisirParryOrAttackCartes(pg.getLastAttack().getAttnb(), pg.getLastAttack().getAttValue().getValue());
-                jouerCarte(3, choisir);
-            }else if(pg.getLastAttack().getAt()==AttackType.INDIRECT){
-                int k = 0;
-                for (int i = 0; i < iaCartes.size(); i++) {
-                    if(iaCartes.get(i).getValue()<5){
-                        k = i;
-                    }
-                }
-                choisir.set(k, true);
-                jouerCarte(2, choisir);
-            }
-        }else if (configAct.action.attack == null && configAct.action.move.getDirection() == 2) { /** Retreat **/
+        }else if (configAct.action.attack == null && configAct.action.move.getDirection() == 2) { /** if there is a Retreat calculed **/
             for (int i = 0; i < iaCartes.size(); i++) {
                 if (iaCartes.get(i).getValue() == configAct.action.move.getC().getValue()) {
                     choisir.set(i, true);
@@ -277,6 +270,27 @@ public class IAMinmax extends IA{
                 }
             }
             jouerCarte(2, choisir);
+            cantMoveAgain = true;
+        }
+        else if(pg.getLastAttack().getAt()!=AttackType.NONE){
+            if(pg.getLastAttack().getAttnb() <= nbCarteI(pg.getLastAttack().getAttValue().getValue(), iaCartes)){
+                choisirParryOrAttackCartes(pg.getLastAttack().getAttnb(), pg.getLastAttack().getAttValue().getValue());
+                jouerCarte(3, choisir);
+            }else if(pg.getLastAttack().getAt()==AttackType.INDIRECT){
+                int min = Integer.MAX_VALUE;
+                int index = 0;
+                /** Si'l faut retreat et config n'a pas aucune action,
+                 *  choisir une carte de une plus petit valeur pour retreat **/
+                for (int i = 0; i < iaCartes.size(); i++) {
+                    if (min >= iaCartes.get(i).getValue() ) {
+                        min = iaCartes.get(i).getValue();
+                        index = i;
+                    }
+                }
+                choisir.set(index, true);
+                jouerCarte(2, choisir);
+                cantMoveAgain = true;
+            }
         }
     }
 
@@ -317,7 +331,7 @@ public class IAMinmax extends IA{
                         if(configAct.tousFils.get(i).action.move.getDirection() == lireAttackEtMove(lastActions[1]).getDirection()){
                             System.out.println("1: ***********" );
                             try{
-                                if(configAct.tousFils.get(i).action.attack.getAt() ==pg.getLastAttack().getAt()){
+                                if(configAct.tousFils.get(i).action.attack.getAt() == pg.getLastAttack().getAt()){
                                     if(configAct.tousFils.get(i).action.attack.getAttValue().getValue() == pg.getLastAttack().getAttValue().getValue()){
                                         if (configAct.tousFils.get(i).action.attack.getAttnb() == pg.getLastAttack().getAttnb()){
                                             setMinmax(configAct.tousFils.get(i), depth);
@@ -334,8 +348,10 @@ public class IAMinmax extends IA{
                 }
                 //configAct = configAct.vraiFils;
             }
-            this.iaParryPhase();
-            this.pickMove();
+            if (epg.isIaRound()) {
+                this.iaParryPhase();
+                if (!cantMoveAgain) this.pickMove();
+            }
             depth--;
         }
 
@@ -398,11 +414,4 @@ public class IAMinmax extends IA{
         return ced;
     }
 
-
-    public void initialise(){
-
-        noirGagne = 0;
-        blancGagne = 0;
-        depth = 0;
-    }
 }

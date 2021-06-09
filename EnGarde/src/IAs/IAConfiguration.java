@@ -147,6 +147,7 @@ public class IAConfiguration{
     }
 
     public IAConfiguration(int gagne, IAConfiguration pere){
+        if (pere.action.attack != null) parry = pere.action.attack;
         this.pere = pere;
         couche = pere.couche + 1;
         owner = pere.owner;
