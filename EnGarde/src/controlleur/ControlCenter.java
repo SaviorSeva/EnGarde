@@ -356,9 +356,13 @@ public class ControlCenter implements Observateur{
 			addAnimationJoueur();
 			break;
 		case 3:
-			if(this.epg.getSelectedCard().getValue() != this.pg.getDistance() || this.pg.getDirectionDeplace() != 1) {
-				// Movement
-				addAnimationJoueur();
+			try {
+				if(this.epg.getSelectedCard().getValue() != this.pg.getDistance() || this.pg.getDirectionDeplace() != 1) {
+					// Movement
+					addAnimationJoueur();
+				}
+			}catch (Exception e) {
+				System.out.println("Perhaps give up this attack");
 			}
 			break;
 		case 5:

@@ -256,13 +256,13 @@ public class IAMinmax extends IA{
         cantMoveAgain = false;
         iaCartes = pg.getCurrentPlayerCards();
         if (pg.getLastAttack().getAt() == AttackType.NONE) return;
-        if (configAct.parry!=null){
+        if (configAct.parry!=null && ((nbCarteI(pg.getLastAttack().getAttValue().getValue(), iaCartes)) >= pg.getLastAttack().getAttnb())){
             System.out.println("Parry 1: " + configAct.parry.getAt());
             System.out.println("Parry 2: " + configAct.parry.getAttValue().getValue());
             System.out.println("Parry 3: " + configAct.parry.getAttnb());
             choisirParryOrAttackCartes(configAct.parry.getAttnb(), configAct.parry.getAttValue().getValue());
             jouerCarte(3, choisir);
-        }else if (configAct.action.attack == null && configAct.action.move.getDirection() == 2) { /** if there is a Retreat calculed **/
+        }else if (configAct.action != null && configAct.action.attack == null && configAct.action.move.getDirection() == 2) { /** if there is a Retreat calculed **/
             for (int i = 0; i < iaCartes.size(); i++) {
                 if (iaCartes.get(i).getValue() == configAct.action.move.getC().getValue()) {
                     choisir.set(i, true);
@@ -311,7 +311,7 @@ public class IAMinmax extends IA{
             IA ia = new IAProba(epg, pg, c);
             ia.iaStep();
         }else{
-            if(!creeArbre){
+            /*if(!creeArbre){
                 config = new IAConfiguration(pg);
                 allPossible(config);
                 minMaxActive = true;
@@ -323,6 +323,7 @@ public class IAMinmax extends IA{
                 Action s = epg.hist.listAction.get(epg.hist.listAction.size() - 1);
                 System.out.println("Hist : " + s);
                 String lastActions[] = s.getActionString().split(",");
+                boolean vue = false;
                 for (int i = 0; i < configAct.tousFils.size(); i++) {
                     System.out.println("1:" + configAct.tousFils.get(i).action.move.getC().getValue());
                     System.out.println("2:" + lireAttackEtMove(lastActions[1]).getC().getValue());
@@ -334,6 +335,7 @@ public class IAMinmax extends IA{
                                 if(configAct.tousFils.get(i).action.attack.getAt() == pg.getLastAttack().getAt()){
                                     if(configAct.tousFils.get(i).action.attack.getAttValue().getValue() == pg.getLastAttack().getAttValue().getValue()){
                                         if (configAct.tousFils.get(i).action.attack.getAttnb() == pg.getLastAttack().getAttnb()){
+                                            vue = true;
                                             setMinmax(configAct.tousFils.get(i), depth);
                                             configAct = configAct.tousFils.get(i).vraiFils;
                                             break;
@@ -346,8 +348,19 @@ public class IAMinmax extends IA{
                         }
                     }
                 }
-                //configAct = configAct.vraiFils;
-            }
+                /** S'il n'y a qu'un fils et il encore ne correspond pas au mouvement (attack) que l'adversaire **/
+                /*if (!vue){
+                    setMinmax(configAct.tousFils.get(0), depth);
+                    configAct = configAct.tousFils.get(0).vraiFils;
+                }
+            }*/
+            config = new IAConfiguration(pg);
+            allPossible(config);
+            minMaxActive = true;
+            creeArbre = true;
+            System.out.println("Depth : " + depth);
+            System.out.println("Alpha : " + setMinmax(config, depth));
+            configAct = config.vraiFils;
             if (epg.isIaRound()) {
                 this.iaParryPhase();
                 if (!cantMoveAgain) this.pickMove();
