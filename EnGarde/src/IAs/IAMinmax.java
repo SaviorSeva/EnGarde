@@ -154,12 +154,11 @@ public class IAMinmax extends IA{
         }
 
         /** AllPossible judge que ce tour(noeud) est perdu ou pas, donc config.tourCourant est gagné **/
-        if(config.action.attack == null){
+        if(config.action.attack == null || config.action.attack.getAt() == AttackType.NONE){
             ArrayList<IAAction> iaAction = new ArrayList<>(iaAttackOrMove(config, null));
             if(iaAction.size()!=0) {
                 for (int i = 0; i < iaAction.size(); i++) {
                     System.out.println("Entre else 1: ");
-                    if(config.cut) return;
                     allPossible(new IAConfiguration(null, new IAAction(iaAction.get(i).move, iaAction.get(i).attack,0), config));
                 }
             }else {
@@ -201,7 +200,7 @@ public class IAMinmax extends IA{
                         canReatreat = true;
                         /** Retreat can use only 1 card, so don't care how many we have, have it or not **/
                         System.out.println("Entre else 5: " );
-                        allPossible(new IAConfiguration(null, new IAAction(new CarteEtDirection(2, Carte.generateCarteFromInt(i), -1), null, 0), config));
+                        allPossible(new IAConfiguration(null, new IAAction(new CarteEtDirection(2, Carte.generateCarteFromInt(i), -1), new Attack(AttackType.NONE, null, 0), 0), config));
                         n++;
                     }
                 }
@@ -256,6 +255,9 @@ public class IAMinmax extends IA{
             System.out.println("Parry 3: " + configAct.parry.getAttnb());
             choisirParryOrAttackCartes(configAct.parry.getAttnb(), configAct.parry.getAttValue().getValue());
             jouerCarte(3, choisir);
+        }else if(pg.getLastAttack().getAt()!=AttackType.NONE){
+            choisirParryOrAttackCartes(pg.getLastAttack().getAttnb(), pg.getLastAttack().getAttValue().getValue());
+            jouerCarte(3, choisir);
         }else if (configAct.action.attack == null && configAct.action.move.getDirection() == 2) { /** Retreat **/
             for (int i = 0; i < iaCartes.size(); i++) {
                 if (iaCartes.get(i).getValue() == configAct.action.move.getC().getValue()) {
@@ -302,14 +304,24 @@ public class IAMinmax extends IA{
                     System.out.println("  ");
                     if(configAct.tousFils.get(i).action.move.getC().getValue()==lireAttackEtMove(lastActions[1]).getC().getValue()){
                         if(configAct.tousFils.get(i).action.move.getDirection() == lireAttackEtMove(lastActions[1]).getDirection()){
-                            if(configAct.tousFils.get(i).action.attack == pg.getLastAttack() || (configAct.tousFils.get(i).action.attack == null && pg.getLastAttack().getAt()==AttackType.NONE)){
-                                setMinmax(configAct.tousFils.get(i), depth);
-                                break;
+                            System.out.println("1: ***********" );
+                            try{
+                                if(configAct.tousFils.get(i).action.attack.getAt() ==pg.getLastAttack().getAt()){
+                                    if(configAct.tousFils.get(i).action.attack.getAttValue().getValue() == pg.getLastAttack().getAttValue().getValue()){
+                                        if (configAct.tousFils.get(i).action.attack.getAttnb() == pg.getLastAttack().getAttnb()){
+                                            setMinmax(configAct.tousFils.get(i), depth);
+                                            configAct = configAct.tousFils.get(i).vraiFils;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }catch (Exception e){
+                                System.out.println(" 11");
                             }
                         }
                     }
                 }
-                configAct = configAct.vraiFils.vraiFils;
+                //configAct = configAct.vraiFils;
             }
             this.iaParryPhase();
             this.pickMove();
