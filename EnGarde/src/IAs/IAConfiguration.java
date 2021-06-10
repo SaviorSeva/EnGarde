@@ -45,7 +45,7 @@ public class IAConfiguration{
         minmax = true;
         tourCourrant = pg.getTourCourant() % 2 + 1; /** Pour mettre le premier "AllPossible" est le tour de IA **/
         this.owner = pg.getTourCourant(); //owner = AI
-        typeGagne = 2;
+        typeGagne = -1;
         action = new IAAction(null, pg.getLastAttack(), 0);
     }
 
@@ -76,7 +76,7 @@ public class IAConfiguration{
         positionBlanc = pere.positionBlanc;
         positionNoir = pere.positionNoir;
 
-        typeGagne = 2;
+        typeGagne = -1;
         couche = pere.couche + 1;
         ArrayList<Carte> cartesCourant;
         if (tourCourrant == owner) {
@@ -138,25 +138,26 @@ public class IAConfiguration{
             positionNoir += action.move.getC().getValue();
         } else System.out.println("No move this time ");
 
-        System.out.println("Couche : " + couche);
-
     }
 
     public IAConfiguration(int gagne, IAConfiguration pere){
-        if (pere.action.attack != null) parry = pere.action.attack;
         this.pere = pere;
         couche = pere.couche + 1;
         owner = pere.owner;
         playerPickLastCard = 0;
         System.out.println("Couche : " + couche);
         tourCourrant = pere.tourCourrant%2+1;
+        pere.tousFils.add(this);
         if(gagne == owner) {
             typeGagne = 1;
-        }
-        else {
+        } else if (gagne == -1){
+            typeGagne = -2;
+            return;
+        }else {
             typeGagne = 0;
         }
-        pere.tousFils.add(this);
+
+        if (pere.action.attack != null) parry = pere.action.attack;
     }
 
     public int getDistance(){

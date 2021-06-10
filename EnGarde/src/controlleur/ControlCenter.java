@@ -70,6 +70,7 @@ public class ControlCenter implements Observateur{
 				this.ia = new IAProba(this.epg, this.pg, this);
 				break;
 			case 3:
+				this.iaMinmax = new IAMinmax(this.epg, this.pg, this);
 				this.iaAlea = new IAAleatoire(this.epg, this.pg, this);
 				this.iaProba = new IAProba(this.epg, this.pg, this);
 				break;

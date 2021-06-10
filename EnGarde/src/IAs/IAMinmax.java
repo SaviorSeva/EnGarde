@@ -77,7 +77,11 @@ public class IAMinmax extends IA{
     public void allPossible(IAConfiguration config){
         int tourCourant = config.tourCourrant % 2 + 1;
         /** config.carteForNext sont les cartes pour ce noeud **/
-        if(config.typeGagne!=2 ){
+        if(config.couche>=leger && config.typeGagne == -1) {
+            allPossible(new IAConfiguration(-1, config));
+            return;
+        }
+        if(config.typeGagne!=-1 ){
             //System.out.println("Config : " + config.typeGagne);
             if(config.couche>depth) depth++;
             if(config.typeGagne==1 && pg.getTourCourant()==1){
@@ -87,7 +91,7 @@ public class IAMinmax extends IA{
                 blancGagne++;
                 config.incrementPerdu();
                 System.out.println(" tourGagne 1:" + config.pere.tourCourrant);
-            }else {
+            }else if(config.typeGagne != -2){
                 noirGagne++;
                 config.incrementGagne();
                 System.out.println(" tourGagne 2:" + config.pere.tourCourrant);
@@ -308,24 +312,26 @@ public class IAMinmax extends IA{
 
     @Override
     public void iaStep() {//IAProba jouer au debut, et puis IAMinmax
-        if(pg.getUsed().size() < 10 && (!minMaxActive)) {
-            IAProba ia = new IAProba(epg, pg, c);
-            ia.iaStep();
-            ;
-        }else{
+            leger = 5;
             config = new IAConfiguration(pg);
             allPossible(config);
             minMaxActive = true;
             creeArbre = true;
+            int al = setMinmax(config, leger);
             System.out.println("Depth : " + depth);
-            System.out.println("Alpha : " + setMinmax(config, depth));
-            configAct = config.vraiFils;
-            if (epg.isIaRound()|| epg.isIaMinmax()) {
-                this.iaParryPhase();
-                if (!cantMoveAgain) this.pickMove();
+            System.out.println("Alpha : " + al);
+            if(config.typeGagne != 1 || config.vraiFils == null){
+                IAProba ia = new IAProba(epg, pg, c);
+                ia.iaStep();
+            }else{
+                System.out.println("Minmax act!!");
+                configAct = config.vraiFils;
+                if (epg.isIaRound()|| epg.isIaMinmax()) {
+                    this.iaParryPhase();
+                    if (!cantMoveAgain) this.pickMove();
+
+                }
             }
-            depth--;
-        }
 
         //System.out.println(allPossible(config).tousFils.size());
     }
@@ -341,8 +347,11 @@ public class IAMinmax extends IA{
                 if(alpha < (k = Math.max(alpha, setMinmax(cg.tousFils.get(i), d-1))) ){
                     alpha = k;
                     cg.vraiFils = cg.tousFils.get(i);
+                    cg.typeGagne = cg.vraiFils.typeGagne;
                 }
             }
+            if(alpha < -1) alpha = -1;
+
         }else{
             alpha= Integer.MAX_VALUE;
             for (int i = 0; i < cg.tousFils.size(); i++) {
@@ -350,8 +359,10 @@ public class IAMinmax extends IA{
                 if(alpha > (k = Math.min(alpha, setMinmax(cg.tousFils.get(i), d-1)))){
                     alpha = k;
                     cg.vraiFils = cg.tousFils.get(i);
+                    cg.typeGagne = cg.vraiFils.typeGagne;
                 }
             }
+            if(alpha >10) alpha = -1;
         }
         return alpha;
     }
