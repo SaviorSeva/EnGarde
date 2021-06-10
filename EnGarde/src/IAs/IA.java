@@ -41,6 +41,7 @@ public abstract class IA {
     }
 
     public void choisirParryOrAttackCartes(int nb, int attValue){
+        iaCartes = epg.getCurrentPlayerCards();
         for (int i = 0; i < iaCartes.size() && nb > 0 ; i++)
             if (iaCartes.get(i).getValue() == attValue){
                 choisir.set(i, true);

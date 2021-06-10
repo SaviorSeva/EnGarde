@@ -329,7 +329,7 @@ public class ExecPlayground extends Observable{
 	
 	public void roundStart(Attack att) {
 		pg.setLastAttack(att);
-		if(pg.getPlayerCourant().getPoint()+pg.getEnemyCourant().getPoint()==10) {
+		if(pg.getPlayerCourant().getPoint()+pg.getEnemyCourant().getPoint()==20) {
 			if(pg.getPlayerCourant().getPoint()>pg.getEnemyCourant().getPoint()){
 				System.out.println("Winner est : " + pg.getTourCourant() + " Point: " + pg.getPlayerCourant().getPoint());
 				System.out.println("Loser est : " + pg.getEnemyCourant().startPlace +" Point: " + pg.getEnemyCourant().getPoint());
@@ -503,11 +503,13 @@ public class ExecPlayground extends Observable{
 			}
 			if(blancNb < noirNb) {
 				this.pg.getNoir().incrementPoint();
-				this.sendLoseSignal(1, "he has less card of value " + this.pg.getDistance());
+				if(this.IAType != 3) this.sendLoseSignal(1, "he has less card of value " + this.pg.getDistance());
+				else this.restartNewRound();
 			}
 			else if(blancNb > noirNb) {
 				this.pg.getBlanc().incrementPoint();
-				this.sendLoseSignal(2, "he has less card of value " + this.pg.getDistance());
+				if(this.IAType != 3) this.sendLoseSignal(2, "he has less card of value " + this.pg.getDistance());
+				else this.restartNewRound();
 			}
 			else {
 				compareDistance();

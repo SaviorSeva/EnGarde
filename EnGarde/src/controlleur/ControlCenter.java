@@ -112,12 +112,14 @@ public class ControlCenter implements Observateur{
 			if(epg.isIaMinmax()){
 				System.out.println("iaMinmax");
 				System.out.println("");
-				iaMinmax.iaStep();
+				//iaMinmax.iaStep();
+				iaAlea.iaStep();
 				System.out.println("iaMinmax fin");
 			}else if(epg.isIaProbaRound()){
 				System.out.println("iaProba");
 				System.out.println("");
-				iaProba.iaStep();
+				//iaProba.iaStep();
+				iaMinmax.iaStep();
 				System.out.println("iaProba fin");
 			}
 		}else if(this.epg.getIAType()==4) this.iaMinmax.iaStep();

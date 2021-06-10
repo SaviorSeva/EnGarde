@@ -328,7 +328,8 @@ public class IAMinmax extends IA{
                 configAct = config.vraiFils;
                 if (epg.isIaRound()|| epg.isIaMinmax()) {
                     this.iaParryPhase();
-                    if (!cantMoveAgain) this.pickMove();
+                    if (epg.getLastCardPlayer == pg.getTourCourant()) System.out.println("IA MinMax picked the last card, it can't move more");
+                    else if (!cantMoveAgain) this.pickMove();
 
                 }
             }
