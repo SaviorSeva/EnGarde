@@ -45,6 +45,10 @@ public class ExecPlayground extends Observable{
 		else return false;
 	}
 
+	public boolean isIaMinmax() {
+		if(IAType == 3 && pg.getTourCourant()==1) return true;
+		else return false;
+	}
 	public boolean isIaProbaRound() {
 		if(IAType == 3 && pg.getTourCourant()==2) return true;
 		else return false;
@@ -325,7 +329,7 @@ public class ExecPlayground extends Observable{
 	
 	public void roundStart(Attack att) {
 		pg.setLastAttack(att);
-		if(pg.getPlayerCourant().getPoint()+pg.getEnemyCourant().getPoint()==30) {
+		if(pg.getPlayerCourant().getPoint()+pg.getEnemyCourant().getPoint()==10) {
 			if(pg.getPlayerCourant().getPoint()>pg.getEnemyCourant().getPoint()){
 				System.out.println("Winner est : " + pg.getTourCourant() + " Point: " + pg.getPlayerCourant().getPoint());
 				System.out.println("Loser est : " + pg.getEnemyCourant().startPlace +" Point: " + pg.getEnemyCourant().getPoint());

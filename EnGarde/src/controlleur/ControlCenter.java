@@ -70,6 +70,7 @@ public class ControlCenter implements Observateur{
 				this.ia = new IAProba(this.epg, this.pg, this);
 				break;
 			case 3:
+				this.iaMinmax = new IAMinmax(this.epg, this.pg, this);
 				this.iaAlea = new IAAleatoire(this.epg, this.pg, this);
 				this.iaProba = new IAProba(this.epg, this.pg, this);
 				break;
@@ -98,6 +99,7 @@ public class ControlCenter implements Observateur{
 			case 3:
 				this.iaAlea = new IAAleatoire(this.epg, this.pg, this);
 				this.iaProba = new IAProba(this.epg, this.pg, this);
+				this.iaMinmax = new IAMinmax(this.epg, this.pg, this);
 				break;
 			case 4:
 				if(epg.hist.size()<=1) {
@@ -107,11 +109,11 @@ public class ControlCenter implements Observateur{
 				break;
 		}
 		if(this.epg.getIAType()==3) {
-			if(epg.isIaAleatoireRound()){
-				System.out.println("iaAlea");
+			if(epg.isIaMinmax()){
+				System.out.println("iaMinmax");
 				System.out.println("");
-				iaAlea.iaStep();
-				System.out.println("iaAlea fin");
+				iaMinmax.iaStep();
+				System.out.println("iaMinmax fin");
 			}else if(epg.isIaProbaRound()){
 				System.out.println("iaProba");
 				System.out.println("");
