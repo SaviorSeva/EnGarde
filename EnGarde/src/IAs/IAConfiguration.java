@@ -111,8 +111,8 @@ public class IAConfiguration{
 
         //Verifier la carte a la main d'abord
         for (int i = 0; i < carteJouer.size(); i++) {
-            System.out.println("remove sucess: " + cartesCourant.remove(carteJouer.get(i)));
-            System.out.println("Cartes jouer :"+ carteJouer.get(i));
+            cartesCourant.remove(carteJouer.get(i));
+            carteJouer.get(i);
         }
 
         //System.out.println("Cartes reste arpès jouer :"+ cartesCourant.size());
@@ -136,7 +136,7 @@ public class IAConfiguration{
             positionNoir -= action.move.getC().getValue();
         } else if (tourCourrant == 2 && action.move.getDirection() == 2) {
             positionNoir += action.move.getC().getValue();
-        } else System.out.println("No move this time ");
+        } //else System.out.println("No move this time ");
 
     }
 
@@ -145,7 +145,7 @@ public class IAConfiguration{
         couche = pere.couche + 1;
         owner = pere.owner;
         playerPickLastCard = 0;
-        System.out.println("Couche : " + couche);
+        //System.out.println("Couche : " + couche);
         tourCourrant = pere.tourCourrant%2+1;
         pere.tousFils.add(this);
         if(gagne == owner) {

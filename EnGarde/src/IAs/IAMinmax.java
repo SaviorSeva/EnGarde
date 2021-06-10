@@ -86,23 +86,18 @@ public class IAMinmax extends IA{
             if(config.couche>depth) depth++;
             if(config.typeGagne==1 && pg.getTourCourant()==1){
                 blancGagne++;
-                System.out.println(" tourGagne 1:" + config.pere.tourCourrant);}
-            else if(config.typeGagne==0 && pg.getTourCourant()==2){
+                //System.out.println(" tourGagne 1:" + config.pere.tourCourrant);
+            } else if(config.typeGagne==0 && pg.getTourCourant()==2){
                 blancGagne++;
                 config.incrementPerdu();
-                System.out.println(" tourGagne 1:" + config.pere.tourCourrant);
+                //System.out.println(" tourGagne 1:" + config.pere.tourCourrant);
             }else if(config.typeGagne != -2){
                 noirGagne++;
                 config.incrementGagne();
-                System.out.println(" tourGagne 2:" + config.pere.tourCourrant);
+                //System.out.println(" tourGagne 2:" + config.pere.tourCourrant);
             }
-
-            System.out.println("NoirGagne : " + noirGagne);
-            System.out.println("BlancGagne : " + blancGagne);
             return ;
         }
-        //if(leger!= 0 && config.couche == leger) return;
-
         /** Phase finale **/
         if (config.pere != null && config.playerPickLastCard == tourCourant) {
             if (config.action.attack == null) {
@@ -165,18 +160,15 @@ public class IAMinmax extends IA{
             ArrayList<IAAction> iaAction = new ArrayList<>(iaAttackOrMove(config, null));
             if(iaAction.size()!=0) {
                 for (int i = 0; i < iaAction.size(); i++) {
-                    System.out.println("Entre else 1: ");
                     allPossible(new IAConfiguration(null, new IAAction(iaAction.get(i).move, iaAction.get(i).attack,0), config));
                 }
             }else {
-                System.out.println("Entre else 2: ");
                 allPossible(new IAConfiguration(config.tourCourrant, config));
             }
         }else{
             boolean parry = false;
             boolean canReatreat = false;
             boolean cantReatreat = false;
-            System.out.println("Entre else 3: ");
             Attack lastAttack = config.action.attack;
 
             /** parry **/
@@ -186,8 +178,6 @@ public class IAMinmax extends IA{
                 ArrayList<IAAction> iaAction = new ArrayList<>(iaAttackOrMove(config, lastAttack));
                 if(iaAction.size()!=0) {
                     for (int i = 0; i < iaAction.size(); i++) {
-                        System.out.println("Entre else 4: ");
-                        //if(config.cut) return;
                         allPossible(new IAConfiguration(lastAttack, new IAAction(iaAction.get(i).move, iaAction.get(i).attack, 0), config));
                     }
                 }else{
@@ -199,28 +189,24 @@ public class IAMinmax extends IA{
             /** No parry **/
             if(lastAttack.getAt()==AttackType.INDIRECT && !parry){
                 int n = 0;
-                //如果能撤,把所有撤的情况列出来
                 for (int i = 1; i < 6; i++) {
                     /** disToDebut dépend le tour **/
                     //if(config.cut) return;
                     if(config.disToDebut(tourCourant) >= i && nbCarteI(i, config.carteForNext) > 0){
                         canReatreat = true;
                         /** Retreat can use only 1 card, so don't care how many we have, have it or not **/
-                        System.out.println("Entre else 5: " );
                         allPossible(new IAConfiguration(null, new IAAction(new CarteEtDirection(2, Carte.generateCarteFromInt(i), -1), new Attack(AttackType.NONE, null, 0), 0), config));
                         n++;
                     }
                 }
                 if (n == 0 && !canReatreat) {
                     cantReatreat = true;
-                    System.out.println("Entre else 6: " );
                     allPossible(new IAConfiguration(config.tourCourrant, config));
                 }
             }
 
             /** Si suffit un attaquet directe et ne "parry" pas, c'est perdu **/
             if(lastAttack.getAt()==AttackType.DIRECT && !parry && !cantReatreat){
-                System.out.println("Entre else 7: " );
                 allPossible(new IAConfiguration(config.tourCourrant, config));
             }
         }
@@ -291,7 +277,6 @@ public class IAMinmax extends IA{
                         index = i;
                     }
                 }
-                System.out.println("Retreat ////////////////////////////////////");
                 choisir.set(index, true);
                 jouerCarte(2, choisir);
                 cantMoveAgain = true;
@@ -318,19 +303,21 @@ public class IAMinmax extends IA{
             minMaxActive = true;
             creeArbre = true;
             int al = setMinmax(config, leger);
+            System.out.println(" ");
             System.out.println("Depth : " + depth);
             System.out.println("Alpha : " + al);
+            System.out.println(" ");
             if(config.typeGagne != 1 || config.vraiFils == null){
+                System.out.println("IA Proba act !!!!!");
                 IAProba ia = new IAProba(epg, pg, c);
                 ia.iaStep();
             }else{
-                System.out.println("Minmax act!!");
+                System.out.println("IA Minmax act  !!!!!");
                 configAct = config.vraiFils;
                 if (epg.isIaRound()|| epg.isIaMinmax()) {
                     this.iaParryPhase();
                     if (epg.getLastCardPlayer == pg.getTourCourant()) System.out.println("IA MinMax picked the last card, it can't move more");
                     else if (!cantMoveAgain) this.pickMove();
-
                 }
             }
 
