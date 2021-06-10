@@ -793,7 +793,7 @@ public class ControlCenter implements Observateur{
 
 	@Override
 	public void receiveLoseSignal(int i, String s) {
-		System.out.println("???????????????????????");
+		System.out.println("Get a lost signal");
 		this.clicable = false;
 		this.wi.button.setText("Got it, start new round");
 		String affiche = "";
