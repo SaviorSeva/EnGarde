@@ -136,6 +136,7 @@ public class IAProba extends IA{
     public void iaCanAttack(){
         boolean []vue = new boolean[5];
         int dis = epg.getDistance();
+        iaCartes = pg.getCurrentPlayerCards();
         //Direct attack possible
         for (Carte iaCarte : iaCartes) {
             if (dis == iaCarte.getValue()) {
